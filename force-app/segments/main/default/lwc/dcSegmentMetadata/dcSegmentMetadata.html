@@ -1,0 +1,45 @@
+<template>
+    <div class="meta">
+        <div class="meta__population">
+            <div class="meta__population-label">Estimated Population</div>
+            <div class="meta__population-value">
+                <template lwc:if={counting}>
+                    <lightning-spinner alternative-text="Counting..." size="small"></lightning-spinner>
+                </template>
+                <template lwc:else>{displayCount}</template>
+            </div>
+            <div class="meta__population-refreshed">Last refreshed: {lastRefreshedDisplay}</div>
+        </div>
+
+        <div class="meta__section">
+            <lightning-input label="Segment Name" value={name} onchange={handleName}></lightning-input>
+        </div>
+        <div class="meta__section">
+            <lightning-textarea label="Description" value={description} onchange={handleDescription}></lightning-textarea>
+        </div>
+        <div class="meta__section">
+            <lightning-combobox
+                label="Publish Schedule"
+                value={publishSchedule}
+                options={scheduleOptions}
+                onchange={handleSchedule}></lightning-combobox>
+        </div>
+
+        <div class="meta__section">
+            <h4 class="meta__section-title">Sample Members</h4>
+            <template lwc:if={hasSample}>
+                <ul class="meta__sample">
+                    <template for:each={sampleMembers} for:item="m">
+                        <li key={m.Id} class="meta__sample-item">
+                            <span class="meta__sample-name">{m.First_Name__c} {m.Last_Name__c}</span>
+                            <span class="meta__sample-meta">{m.Tier__c} · {m.Lifecycle_Stage__c}</span>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template lwc:else>
+                <p class="meta__empty">No matches yet — add a filter to see sample members.</p>
+            </template>
+        </div>
+    </div>
+</template>

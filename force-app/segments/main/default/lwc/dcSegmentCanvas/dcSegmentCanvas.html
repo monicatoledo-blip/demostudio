@@ -1,0 +1,11 @@
+<template>
+    <div class="canvas">
+        <c-dc-segment-canvas-container container={includeView} onoperator={handleContainerOperator}
+            onrowop={handleRowOp} onrowvalue={handleRowValue} onrowvalueend={handleRowValueEnd}
+            onrowremove={handleRowRemove}></c-dc-segment-canvas-container>
+
+        <c-dc-segment-canvas-container container={excludeView} onoperator={handleContainerOperator}
+            onrowop={handleRowOp} onrowvalue={handleRowValue} onrowvalueend={handleRowValueEnd}
+            onrowremove={handleRowRemove}></c-dc-segment-canvas-container>
+    </div>
+</template>

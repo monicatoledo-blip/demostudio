@@ -1,0 +1,49 @@
+<template>
+    <div class="row">
+        <span class="row__field">{label}</span>
+        <lightning-combobox
+            variant="label-hidden"
+            value={op}
+            options={operatorOptions}
+            onchange={handleOp}
+            class="row__op"></lightning-combobox>
+
+        <template lwc:if={needsScalarInput}>
+            <lightning-input
+                variant="label-hidden"
+                type={inputType}
+                value={value}
+                onchange={handleValue}
+                class="row__value"></lightning-input>
+        </template>
+
+        <template lwc:if={isPicklist}>
+            <lightning-combobox
+                variant="label-hidden"
+                value={value}
+                options={picklistOptions}
+                onchange={handleValue}
+                class="row__value"></lightning-combobox>
+        </template>
+
+        <template lwc:if={isBetween}>
+            <lightning-input variant="label-hidden" type={inputType} value={value}
+                onchange={handleValue} class="row__value"></lightning-input>
+            <span class="row__between">and</span>
+            <lightning-input variant="label-hidden" type={inputType} value={valueEnd}
+                onchange={handleValueEnd} class="row__value"></lightning-input>
+        </template>
+
+        <template lwc:if={isInList}>
+            <lightning-input
+                variant="label-hidden"
+                placeholder="comma-separated values"
+                value={listValueString}
+                onchange={handleValue}
+                class="row__value"></lightning-input>
+        </template>
+
+        <lightning-button-icon icon-name="utility:close" variant="bare"
+            alternative-text="Remove" onclick={handleRemove}></lightning-button-icon>
+    </div>
+</template>

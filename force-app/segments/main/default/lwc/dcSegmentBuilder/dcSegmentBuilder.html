@@ -1,0 +1,40 @@
+<template>
+    <div class="builder">
+        <header class="builder__header">
+            <div class="builder__title-block">
+                <span class="builder__eyebrow">Data Cloud Studio · Segment Builder</span>
+                <h1 class="builder__title">{name}</h1>
+            </div>
+            <div class="builder__status-block">
+                <lightning-badge label={status} class="builder__status"></lightning-badge>
+                <lightning-button label="Save" onclick={handleSave} disabled={isSaveDisabled}></lightning-button>
+                <lightning-button variant="brand" label="Publish" onclick={handlePublish} disabled={isPublishDisabled}></lightning-button>
+            </div>
+        </header>
+
+        <div class="builder__grid">
+            <aside class="builder__pane builder__pane--left">
+                <c-dc-attribute-picker onattributeselect={handleAttributeSelect}></c-dc-attribute-picker>
+            </aside>
+
+            <section class="builder__pane builder__pane--center">
+                <c-dc-segment-canvas onfilterchange={handleFilterChange}></c-dc-segment-canvas>
+            </section>
+
+            <aside class="builder__pane builder__pane--right">
+                <c-dc-segment-metadata
+                    name={name}
+                    description={description}
+                    publish-schedule={publishSchedule}
+                    population-count={populationCount}
+                    last-refreshed={lastRefreshed}
+                    sample-members={sampleMembers}
+                    counting={counting}
+                    onnamechange={handleNameChange}
+                    ondescriptionchange={handleDescriptionChange}
+                    onschedulechange={handleScheduleChange}>
+                </c-dc-segment-metadata>
+            </aside>
+        </div>
+    </div>
+</template>

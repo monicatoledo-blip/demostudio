@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Data Cloud Studio: Segment List</masterLabel>
+    <description>List view of Demo_Segment__c records with status, population, last-refreshed, and open action.</description>
+    <targets>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+</LightningComponentBundle>

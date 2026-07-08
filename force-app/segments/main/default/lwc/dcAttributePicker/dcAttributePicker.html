@@ -1,0 +1,71 @@
+<template>
+    <div class="picker">
+        <div class="picker__header">
+            <h3 class="picker__title">Attributes</h3>
+            <lightning-input
+                type="search"
+                variant="label-hidden"
+                placeholder="Search fields..."
+                value={search}
+                onchange={handleSearch}></lightning-input>
+        </div>
+
+        <template lwc:if={loading}>
+            <div class="picker__loading">
+                <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+            </div>
+        </template>
+
+        <template lwc:if={error}>
+            <div class="picker__error">{error}</div>
+        </template>
+
+        <template lwc:if={describe}>
+            <div class="picker__group">
+                <button class="picker__group-header" onclick={toggleDirect} type="button">
+                    <lightning-icon icon-name="utility:person_account" size="xx-small"></lightning-icon>
+                    <span>Individual</span>
+                </button>
+                <template lwc:if={directExpanded}>
+                    <ul class="picker__list">
+                        <template for:each={rootAttributes} for:item="attr">
+                            <li key={attr.apiName}
+                                class="picker__item"
+                                data-object="Demo_DMO_Individual__c"
+                                data-field={attr.apiName}
+                                onclick={handleAttrClick}
+                                title={attr.apiName}>
+                                <span class="picker__item-label">{attr.label}</span>
+                                <span class="picker__item-type">{attr.type}</span>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+            </div>
+
+            <template for:each={relatedObjects} for:item="obj">
+                <div key={obj.apiName} class="picker__group">
+                    <button class="picker__group-header" data-object={obj.apiName} onclick={handleRelatedToggle} type="button">
+                        <lightning-icon icon-name="utility:activity" size="xx-small"></lightning-icon>
+                        <span>{obj.pluralLabel}</span>
+                    </button>
+                    <template lwc:if={obj.expanded}>
+                        <ul class="picker__list">
+                            <template for:each={obj.filteredAttributes} for:item="attr">
+                                <li key={attr.apiName}
+                                    class="picker__item picker__item--related"
+                                    data-object={obj.apiName}
+                                    data-field={attr.apiName}
+                                    onclick={handleAttrClick}
+                                    title={attr.apiName}>
+                                    <span class="picker__item-label">{attr.label}</span>
+                                    <span class="picker__item-type">{attr.type}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+            </template>
+        </template>
+    </div>
+</template>

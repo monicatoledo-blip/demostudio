@@ -1,0 +1,49 @@
+:host {
+    display: block;
+    height: 100%;
+    background: #fafaf9;
+    border-right: 1px solid #e5e5e5;
+    overflow-y: auto;
+}
+.picker { padding: 0.75rem; }
+.picker__header {
+    position: sticky;
+    top: 0;
+    background: #fafaf9;
+    padding-bottom: 0.5rem;
+    z-index: 2;
+}
+.picker__title { font-size: 0.875rem; font-weight: 700; color: #514f4d; margin-bottom: 0.5rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.picker__loading, .picker__error { padding: 1rem; text-align: center; }
+.picker__error { color: #c23934; }
+.picker__group { margin-top: 0.75rem; }
+.picker__group-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.5rem;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font-weight: 600;
+    color: #181818;
+    cursor: pointer;
+    border-radius: 0.25rem;
+}
+.picker__group-header:hover { background: #f3f2f2; }
+.picker__list { list-style: none; margin: 0; padding: 0.25rem 0 0.25rem 1.5rem; }
+.picker__item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    color: #181818;
+    user-select: none;
+}
+.picker__item:hover { background: #eaf3ff; }
+.picker__item--related { border-left: 2px solid #d8dde6; padding-left: 0.5rem; }
+.picker__item-type { font-size: 0.6875rem; color: #706e6b; text-transform: uppercase; }

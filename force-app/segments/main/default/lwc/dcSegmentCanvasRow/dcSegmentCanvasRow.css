@@ -1,0 +1,6 @@
+:host { display: block; margin-bottom: 0.5rem; }
+.row { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem 0.75rem; background: #f7f9fb; border: 1px solid #e5e5e5; border-radius: 0.25rem; }
+.row__field { flex: 0 0 auto; font-weight: 600; color: #181818; min-width: 8rem; font-size: 0.8125rem; }
+.row__op { width: 8rem; flex: 0 0 auto; }
+.row__value { flex: 1 1 auto; min-width: 6rem; }
+.row__between { color: #706e6b; font-size: 0.8125rem; }

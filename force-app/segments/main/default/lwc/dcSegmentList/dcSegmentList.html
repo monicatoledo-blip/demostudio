@@ -1,0 +1,36 @@
+<template>
+    <lightning-card title="Segments" icon-name="standard:segments">
+        <div slot="actions" class="slds-grid slds-gutters_x-small">
+            <lightning-combobox
+                variant="label-hidden"
+                value={scope}
+                options={scopeOptions}
+                onchange={handleScopeChange}></lightning-combobox>
+            <lightning-button-icon icon-name="utility:refresh" alternative-text="Refresh" onclick={handleRefresh}></lightning-button-icon>
+            <lightning-button variant="brand" label="New Segment" onclick={handleNewSegment}></lightning-button>
+        </div>
+
+        <div class="slds-p-around_medium">
+            <template lwc:if={loading}>
+                <lightning-spinner alternative-text="Loading..." size="small"></lightning-spinner>
+            </template>
+            <template lwc:if={errorMessage}>
+                <div class="slds-box slds-theme_error">{errorMessage}</div>
+            </template>
+            <template lwc:elseif={segments.length}>
+                <lightning-datatable
+                    key-field="Id"
+                    data={segments}
+                    columns={columns}
+                    hide-checkbox-column="true"
+                    resize-column-disabled="false">
+                </lightning-datatable>
+            </template>
+            <template lwc:else>
+                <p class="slds-text-align_center slds-p-vertical_large slds-text-color_weak">
+                    No segments yet. Click "New Segment" to create one.
+                </p>
+            </template>
+        </div>
+    </lightning-card>
+</template>

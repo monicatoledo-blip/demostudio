@@ -1,0 +1,8 @@
+:host { display: block; }
+.container { background: #fff; border: 1px solid #d8dde6; border-radius: 0.5rem; padding: 1rem; }
+.container--exclude { border-left: 4px solid #c23934; }
+.container--include { border-left: 4px solid #04844b; }
+.container__header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f3f2f2; }
+.container__title { font-weight: 700; font-size: 0.875rem; color: #181818; text-transform: uppercase; letter-spacing: 0.05em; }
+.container__operator { width: 6rem; }
+.container__empty { padding: 1.25rem; text-align: center; color: #706e6b; font-size: 0.8125rem; background: #f7f9fb; border-radius: 0.25rem; border: 1px dashed #d8dde6; }

@@ -1,0 +1,28 @@
+<template>
+    <div class={containerClass}>
+        <div class="container__header">
+            <span class="container__title">{title}</span>
+            <template lwc:if={rows.length}>
+                <lightning-combobox
+                    variant="label-hidden"
+                    value={operator}
+                    options={operatorOptions}
+                    onchange={handleOperator}
+                    class="container__operator"></lightning-combobox>
+            </template>
+        </div>
+
+        <template lwc:if={isEmpty}>
+            <div class="container__empty">
+                Drag or click attributes from the left to add filters.
+            </div>
+        </template>
+
+        <template for:each={rows} for:item="row">
+            <c-dc-segment-canvas-row key={row.id} row={row} container-key={containerKey}
+                onrowop={handleRowOp} onrowvalue={handleRowValue}
+                onrowvalueend={handleRowValueEnd} onrowremove={handleRowRemove}>
+            </c-dc-segment-canvas-row>
+        </template>
+    </div>
+</template>

@@ -1,0 +1,12 @@
+:host { display: block; height: 100%; overflow-y: auto; background: #fff; border-left: 1px solid #e5e5e5; padding: 1rem; }
+.meta__population { text-align: center; padding: 1rem; background: linear-gradient(135deg,#1b96ff 0%,#0176d3 100%); color: #fff; border-radius: 0.5rem; margin-bottom: 1rem; }
+.meta__population-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; }
+.meta__population-value { font-size: 2.5rem; font-weight: 700; line-height: 1.2; margin: 0.25rem 0; min-height: 3rem; display: flex; align-items: center; justify-content: center; }
+.meta__population-refreshed { font-size: 0.6875rem; opacity: 0.8; }
+.meta__section { margin-bottom: 1rem; }
+.meta__section-title { font-size: 0.75rem; font-weight: 700; color: #514f4d; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; }
+.meta__sample { list-style: none; margin: 0; padding: 0; }
+.meta__sample-item { display: flex; justify-content: space-between; padding: 0.375rem 0; border-bottom: 1px solid #f3f2f2; font-size: 0.8125rem; }
+.meta__sample-name { font-weight: 600; }
+.meta__sample-meta { color: #706e6b; font-size: 0.75rem; }
+.meta__empty { font-size: 0.8125rem; color: #706e6b; font-style: italic; }

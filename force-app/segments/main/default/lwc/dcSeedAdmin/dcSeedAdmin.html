@@ -1,0 +1,64 @@
+<template>
+    <lightning-card title="Seed Admin" icon-name="utility:database">
+        <div class="slds-p-around_medium">
+            <p class="slds-text-body_regular slds-m-bottom_medium">
+                Load synthetic DMO records from a Static Resource pack. Pick a vertical or enter a
+                custom Static Resource name. Wiping removes existing Demo_DMO_* rows before insert.
+            </p>
+            <div class="slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                    <lightning-combobox
+                        label="Seed pack"
+                        value={selectedPack}
+                        options={packOptions}
+                        onchange={handlePackChange}
+                        disabled={running}></lightning-combobox>
+                </div>
+                <template lwc:if={showCustomInput}>
+                    <div class="slds-col slds-size_1-of-2 slds-m-bottom_small">
+                        <lightning-input
+                            label="Custom Static Resource name"
+                            value={customPackName}
+                            onchange={handleCustomChange}
+                            disabled={running}></lightning-input>
+                    </div>
+                </template>
+                <div class="slds-col slds-size_1-of-1 slds-m-bottom_small">
+                    <lightning-input
+                        type="checkbox"
+                        label="Wipe existing Demo_DMO_* records first"
+                        checked={wipeExisting}
+                        onchange={handleWipeChange}
+                        disabled={running}></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1">
+                    <lightning-button
+                        variant="brand"
+                        label="Run seed"
+                        onclick={handleRun}
+                        disabled={runDisabled}></lightning-button>
+                    <template lwc:if={running}>
+                        <lightning-spinner alternative-text="Seeding..." size="small"></lightning-spinner>
+                    </template>
+                </div>
+            </div>
+
+            <template lwc:if={lastResult}>
+                <div class="slds-box slds-m-top_medium slds-theme_success">
+                    <p><strong>Seed complete:</strong> {lastResult.pack}</p>
+                    <ul class="slds-list_dotted">
+                        <li>Individuals: {lastResult.individuals}</li>
+                        <li>Events: {lastResult.events}</li>
+                        <li>Transactions: {lastResult.transactions}</li>
+                        <li>Duration: {lastResult.durationMs} ms</li>
+                    </ul>
+                </div>
+            </template>
+            <template lwc:if={lastError}>
+                <div class="slds-box slds-m-top_medium slds-theme_error">
+                    <p><strong>Error:</strong> {lastError}</p>
+                </div>
+            </template>
+        </div>
+    </lightning-card>
+</template>
