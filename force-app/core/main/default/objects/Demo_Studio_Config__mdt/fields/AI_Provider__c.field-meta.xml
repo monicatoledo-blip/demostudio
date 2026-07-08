@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>AI_Provider__c</fullName>
+    <label>AI Provider</label>
+    <description>Which persona generation backend to use. Einstein = live LLM call via aiplatform.ModelsAPI. Archetype = deterministic keyword-scored fallback using Persona_Archetype__mdt.</description>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Einstein</fullName><default>true</default><label>Einstein</label></value>
+            <value><fullName>Archetype</fullName><default>false</default><label>Archetype (deterministic fallback)</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

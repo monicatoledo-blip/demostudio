@@ -1,0 +1,4 @@
+<aura:component implements="lightning:actionOverride,force:hasRecordId,force:hasSObjectName" description="Overrides the New action on Demo_Persona__c to launch the New Demo Persona screen flow instead of the standard create form (which shows the org's multi-currency picker).">
+    <lightning:flow aura:id="flow" onstatuschange="{!c.handleStatus}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+</aura:component>

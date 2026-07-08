@@ -1,0 +1,60 @@
+<template>
+    <article class="identities-card">
+        <template lwc:if={hasEmails}>
+            <section class="ident-section">
+                <header class="ident-header">
+                    <span class="ident-icon ident-icon--email">
+                        <lightning-icon icon-name="utility:email" size="x-small" variant="inverse"></lightning-icon>
+                    </span>
+                    <h3 class="ident-title">Email Addresses ({emailCount})</h3>
+                </header>
+                <ul class="ident-list">
+                    <template for:each={emails} for:item="e">
+                        <li key={e.Id} class="ident-row">
+                            <a href={e.Value__c} class="ident-value">{e.Value__c}</a>
+                            <span class="ident-label">{e.Label__c}</span>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+
+        <template lwc:if={hasPhones}>
+            <section class="ident-section">
+                <header class="ident-header">
+                    <span class="ident-icon ident-icon--phone">
+                        <lightning-icon icon-name="utility:call" size="x-small" variant="inverse"></lightning-icon>
+                    </span>
+                    <h3 class="ident-title">Phone Numbers ({phoneCount})</h3>
+                </header>
+                <ul class="ident-list">
+                    <template for:each={phones} for:item="p">
+                        <li key={p.Id} class="ident-row">
+                            <span class="ident-value">{p.Value__c}</span>
+                            <span class="ident-label">{p.Label__c}</span>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+
+        <template lwc:if={hasAddresses}>
+            <section class="ident-section">
+                <header class="ident-header">
+                    <span class="ident-icon ident-icon--address">
+                        <lightning-icon icon-name="utility:checkin" size="x-small" variant="inverse"></lightning-icon>
+                    </span>
+                    <h3 class="ident-title">Addresses ({addressCount})</h3>
+                </header>
+                <ul class="ident-list">
+                    <template for:each={addresses} for:item="a">
+                        <li key={a.Id} class="ident-row">
+                            <span class="ident-value">{a.Value__c}</span>
+                            <span class="ident-label">{a.Label__c}</span>
+                        </li>
+                    </template>
+                </ul>
+            </section>
+        </template>
+    </article>
+</template>

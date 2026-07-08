@@ -1,0 +1,85 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <h2 class="ed-h2">Identity</h2>
+            <p class="ed-sub">Who is this persona? Core name, role, contact details, and where they fit.</p>
+        </header>
+
+        <div class="ed-info-tip">
+            <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+            <span>Set the <b>Customer Name</b> so you remember which customer this persona belongs to (e.g. "Cumulus Bank").</span>
+        </div>
+
+        <div class="ed-grid ed-grid-2">
+            <lightning-input label="Customer Name" value={persona.Brand__c} data-field="Brand__c" onchange={bubbleChange} class="ed-col-span-2 ed-input-hint"
+                placeholder="e.g. Cumulus Bank"
+                field-level-help="The customer this persona belongs to. Drives the Brand Kit selection and appears on the profile header."></lightning-input>
+            <lightning-input label="First Name" value={persona.First_Name__c} data-field="First_Name__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Rachel"></lightning-input>
+            <lightning-input label="Last Name"  value={persona.Last_Name__c}  data-field="Last_Name__c"  onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Adams"></lightning-input>
+            <lightning-input label="Title"      value={persona.Title__c}      data-field="Title__c"      onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. VP of Finance"></lightning-input>
+            <lightning-input label="Company"    value={persona.Company__c}    data-field="Company__c"    onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. BrightPath Logistics"></lightning-input>
+            <lightning-input label="Customer ID" value={persona.Customer_ID__c} data-field="Customer_ID__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. C-100482"></lightning-input>
+            <lightning-input label="Badge Text" value={persona.Badge_Text__c} data-field="Badge_Text__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Pre-Approved Buyer"></lightning-input>
+        </div>
+
+        <!-- AVATAR block -->
+        <div class="ed-avatar-block">
+            <h3 class="ed-h3">Avatar</h3>
+            <p class="ed-sub-small">Paste a URL, upload an image, or leave blank to show initials. If you upload, the file becomes the avatar automatically.</p>
+            <div class="ed-avatar-row">
+                <div class="ed-avatar-preview">
+                    <template lwc:if={hasAvatar}>
+                        <img src={persona.Avatar_URL__c} alt="Avatar" class="ed-avatar-img" />
+                    </template>
+                    <template lwc:else>
+                        <span class="ed-avatar-initials">{initials}</span>
+                    </template>
+                </div>
+                <div class="ed-avatar-inputs">
+                    <lightning-input type="url" label="Avatar URL" value={persona.Avatar_URL__c} data-field="Avatar_URL__c" onchange={bubbleChange} class="ed-input-hint"
+                        placeholder="e.g. https://cdn.example.com/sarah.png"></lightning-input>
+                    <div class="ed-uploader-wrap slds-m-top_x-small">
+                        <lightning-file-upload
+                            label="Or upload image"
+                            name="avatarUpload"
+                            accept={acceptedAvatarFormats}
+                            record-id={persona.Id}
+                            onuploadfinished={handleAvatarUploaded}>
+                        </lightning-file-upload>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="ed-grid ed-grid-2 slds-m-top_medium">
+            <lightning-input type="email" label="Primary Email" value={persona.Primary_Email__c} data-field="Primary_Email__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. rachel.adams@example.com"></lightning-input>
+            <lightning-input type="tel" label="Primary Phone" value={persona.Primary_Phone__c} data-field="Primary_Phone__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. (315) 555-1254"></lightning-input>
+            <lightning-input label="Primary Address" value={persona.Primary_Address__c} data-field="Primary_Address__c" onchange={bubbleChange} class="ed-col-span-2 ed-input-hint"
+                placeholder="e.g. 2259 Green Avenue, Alpharetta, GA 30004"></lightning-input>
+            <lightning-input label="Segment"    value={persona.Segment__c}    data-field="Segment__c"    onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Small Business Cross-Sell"></lightning-input>
+            <lightning-combobox label="Lifecycle Stage" value={persona.Lifecycle_Stage__c} options={lifecycleOptions} data-field="Lifecycle_Stage__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Cross-Sell Target"></lightning-combobox>
+            <lightning-input type="number" label="Lifetime Value" value={persona.LTV__c} data-field="LTV__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. 11450"
+                field-level-help="Numeric value only. The display currency is chosen in the field below and applied by the renderer."></lightning-input>
+            <lightning-combobox label="Display Currency" value={persona.Currency_Code__c} options={currencyOptions}
+                data-field="Currency_Code__c" onchange={bubbleChange}
+                field-level-help="Controls how LTV renders (e.g. $11,450 vs €11,450). Does not convert the number."></lightning-combobox>
+            <lightning-input type="number" label="Engagement Score (0-100)" min="0" max="100" value={persona.Engagement_Score__c} data-field="Engagement_Score__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. 84"></lightning-input>
+            <lightning-input label="Engagement Label" value={persona.Engagement_Label__c} data-field="Engagement_Label__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Highly Engaged"></lightning-input>
+            <lightning-combobox label="Propensity to Transact" value={persona.Propensity__c} options={propensityOptions} data-field="Propensity__c" onchange={bubbleChange}></lightning-combobox>
+            <lightning-combobox label="Risk Tier" value={persona.Risk_Tier__c} options={riskOptions} data-field="Risk_Tier__c" onchange={bubbleChange}></lightning-combobox>
+        </div>
+    </section>
+</template>

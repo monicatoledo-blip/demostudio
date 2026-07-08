@@ -1,0 +1,37 @@
+<template>
+    <article class="brief-card">
+        <header class="brief-header">
+            <div class="brief-icon">
+                <lightning-icon icon-name="utility:einstein" size="small"></lightning-icon>
+            </div>
+            <h2 class="brief-title">Agentforce Lead Brief</h2>
+            <span class="brief-stamp">Generated just now</span>
+        </header>
+
+        <template lwc:if={persona.Intent_Summary__c}>
+            <section class="brief-section">
+                <h3 class="brief-section-title">Intent Summary</h3>
+                <p class="brief-body">{persona.Intent_Summary__c}</p>
+            </section>
+        </template>
+
+        <template lwc:if={persona.Key_Context__c}>
+            <section class="brief-section">
+                <h3 class="brief-section-title">Key Context</h3>
+                <p class="brief-body">{persona.Key_Context__c}</p>
+            </section>
+        </template>
+
+        <template lwc:if={persona.Suggested_Opener__c}>
+            <section class="brief-section">
+                <h3 class="brief-section-title">Suggested Opener</h3>
+                <blockquote class="brief-opener">{persona.Suggested_Opener__c}</blockquote>
+            </section>
+        </template>
+
+        <div class="brief-actions">
+            <lightning-button variant="brand" label="Send Email" icon-name="utility:email"></lightning-button>
+            <lightning-button variant="neutral" label="Click to Dial" icon-name="utility:call" class="slds-m-left_x-small"></lightning-button>
+        </div>
+    </article>
+</template>

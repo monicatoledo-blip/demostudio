@@ -1,0 +1,64 @@
+.ed-section { max-width: 780px; }
+.ed-section-head { margin-bottom: 1.25rem; }
+.ed-h2 { font-size: 1.25rem; font-weight: 700; color: #181818; margin: 0; }
+.ed-sub { font-size: 0.8125rem; color: #6b7280; margin: 0.25rem 0 0 0; }
+.ed-grid { display: grid; gap: 1rem; }
+.ed-grid-2 { grid-template-columns: 1fr 1fr; }
+.ed-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ed-col-span-2 { grid-column: span 2; }
+.ed-stack { display: flex; flex-direction: column; gap: 1rem; }
+
+.ed-info-tip {
+    display: flex; align-items: flex-start; gap: 0.5rem;
+    background: #eef4fb;
+    border: 1px solid #b7d4f2;
+    color: #032d60;
+    padding: 0.6rem 0.75rem;
+    border-radius: 0.375rem;
+    margin: 0 0 1rem 0;
+    font-size: 0.8125rem;
+}
+.ed-h3 { font-size: 0.875rem; font-weight: 700; color: #181818; margin: 0 0 0.25rem 0; }
+.ed-sub-small { font-size: 0.75rem; color: #6b7280; margin: 0 0 0.75rem 0; }
+.ed-avatar-block {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: #f9fafb;
+    border: 1px solid #e6e9ee;
+    border-radius: 0.5rem;
+}
+.ed-avatar-row {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+}
+.ed-avatar-preview {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #0A1F44, #C8102E);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.75rem; font-weight: 700;
+    overflow: hidden;
+    flex: 0 0 auto;
+    border: 2px solid #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+.ed-avatar-img { width: 100%; height: 100%; object-fit: cover; }
+.ed-avatar-initials { line-height: 1; }
+.ed-avatar-inputs { flex: 1 1 auto; }
+.ed-uploader-wrap :is(.slds-file-selector__body,.slds-file-selector__text) {
+    font-size: 0.75rem;
+}
+
+/* Make placeholders unmistakably not-a-value: light italic gray */
+.ed-input-hint input::placeholder,
+.ed-input-hint textarea::placeholder,
+.ed-input-hint .slds-combobox__input::placeholder {
+    color: #b6b9c0 !important;
+    font-style: italic;
+    opacity: 1;
+}
+.ed-input-hint input,
+.ed-input-hint textarea {
+    color: #181818;
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Currency_Code__c</fullName>
+    <label>Display Currency</label>
+    <description>ISO code used when rendering money values on the profile (LTV, KPIs). This is a demo-display-only picklist; it does NOT enable org-level multi-currency and does not convert values.</description>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>true</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>USD</fullName><default>true</default><label>USD — US Dollar</label></value>
+            <value><fullName>EUR</fullName><default>false</default><label>EUR — Euro</label></value>
+            <value><fullName>GBP</fullName><default>false</default><label>GBP — British Pound</label></value>
+            <value><fullName>CAD</fullName><default>false</default><label>CAD — Canadian Dollar</label></value>
+            <value><fullName>AUD</fullName><default>false</default><label>AUD — Australian Dollar</label></value>
+            <value><fullName>JPY</fullName><default>false</default><label>JPY — Japanese Yen</label></value>
+            <value><fullName>MXN</fullName><default>false</default><label>MXN — Mexican Peso</label></value>
+            <value><fullName>INR</fullName><default>false</default><label>INR — Indian Rupee</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Value__c</fullName>
+    <label>Value</label>
+    <description>Free-form display value (e.g. "$1,326,969", "6 Accounts", "84%").</description>
+    <length>60</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+</CustomField>

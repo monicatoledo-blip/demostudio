@@ -1,0 +1,116 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <h2 class="ed-h2">Brand Kit</h2>
+            <p class="ed-sub">Pick a Brand Kit to apply the customer's colors, gradient, and logo to this persona. To edit the kit itself (colors, logo), open the record on the Brand Kits tab.</p>
+        </header>
+
+        <!-- Current theme preview — mirrors the live-preview mini-card in Theme Studio -->
+        <div class="theme-card">
+            <div class="ts-mini-card" style={miniCardStyle}>
+                <div class="ts-mini-logo-row">
+                    <template lwc:if={hasLogo}>
+                        <img src={logo} alt="Logo" class="ts-mini-logo" />
+                    </template>
+                    <template lwc:else>
+                        <span class="ts-mini-logo-placeholder">LOGO</span>
+                    </template>
+                </div>
+                <div class="ts-mini-header">
+                    <div class="ts-mini-avatar">SJ</div>
+                    <div>
+                        <h3 class="ts-mini-name">Sample Persona</h3>
+                        <p class="ts-mini-sub">Title | Company</p>
+                        <span class="ts-mini-badge" style={miniBadgeStyle}>PRE-APPROVED</span>
+                    </div>
+                </div>
+                <div class="ts-mini-metrics">
+                    <div class="ts-mini-row"><span>Segment</span><b>Cross-Sell Target</b></div>
+                    <div class="ts-mini-row"><span>LTV</span><b>$250,000</b></div>
+                </div>
+                <div class="ts-mini-engagement">
+                    <div class="ts-mini-donut">
+                        <svg viewBox="0 0 100 100" class="ts-mini-donut-svg" aria-hidden="true">
+                            <circle cx="50" cy="50" r="42" class="ts-mini-donut-track" />
+                            <circle cx="50" cy="50" r="42" class="ts-mini-donut-fill"
+                                stroke-dasharray="263.89"
+                                stroke-dashoffset="42.22" />
+                        </svg>
+                        <span class="ts-mini-donut-value">84%</span>
+                    </div>
+                    <div>
+                        <div class="ts-mini-engage-label">Engagement Score</div>
+                        <div class="ts-mini-engage-sub">Highly Engaged</div>
+                    </div>
+                </div>
+            </div>
+            <div class="theme-swatch-row">
+                <div class="theme-swatch">
+                    <span class="theme-swatch-chip" style={primarySwatchStyle}></span>
+                    <div>
+                        <span class="theme-swatch-label">Primary</span>
+                        <span class="theme-swatch-hex">{primaryColor}</span>
+                    </div>
+                </div>
+                <div class="theme-swatch">
+                    <span class="theme-swatch-chip" style={accentSwatchStyle}></span>
+                    <div>
+                        <span class="theme-swatch-label">Accent</span>
+                        <span class="theme-swatch-hex">{accentColor}</span>
+                    </div>
+                </div>
+                <div class="theme-swatch">
+                    <span class="theme-swatch-chip" style={gradientStyle}></span>
+                    <div>
+                        <span class="theme-swatch-label">Background</span>
+                        <span class="theme-swatch-hex theme-gradient-hex">{gradient}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Theme switcher -->
+        <div class="theme-switcher-block slds-m-top_medium">
+            <div class="brand-kit-switcher-head">
+                <div>
+                    <h3 class="ed-h3">Switch Brand Kit</h3>
+                    <p class="ed-sub-small">Click a kit to apply it. Colors and gradient update the preview immediately; auto-save persists.</p>
+                </div>
+                <lightning-radio-group variant="label-hidden" label="Scope" type="button"
+                    options={scopeOptions} value={scope} onchange={handleScopeChange}></lightning-radio-group>
+            </div>
+
+            <template lwc:if={themeChoices.length}>
+                <div class="theme-choice-grid">
+                    <template for:each={themeChoices} for:item="tc">
+                        <button key={tc.id} type="button" class={tc.cardClass}
+                            data-theme-id={tc.id} onclick={handleThemeSelect}>
+                            <span class="theme-choice-swatch" style={tc.swatchStyle}>
+                                <template lwc:if={tc.hasLogo}>
+                                    <img src={tc.logoUrl} alt={tc.name} class="theme-choice-logo" />
+                                </template>
+                            </span>
+                            <span class="theme-choice-name">{tc.name}</span>
+                            <template lwc:if={tc.isActive}>
+                                <span class="theme-choice-active-badge">
+                                    <lightning-icon icon-name="utility:check" size="xx-small" variant="inverse"></lightning-icon>
+                                    Active
+                                </span>
+                            </template>
+                        </button>
+                    </template>
+                </div>
+            </template>
+            <template lwc:else>
+                <div class="ed-empty">
+                    <p>No Brand Kits yet. Create one on the Brand Kits tab (Demo Studio app).</p>
+                </div>
+            </template>
+        </div>
+
+        <p class="ed-hint slds-m-top_medium">
+            <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+            To edit a Brand Kit's colors, gradient, or logo, open the record on the Brand Kits tab. Edits propagate to every persona using that kit.
+        </p>
+    </section>
+</template>

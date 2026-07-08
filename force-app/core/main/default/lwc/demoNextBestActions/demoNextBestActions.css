@@ -1,0 +1,178 @@
+/* Container-queried: 2-across when placed in a wide slot (center column
+   on a record page), stacked single-column when placed in a narrow rail. */
+:host {
+    container-type: inline-size;
+    display: block;
+}
+
+.nba-card {
+    background: #fff;
+    border: 1px solid #e6e9ee;
+    border-radius: 0.75rem;
+    padding: 1rem 1.125rem 1.25rem 1.125rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.nba-header {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 0.9rem;
+}
+.nba-header-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 0.5rem;
+    background: var(--demo-primary, #1F5FBF);
+    color: #fff;
+    flex: 0 0 auto;
+}
+.nba-header-text { display: flex; flex-direction: column; }
+.nba-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+    line-height: 1.2;
+}
+.nba-subtitle {
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0;
+}
+
+.nba-grid {
+    display: grid;
+    /* Default (narrow rails + typical center columns): single column stacked */
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+/* Only go side-by-side when there's genuinely enough room for both
+   cards plus side-by-side buttons (no orphaned wraps). Below this, one
+   card wide reads better than two squished cards. */
+@container (min-width: 640px) {
+    .nba-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+    }
+}
+
+.nba-item {
+    display: flex;
+    flex-direction: column;
+    background: #fbfcfe;
+    border: 1px solid #e6e9ee;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.nba-image-wrap {
+    width: 100%;
+    aspect-ratio: 16 / 7;
+    background: #eef2f7;
+    overflow: hidden;
+}
+.nba-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+.nba-image--fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 700;
+    font-size: 2rem;
+    letter-spacing: 0.05em;
+}
+.nba-image-initial { line-height: 1; }
+
+.nba-body {
+    padding: 0.85rem 0.9rem 0.9rem 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.nba-cat {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--demo-accent, #0B2A5B);
+    background: rgba(31, 95, 191, 0.08);
+    border-radius: 999px;
+    padding: 0.15rem 0.55rem;
+    align-self: flex-start;
+}
+
+.nba-item-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+    line-height: 1.25;
+}
+
+.nba-reason {
+    background: #f4f7fb;
+    border-left: 3px solid var(--demo-primary, #1F5FBF);
+    padding: 0.5rem 0.6rem;
+    border-radius: 0.25rem;
+}
+.nba-reason-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--demo-primary, #1F5FBF);
+    margin-bottom: 0.25rem;
+}
+.nba-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--demo-primary, #1F5FBF);
+}
+.nba-reason-text {
+    font-size: 0.75rem;
+    color: #495057;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.nba-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    margin-top: 0.15rem;
+    align-items: center;
+    min-width: 0;
+}
+.nba-actions lightning-button {
+    flex: 0 0 auto;
+    min-width: 0;
+}
+/* Compact button padding/type in narrow containers so both stay side-by-side
+   without overflowing the card. */
+@container (max-width: 380px) {
+    .nba-actions lightning-button {
+        --sds-c-button-sizing-height: 1.75rem;
+        --slds-c-button-sizing-height: 1.75rem;
+        --sds-c-button-spacing-inline-start: 0.5rem;
+        --sds-c-button-spacing-inline-end: 0.5rem;
+        --slds-c-button-spacing-inline-start: 0.5rem;
+        --slds-c-button-spacing-inline-end: 0.5rem;
+        font-size: 0.75rem;
+    }
+}

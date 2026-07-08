@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bot xmlns="http://soap.sforce.com/2006/04/metadata">
+    <agentDSLEnabled>true</agentDSLEnabled>
+    <agentType>AgentforceEmployeeAgent</agentType>
+    <botMlDomain>
+        <label>Demo Studio Persona Agent</label>
+        <name>Demo_Studio_Persona_Agent</name>
+    </botMlDomain>
+    <botSource>None</botSource>
+    <description>Embedded assistant in Persona Studio that generates a full Demo Persona JSON payload from a natural-language brief.</description>
+    <label>Demo Studio Persona Agent</label>
+    <logPrivateConversationData>false</logPrivateConversationData>
+    <richContentEnabled>true</richContentEnabled>
+    <sessionTimeout>0</sessionTimeout>
+    <type>InternalCopilot</type>
+</Bot>

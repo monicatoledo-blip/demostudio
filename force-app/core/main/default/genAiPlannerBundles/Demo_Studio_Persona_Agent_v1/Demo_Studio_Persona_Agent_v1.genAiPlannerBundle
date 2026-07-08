@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<GenAiPlannerBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Embedded assistant in Persona Studio that generates a full Demo Persona JSON payload from a natural-language brief.</description>
+    <localTopicLinks>
+        <genAiPluginName>ambiguous_question_16jKh000000Gq7g</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>off_topic_16jKh000000Gq7g</genAiPluginName>
+    </localTopicLinks>
+    <localTopicLinks>
+        <genAiPluginName>persona_generator_16jKh000000Gq7g</genAiPluginName>
+    </localTopicLinks>
+    <localTopics>
+        <fullName>ambiguous_question_16jKh000000Gq7g</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Ask the user to clarify when the brief is too vague to act on.</description>
+        <developerName>ambiguous_question_16jKh000000Gq7g</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI assistant embedded inside the Persona Studio tool. Your only job is
+to help a demo engineer generate a Demo Studio persona from a short story or brief.
+You are an AI assistant, not a human.</description>
+            <developerName>instruction0_179Kh000000x32F</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179Kh000000x32F</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>ambiguous_question</localDeveloperName>
+        <masterLabel>Ambiguous Question</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>persona_generator_16jKh000000Gq7g</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Understand a persona brief and call the generation action.</description>
+        <developerName>persona_generator_16jKh000000Gq7g</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI assistant embedded inside the Persona Studio tool. Your only job is
+to help a demo engineer generate a Demo Studio persona from a short story or brief.
+You are an AI assistant, not a human.</description>
+            <developerName>instruction0_179Kh000000x32G</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179Kh000000x32G</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localActionLinks>
+            <functionName>generate_persona_payload_179Kh000000x32G</functionName>
+        </localActionLinks>
+        <localActions>
+            <fullName>generate_persona_payload_179Kh000000x32G</fullName>
+            <description>Generate a Demo Studio persona JSON payload from a natural-language brief.</description>
+            <developerName>generate_persona_payload_179Kh000000x32G</developerName>
+            <invocationTarget>DemoStudioPersonaGenerator</invocationTarget>
+            <invocationTargetType>apex</invocationTargetType>
+            <isConfirmationRequired>false</isConfirmationRequired>
+            <isIncludeInProgressIndicator>false</isIncludeInProgressIndicator>
+            <localDeveloperName>generate_persona_payload</localDeveloperName>
+            <masterLabel>Generate Persona Payload</masterLabel>
+        </localActions>
+        <localDeveloperName>persona_generator</localDeveloperName>
+        <masterLabel>Persona Generator</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <localTopics>
+        <fullName>off_topic_16jKh000000Gq7g</fullName>
+        <canEscalate>false</canEscalate>
+        <description>Redirect conversation back to persona generation when user asks about unrelated topics.</description>
+        <developerName>off_topic_16jKh000000Gq7g</developerName>
+        <genAiPluginInstructions>
+            <description>You are an AI assistant embedded inside the Persona Studio tool. Your only job is
+to help a demo engineer generate a Demo Studio persona from a short story or brief.
+You are an AI assistant, not a human.</description>
+            <developerName>instruction0_179Kh000000x32H</developerName>
+            <language>en_US</language>
+            <masterLabel>instruction0_179Kh000000x32H</masterLabel>
+            <sortOrder>1</sortOrder>
+        </genAiPluginInstructions>
+        <language>en_US</language>
+        <localDeveloperName>off_topic</localDeveloperName>
+        <masterLabel>Off Topic</masterLabel>
+        <pluginType>Topic</pluginType>
+    </localTopics>
+    <masterLabel>Demo Studio Persona Agent</masterLabel>
+    <plannerType>Atlas__ConcurrentMultiAgentOrchestration</plannerType>
+</GenAiPlannerBundle>

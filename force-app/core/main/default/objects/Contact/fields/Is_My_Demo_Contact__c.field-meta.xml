@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Is_My_Demo_Contact__c</fullName>
+    <label>Is My Demo Contact</label>
+    <description>Formula: true when the running user assigned this Contact's Demo Persona OR created the linked Demo_Persona__c record. Used to filter the "My Demo Contacts" list view (which can't reference $User.Id directly).</description>
+    <formula>IF(
+    Demo_Assigned_By__c = $User.Id,
+    TRUE,
+    IF(
+        NOT(ISBLANK(Demo_Persona__c))
+        &amp;&amp; Demo_Persona__r.CreatedById = $User.Id,
+        TRUE,
+        FALSE
+    )
+)</formula>
+    <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+    <type>Checkbox</type>
+</CustomField>

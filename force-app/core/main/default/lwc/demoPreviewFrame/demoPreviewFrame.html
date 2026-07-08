@@ -1,0 +1,150 @@
+<template>
+    <!-- STACK: single-column list, used for per-tab focused previews -->
+    <template lwc:if={isStackLayout}>
+        <div class="pf-stack">
+            <template lwc:if={showHeader}>
+                <c-demo-unified-profile-header persona={persona} theme={theme} identities={identities} segments={segments} initial-tab={headerInitialTab}></c-demo-unified-profile-header>
+            </template>
+            <template lwc:if={showKpiRow}>
+                <c-demo-kpi-stat-row kpis={kpis}></c-demo-kpi-stat-row>
+            </template>
+            <template lwc:if={showAlerts}>
+                <c-demo-ai-insights-alerts alerts={alerts}></c-demo-ai-insights-alerts>
+            </template>
+            <template lwc:if={showBrief}>
+                <c-demo-agentforce-brief persona={persona}></c-demo-agentforce-brief>
+            </template>
+            <template lwc:if={showCrossSell}>
+                <c-demo-cross-sell-insights insights={insights}></c-demo-cross-sell-insights>
+            </template>
+            <template lwc:if={showNba}>
+                <c-demo-next-best-actions nbas={nbas}></c-demo-next-best-actions>
+            </template>
+            <template lwc:if={showLikelihood}>
+                <c-demo-likelihood-score-card persona={persona}></c-demo-likelihood-score-card>
+            </template>
+            <template lwc:if={showTimeline}>
+                <c-demo-activity-timeline activities={activities}></c-demo-activity-timeline>
+            </template>
+            <template lwc:if={showJourneys}>
+                <c-demo-active-journey-tracker journeys={journeys}></c-demo-active-journey-tracker>
+            </template>
+        </div>
+    </template>
+
+    <!-- THREE-COL: full record-page composition — left rail | center | right rail -->
+    <template lwc:if={isThreeColLayout}>
+        <div class="pf-three-col">
+            <div class="pf-col pf-col-left">
+                <template lwc:if={leftRailEmpty}>
+                    <div class="pf-slot-empty">Left Rail</div>
+                </template>
+                <template for:each={leftRailComponents} for:item="comp">
+                    <div key={comp.name} class="pf-col-item">
+                        <template lwc:if={comp.isHeader}>
+                            <c-demo-unified-profile-header persona={persona} theme={theme} identities={identities} segments={segments} initial-tab={headerInitialTab}></c-demo-unified-profile-header>
+                        </template>
+                        <template lwc:if={comp.isBrief}>
+                            <c-demo-agentforce-brief persona={persona}></c-demo-agentforce-brief>
+                        </template>
+                        <template lwc:if={comp.isCrossSell}>
+                            <c-demo-cross-sell-insights insights={insights}></c-demo-cross-sell-insights>
+                        </template>
+                        <template lwc:if={comp.isNba}>
+                            <c-demo-next-best-actions nbas={nbas}></c-demo-next-best-actions>
+                        </template>
+                        <template lwc:if={comp.isLikelihood}>
+                            <c-demo-likelihood-score-card persona={persona}></c-demo-likelihood-score-card>
+                        </template>
+                        <template lwc:if={comp.isTimeline}>
+                            <c-demo-activity-timeline activities={activities}></c-demo-activity-timeline>
+                        </template>
+                        <template lwc:if={comp.isJourneys}>
+                            <c-demo-active-journey-tracker journeys={journeys}></c-demo-active-journey-tracker>
+                        </template>
+                        <template lwc:if={comp.isKpiRow}>
+                            <c-demo-kpi-stat-row kpis={kpis}></c-demo-kpi-stat-row>
+                        </template>
+                        <template lwc:if={comp.isAlerts}>
+                            <c-demo-ai-insights-alerts alerts={alerts}></c-demo-ai-insights-alerts>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <div class="pf-col pf-col-center">
+                <template lwc:if={centerEmpty}>
+                    <div class="pf-slot-empty">Center</div>
+                </template>
+                <template for:each={centerComponents} for:item="comp">
+                    <div key={comp.name} class="pf-col-item">
+                        <template lwc:if={comp.isHeader}>
+                            <c-demo-unified-profile-header persona={persona} theme={theme} identities={identities} segments={segments} initial-tab={headerInitialTab}></c-demo-unified-profile-header>
+                        </template>
+                        <template lwc:if={comp.isBrief}>
+                            <c-demo-agentforce-brief persona={persona}></c-demo-agentforce-brief>
+                        </template>
+                        <template lwc:if={comp.isCrossSell}>
+                            <c-demo-cross-sell-insights insights={insights}></c-demo-cross-sell-insights>
+                        </template>
+                        <template lwc:if={comp.isNba}>
+                            <c-demo-next-best-actions nbas={nbas}></c-demo-next-best-actions>
+                        </template>
+                        <template lwc:if={comp.isLikelihood}>
+                            <c-demo-likelihood-score-card persona={persona}></c-demo-likelihood-score-card>
+                        </template>
+                        <template lwc:if={comp.isTimeline}>
+                            <c-demo-activity-timeline activities={activities}></c-demo-activity-timeline>
+                        </template>
+                        <template lwc:if={comp.isJourneys}>
+                            <c-demo-active-journey-tracker journeys={journeys}></c-demo-active-journey-tracker>
+                        </template>
+                        <template lwc:if={comp.isKpiRow}>
+                            <c-demo-kpi-stat-row kpis={kpis}></c-demo-kpi-stat-row>
+                        </template>
+                        <template lwc:if={comp.isAlerts}>
+                            <c-demo-ai-insights-alerts alerts={alerts}></c-demo-ai-insights-alerts>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <div class="pf-col pf-col-right">
+                <template lwc:if={rightRailEmpty}>
+                    <div class="pf-slot-empty">Right Rail</div>
+                </template>
+                <template for:each={rightRailComponents} for:item="comp">
+                    <div key={comp.name} class="pf-col-item">
+                        <template lwc:if={comp.isHeader}>
+                            <c-demo-unified-profile-header persona={persona} theme={theme} identities={identities} segments={segments} initial-tab={headerInitialTab}></c-demo-unified-profile-header>
+                        </template>
+                        <template lwc:if={comp.isBrief}>
+                            <c-demo-agentforce-brief persona={persona}></c-demo-agentforce-brief>
+                        </template>
+                        <template lwc:if={comp.isCrossSell}>
+                            <c-demo-cross-sell-insights insights={insights}></c-demo-cross-sell-insights>
+                        </template>
+                        <template lwc:if={comp.isNba}>
+                            <c-demo-next-best-actions nbas={nbas}></c-demo-next-best-actions>
+                        </template>
+                        <template lwc:if={comp.isLikelihood}>
+                            <c-demo-likelihood-score-card persona={persona}></c-demo-likelihood-score-card>
+                        </template>
+                        <template lwc:if={comp.isTimeline}>
+                            <c-demo-activity-timeline activities={activities}></c-demo-activity-timeline>
+                        </template>
+                        <template lwc:if={comp.isJourneys}>
+                            <c-demo-active-journey-tracker journeys={journeys}></c-demo-active-journey-tracker>
+                        </template>
+                        <template lwc:if={comp.isKpiRow}>
+                            <c-demo-kpi-stat-row kpis={kpis}></c-demo-kpi-stat-row>
+                        </template>
+                        <template lwc:if={comp.isAlerts}>
+                            <c-demo-ai-insights-alerts alerts={alerts}></c-demo-ai-insights-alerts>
+                        </template>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</template>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>My_Personas</fullName>
+    <columns>NAME</columns>
+    <columns>Brand__c</columns>
+    <columns>Title__c</columns>
+    <columns>Company__c</columns>
+    <columns>Segment__c</columns>
+    <columns>Theme__c</columns>
+    <columns>LAST_UPDATE</columns>
+    <filterScope>Mine</filterScope>
+    <label>My Personas</label>
+    <sharedTo>
+        <allInternalUsers></allInternalUsers>
+    </sharedTo>
+</ListView>

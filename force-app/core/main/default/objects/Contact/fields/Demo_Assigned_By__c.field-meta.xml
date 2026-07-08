@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Demo_Assigned_By__c</fullName>
+    <label>Demo Assigned By</label>
+    <description>User who last assigned a Demo Persona to this Contact via Demo Studio. Used to filter "My Demo Contacts" list views. Managed automatically by DemoStudioService.</description>
+    <referenceTo>User</referenceTo>
+    <relationshipLabel>Demo Studio Contacts</relationshipLabel>
+    <relationshipName>Demo_Studio_Contacts</relationshipName>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Lookup</type>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>

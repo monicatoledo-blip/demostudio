@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>New</actionName>
+        <content>NewDemoPersonaAction</content>
+        <formFactor>Large</formFactor>
+        <type>LightningComponent</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>Persona_Compact</compactLayoutAssignment>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <externalSharingModel>ReadWrite</externalSharingModel>
+    <label>Demo Persona</label>
+    <nameField>
+        <label>Persona Name</label>
+        <type>Text</type>
+    </nameField>
+    <pluralLabel>Demo Personas</pluralLabel>
+    <searchLayouts>
+        <customTabListAdditionalFields>Brand__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Title__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Company__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Segment__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Engagement_Score__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Theme__c</customTabListAdditionalFields>
+        <lookupDialogsAdditionalFields>Brand__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Title__c</lookupDialogsAdditionalFields>
+        <lookupDialogsAdditionalFields>Company__c</lookupDialogsAdditionalFields>
+        <lookupPhoneDialogsAdditionalFields>Brand__c</lookupPhoneDialogsAdditionalFields>
+        <searchResultsAdditionalFields>Brand__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Title__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Company__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Segment__c</searchResultsAdditionalFields>
+    </searchLayouts>
+    <sharingModel>ReadWrite</sharingModel>
+    <visibility>Public</visibility>
+</CustomObject>

@@ -1,0 +1,22 @@
+<template>
+    <div class={panelClass}>
+        <button type="button" class="help-toggle" onclick={toggle}>
+            <lightning-icon icon-name="utility:info_alt" size="x-small"></lightning-icon>
+            <span class="help-heading">{heading}</span>
+            <lightning-icon icon-name={iconName} size="x-small" class="help-chevron"></lightning-icon>
+        </button>
+        <template lwc:if={open}>
+            <ol class="help-list">
+                <template for:each={decoratedSteps} for:item="s">
+                    <li key={s.key} class="help-item">
+                        <span class="help-num">{s.num}</span>
+                        <div class="help-body">
+                            <div class="help-title">{s.title}</div>
+                            <div class="help-desc">{s.desc}</div>
+                        </div>
+                    </li>
+                </template>
+            </ol>
+        </template>
+    </div>
+</template>

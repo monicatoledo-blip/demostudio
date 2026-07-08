@@ -1,0 +1,88 @@
+.identities-card {
+    background: #fff;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    border: 1px solid #e5e7eb;
+}
+
+.ident-section {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #f0f2f5;
+}
+
+.ident-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.ident-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.ident-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    --sds-c-icon-color-foreground-default: #fff;
+    --slds-c-icon-color-foreground-default: #fff;
+}
+
+.ident-icon--email   { background: #1e88e5; }
+.ident-icon--phone   { background: #f57c00; }
+.ident-icon--address { background: var(--demo-primary); }
+
+.ident-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+}
+
+.ident-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ident-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    font-size: 0.8125rem;
+    border-bottom: 1px dashed #eef0f3;
+}
+.ident-row:last-child {
+    border-bottom: none;
+}
+
+.ident-value {
+    color: #0176d3;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 0.75rem;
+}
+
+.ident-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #6b7280;
+    flex: 0 0 auto;
+}

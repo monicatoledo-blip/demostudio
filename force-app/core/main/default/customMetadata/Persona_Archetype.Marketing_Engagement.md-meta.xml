@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Marketing Engagement Prospect</label>
+    <protected>false</protected>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Marketing</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">A marketing-qualified lead across multiple journeys, showing likelihood scores, engagement history, and BU membership.</value>
+    </values>
+    <values>
+        <field>Sample_Brief__c</field>
+        <value xsi:type="xsd:string">A marketing-qualified lead who has opened 4 emails, clicked 2, and is enrolled in both a nurture journey and a webinar follow-up. Story: showcase real-time engagement, likelihood scores, and cross-BU orchestration.</value>
+    </values>
+    <values>
+        <field>Payload_JSON__c</field>
+        <value xsi:type="xsd:string">{"persona":{"First_Name__c":"Alex","Last_Name__c":"Morgan","Title__c":"VP of Marketing","Company__c":"Northwind Retail","Customer_ID__c":"MK-99012","Segment__c":"MQL - High Engagement","Lifecycle_Stage__c":"Engaged NDR","LTV__c":180000,"Propensity__c":"High","Engagement_Score__c":89,"Engagement_Label__c":"Highly Engaged","Risk_Tier__c":"Low","Badge_Text__c":"Marketing Qualified","Suggested_Opener__c":"Hi Alex, I saw you registered for our upcoming webinar on omnichannel personalization — perfect timing given your recent visits to our journey builder pages. I would love to walk you through what a live implementation looks like for a retailer your size.","Intent_Summary__c":"Alex has engaged consistently over 30 days: 4 opens, 2 clicks, registered for an upcoming webinar. Enrolled in both a product nurture journey and a webinar follow-up sequence.","Key_Context__c":"MQL with clear buying signals. Two active journeys across Marketing and Sales BUs. Never unsubscribed. Consistent morning engagement pattern.","Open_Likelihood__c":94,"Click_Likelihood__c":81,"Unsubscribe_Risk__c":2},"insights":[{"Title__c":"Book a Discovery Call","Category__c":"Next-Best-Action","Why_This_Suggestion__c":"MQLs at engagement score 85+ have a 62% call-book rate when contacted within 24h of webinar registration.","CTA_Label__c":"Send Calendar","Sort_Order__c":1}],"activities":[{"Type__c":"Web","Title__c":"Registered for Webinar","Description__c":"Signed up for &quot;Omnichannel Personalization at Scale&quot; via marketing site.","Timestamp_Label__c":"1 hour ago","Icon__c":"utility:event","Sort_Order__c":1},{"Type__c":"Email","Title__c":"Clicked Product Update Email","Description__c":"Clicked the Journey Builder feature callout in this week's product update.","Timestamp_Label__c":"Yesterday","Icon__c":"utility:email","Sort_Order__c":2},{"Type__c":"Email","Title__c":"Opened Welcome Series #3","Description__c":"Opened the third email in the welcome nurture sequence.","Timestamp_Label__c":"3 days ago","Icon__c":"utility:email","Sort_Order__c":3}],"journeys":[{"Journey_Name__c":"Product Nurture — Journey Builder","Business_Unit__c":"Corporate Comms","Status__c":"Active"},{"Journey_Name__c":"Webinar Follow-up — Omnichannel","Business_Unit__c":"Corporate Comms","Status__c":"Active"}],"recipe":{"leftRail":[{"component":"demoUnifiedProfileHeader"}],"center":[{"component":"demoAgentforceBrief"}],"rightRail":[{"component":"demoLikelihoodScoreCard"},{"component":"demoActivityTimeline"},{"component":"demoActiveJourneyTracker"}]}}</value>
+    </values>
+</CustomMetadata>

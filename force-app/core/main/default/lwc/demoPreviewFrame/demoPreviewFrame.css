@@ -1,0 +1,50 @@
+:host {
+    --demo-primary: #C8102E;
+    --demo-accent: #0A1F44;
+    --demo-bg-gradient: linear-gradient(135deg, #0A1F44 0%, #1C3B7B 100%);
+    display: block;
+    width: 100%;
+}
+
+.pf-stack {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+}
+
+.pf-stack > * {
+    display: block;
+    width: 100%;
+}
+
+/* Three-column layout mirrors a Lightning record page: narrow left rail
+   for the hero card, wider center for the story, narrow right rail for
+   auxiliary widgets. */
+.pf-three-col {
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) minmax(360px, 1.5fr) minmax(280px, 1fr);
+    gap: 0.75rem;
+    width: 100%;
+    align-items: start;
+}
+.pf-col {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    min-width: 0;
+}
+.pf-col > * { min-width: 0; }
+.pf-col-item { display: block; }
+.pf-slot-empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: 0.5rem;
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    color: #94a3b8;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    background: rgba(255, 255, 255, 0.4);
+}

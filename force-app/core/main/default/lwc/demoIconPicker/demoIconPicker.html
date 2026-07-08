@@ -1,0 +1,28 @@
+<template>
+    <div class="ip-wrap">
+        <label class="ip-label">{label}</label>
+        <button type="button" class="ip-trigger" onclick={toggleOpen}>
+            <template lwc:if={value}>
+                <lightning-icon icon-name={value} size="small" class="ip-trigger-icon"></lightning-icon>
+            </template>
+            <template lwc:else>
+                <lightning-icon icon-name="utility:add" size="x-small" class="ip-trigger-icon ip-trigger-icon--empty"></lightning-icon>
+            </template>
+            <span class="ip-trigger-name">{displayValue}</span>
+            <lightning-icon icon-name="utility:down" size="xx-small" class="ip-trigger-caret"></lightning-icon>
+        </button>
+
+        <template lwc:if={isOpen}>
+            <div class="ip-popover">
+                <div class="ip-grid">
+                    <template for:each={iconOptions} for:item="ic">
+                        <button key={ic.name} type="button" class={ic.class}
+                            data-name={ic.name} onclick={handlePick} title={ic.name}>
+                            <lightning-icon icon-name={ic.name} size="small"></lightning-icon>
+                        </button>
+                    </template>
+                </div>
+            </div>
+        </template>
+    </div>
+</template>

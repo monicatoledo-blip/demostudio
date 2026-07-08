@@ -1,0 +1,26 @@
+:host {
+    /* Fallback theme tokens if no Demo_Theme__c is attached */
+    --demo-primary: #0070d2;
+    --demo-accent: #032d60;
+    --demo-bg-gradient: linear-gradient(135deg, #032d60 0%, #0070d2 100%);
+    --demo-font: 'Salesforce Sans', Arial, sans-serif;
+    display: block;
+    font-family: var(--demo-font);
+}
+
+.demo-shell {
+    padding: 0.5rem;
+}
+
+.demo-slot > * {
+    display: block;
+}
+.demo-slot-item {
+    display: block;
+    margin-bottom: 1rem;
+}
+.demo-slot-item:last-child { margin-bottom: 0; }
+
+.demo-empty {
+    padding: 3rem 1rem;
+}

@@ -1,0 +1,244 @@
+:host {
+    --demo-primary: #C8102E;
+    --demo-accent: #0A1F44;
+    --demo-bg-gradient: linear-gradient(135deg, #0A1F44 0%, #1C3B7B 100%);
+    --demo-font: 'Salesforce Sans', Arial, sans-serif;
+    display: block;
+    width: 100%;
+    font-family: var(--demo-font);
+}
+
+.studio-frame {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 800px;
+    background: #f4f6f9;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+.studio-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1.25rem;
+    background: var(--demo-bg-gradient);
+    color: #fff;
+    border-bottom: 1px solid rgba(255,255,255,0.15);
+}
+.studio-toolbar-left { display: flex; align-items: center; gap: 0.75rem; }
+.studio-logo {
+    width: 36px; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,0.15);
+    display: flex; align-items: center; justify-content: center;
+    --sds-c-icon-color-foreground-default: #fff;
+    --slds-c-icon-color-foreground-default: #fff;
+}
+.studio-title { font-size: 1.125rem; font-weight: 700; margin: 0; color: #fff; letter-spacing: -0.01em; }
+.studio-subtitle { font-size: 0.75rem; color: rgba(255,255,255,0.75); margin: 0.1rem 0 0 0; }
+.studio-toolbar-right { display: flex; align-items: center; }
+
+/* Auto-save status pill in the toolbar */
+.save-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.12);
+    transition: background 0.2s, color 0.2s;
+    min-width: 8rem;
+    justify-content: center;
+}
+.save-status-icon {
+    --sds-c-icon-color-foreground-default: currentColor;
+    --slds-c-icon-color-foreground-default: currentColor;
+}
+.save-status--saved   { background: rgba(45, 132, 66, 0.35);  color: #d4f4dd; }
+.save-status--saving  { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+.save-status--pending { background: rgba(255, 184, 40, 0.35); color: #fff5d1; }
+.save-status--error   { background: rgba(234, 0, 27, 0.45);   color: #ffe1e5; }
+.save-status--idle    { background: rgba(255, 255, 255, 0.10); color: rgba(255, 255, 255, 0.7); }
+/* Gentle spin on the syncing icon so users know something's happening */
+.save-status--saving .save-status-icon {
+    animation: save-spin 1s linear infinite;
+}
+@keyframes save-spin { to { transform: rotate(360deg); } }
+
+.studio-split {
+    display: grid;
+    grid-template-columns: 200px minmax(560px, 780px) 1fr;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+/* When preview is hidden (Contacts tab), let editor grow */
+.studio-split:not(:has(.studio-preview)) {
+    grid-template-columns: 200px 1fr;
+}
+
+/* Recipe / Contacts: give the preview more real estate for the composed view */
+.studio-split--preview-wide-fit {
+    grid-template-columns: 200px minmax(320px, 440px) 1fr;
+}
+.studio-split--preview-wide {
+    grid-template-columns: 200px 260px 1fr;
+}
+
+.studio-rail {
+    background: #fff;
+    border-right: 1px solid #e6e9ee;
+    padding: 0.75rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+.studio-tab {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 1rem;
+    background: transparent;
+    border: none;
+    border-left: 3px solid transparent;
+    color: #444;
+    font-size: 0.875rem;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+.studio-tab:hover { background: #f4f6f9; }
+/* Rail is Salesforce chrome — use SLDS brand blue instead of --demo-primary
+   so light/pale brand colors (yellow, off-white) don't render as unreadable
+   text on the white rail. */
+.studio-tab--active {
+    background: rgba(1, 118, 211, 0.08);
+    border-left-color: #0176d3;
+    color: #0176d3;
+    font-weight: 600;
+}
+/* Group parents (e.g. Identity) — same padding, but subtle upper-case/uppercase-y
+   affordance so users recognize they're a section header. Children are indented. */
+.studio-tab-group { display: contents; }
+.studio-tab--group {
+    color: #6b7280;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+.studio-tab--group:hover { background: transparent; cursor: default; }
+.studio-tab--parent-active {
+    color: #0176d3;
+}
+.studio-tab--child {
+    padding-left: 2.25rem;
+}
+.rail-icon {
+    --sds-c-icon-color-foreground-default: currentColor;
+    --slds-c-icon-color-foreground-default: currentColor;
+    width: 16px;
+    height: 16px;
+    flex: 0 0 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.rail-label { flex: 1 1 auto; }
+
+.studio-editor {
+    background: #fff;
+    padding: 1.5rem;
+    overflow-y: auto;
+    border-right: 1px solid #e6e9ee;
+}
+
+.studio-preview {
+    background: #eef1f4;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+.preview-header {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #6b7280;
+    background: #fff;
+    border-bottom: 1px solid #e6e9ee;
+}
+.preview-canvas {
+    flex: 1 1 auto;
+    padding: 1.5rem 1rem;
+    overflow-y: auto;
+    /* Center a realistic record-page-width preview on a gray backdrop
+       so it feels like the real Lightning surface, not a stretched slab. */
+    display: flex;
+    justify-content: center;
+    background: #e5e8ec;
+}
+.preview-canvas > * {
+    width: 100%;
+    max-width: 440px;
+    flex: 0 0 auto;
+}
+/* On Recipe/Contacts, the 3-column composed view needs the full canvas width */
+.studio-split--preview-wide-fit .preview-canvas > *,
+.studio-split--preview-wide .preview-canvas > * {
+    max-width: 1200px;
+}
+
+.generate-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin: 0.75rem 1.25rem 0 1.25rem;
+    padding: 0.6rem 0.75rem;
+    background: #eef4fb;
+    border: 1px solid #b7d4f2;
+    border-radius: 0.5rem;
+    border-bottom-left-radius: 0;
+    border-bottom-right-radius: 0;
+    border-bottom: none;
+}
+.generate-banner-body {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+.generate-banner-icon {
+    width: 32px; height: 32px;
+    background: #032d60;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    flex: 0 0 auto;
+    --sds-c-icon-color-foreground-default: #fff;
+    --slds-c-icon-color-foreground-default: #fff;
+}
+.generate-banner-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #032d60;
+    margin: 0;
+}
+.generate-banner-sub {
+    font-size: 0.75rem;
+    color: #4b5563;
+    margin: 0.1rem 0 0 0;
+    line-height: 1.35;
+}
+.generate-banner-btn { flex: 0 0 auto; }

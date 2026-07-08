@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Public logo endpoint used by Brand Kit Studio to fetch brand logos by domain. No API key required.</description>
+    <endpointUrl>https://logo.clearbit.com</endpointUrl>
+    <isActive>true</isActive>
+    <isApplicableToConnectSrc>false</isApplicableToConnectSrc>
+    <isApplicableToFrameSrc>false</isApplicableToFrameSrc>
+    <isApplicableToImgSrc>true</isApplicableToImgSrc>
+    <isApplicableToMediaSrc>false</isApplicableToMediaSrc>
+    <isApplicableToStyleSrc>false</isApplicableToStyleSrc>
+    <isApplicableToFontSrc>false</isApplicableToFontSrc>
+</CspTrustedSite>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Public image proxy used ONLY to fetch logos through a CORS-permissive endpoint so we can sample pixel colors on a canvas. Falls back to the raw source if the proxy fails.</description>
+    <endpointUrl>https://images.weserv.nl</endpointUrl>
+    <isActive>true</isActive>
+    <isApplicableToConnectSrc>true</isApplicableToConnectSrc>
+    <isApplicableToFrameSrc>false</isApplicableToFrameSrc>
+    <isApplicableToImgSrc>true</isApplicableToImgSrc>
+    <isApplicableToMediaSrc>false</isApplicableToMediaSrc>
+    <isApplicableToStyleSrc>false</isApplicableToStyleSrc>
+    <isApplicableToFontSrc>false</isApplicableToFontSrc>
+</CspTrustedSite>

@@ -1,0 +1,21 @@
+.ed-section { max-width: 780px; }
+.ed-section-head { margin-bottom: 1.25rem; }
+.ed-h2 { font-size: 1.25rem; font-weight: 700; color: #181818; margin: 0; }
+.ed-sub { font-size: 0.8125rem; color: #6b7280; margin: 0.25rem 0 0 0; }
+.ed-grid { display: grid; gap: 1rem; }
+.ed-grid-2 { grid-template-columns: 1fr 1fr; }
+.ed-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ed-col-span-2 { grid-column: span 2; }
+.ed-stack { display: flex; flex-direction: column; gap: 1rem; }
+
+/* Placeholders styled unmistakably as hint text (not real values) */
+.ed-input-hint input::placeholder,
+.ed-input-hint textarea::placeholder {
+    color: #b6b9c0 !important;
+    font-style: italic;
+    opacity: 1;
+}
+.ed-input-hint input,
+.ed-input-hint textarea {
+    color: #181818;
+}

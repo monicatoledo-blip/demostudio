@@ -1,0 +1,79 @@
+.ed-section { max-width: 780px; }
+.ed-section-head { margin-bottom: 1.25rem; }
+.ed-section-head-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+.ed-section-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    flex: 0 0 auto;
+}
+.ed-sparkling {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #6b7280;
+    margin: 0.35rem 0 0 0;
+}
+.ed-sparkling lightning-icon {
+    animation: sparkle-spin 1s linear infinite;
+}
+@keyframes sparkle-spin { to { transform: rotate(360deg); } }
+.ed-h2 { font-size: 1.25rem; font-weight: 700; color: #181818; margin: 0; }
+.ed-sub { font-size: 0.8125rem; color: #6b7280; margin: 0.25rem 0 0 0; }
+.ed-grid { display: grid; gap: 0.85rem; }
+.ed-grid-2 { grid-template-columns: 1fr 1fr; }
+.ed-grid-3 { grid-template-columns: repeat(3, 1fr); }
+.ed-col-span-2 { grid-column: span 2; }
+.ed-rows { display: flex; flex-direction: column; gap: 1rem; }
+
+.ed-row-card {
+    background: #f9fafb;
+    border: 1px solid #e6e9ee;
+    border-radius: 0.5rem;
+    padding: 1rem 1rem 1.25rem 1rem;
+    position: relative;
+}
+.ed-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px dashed #e6e9ee;
+}
+.ed-row-num {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+.ed-row-delete {
+    background: transparent;
+    border: 1px solid transparent;
+    color: #b91c1c;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    --sds-c-icon-color-foreground-default: #b91c1c;
+    --slds-c-icon-color-foreground-default: #b91c1c;
+}
+.ed-row-delete:hover { background: #fee2e2; border-color: #fecaca; }
+
+.ed-empty {
+    background: #f9fafb;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.nba-image-block { display: flex; flex-direction: column; gap: 0.4rem; }
+.nba-upload-row :is(.slds-file-selector__body, .slds-file-selector__text) { font-size: 0.75rem; }

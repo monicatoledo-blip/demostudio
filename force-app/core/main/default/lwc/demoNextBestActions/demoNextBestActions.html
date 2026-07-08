@@ -1,0 +1,56 @@
+<template>
+    <template lwc:if={hasNbas}>
+        <article class="nba-card">
+            <header class="nba-header">
+                <span class="nba-header-icon" role="img" aria-label="Next Best Actions">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <circle cx="12" cy="12" r="6"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                    </svg>
+                </span>
+                <div class="nba-header-text">
+                    <h2 class="nba-title">Next Best Actions</h2>
+                    <p class="nba-subtitle">AI-recommended plays for this customer</p>
+                </div>
+            </header>
+
+            <div class="nba-grid">
+                <template for:each={decoratedNbas} for:item="nba">
+                    <div key={nba._key} class="nba-item">
+                        <div class="nba-image-wrap">
+                            <template lwc:if={nba._hasImage}>
+                                <img src={nba._effectiveUrl} alt={nba.Title__c}
+                                    class="nba-image"
+                                    data-key={nba._key}
+                                    data-stage={nba._stage}
+                                    onerror={handleImageError} />
+                            </template>
+                            <template lwc:else>
+                                <div class="nba-image nba-image--fallback" style={nba._fallbackStyle}>
+                                    <span class="nba-image-initial">{nba._initial}</span>
+                                </div>
+                            </template>
+                        </div>
+                        <div class="nba-body">
+                            <span class="nba-cat">{nba.Category__c}</span>
+                            <h3 class="nba-item-title">{nba.Title__c}</h3>
+                            <div class="nba-reason">
+                                <span class="nba-reason-tag">
+                                    <span class="nba-dot"></span>
+                                    Why this suggestion?
+                                </span>
+                                <p class="nba-reason-text">{nba.Why_This_Suggestion__c}</p>
+                            </div>
+                            <div class="nba-actions">
+                                <lightning-button variant="brand" label={nba._ctaLabel} class="nba-btn-primary"></lightning-button>
+                                <lightning-button variant="neutral" label="Dismiss" class="nba-btn-secondary"></lightning-button>
+                            </div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </article>
+    </template>
+</template>

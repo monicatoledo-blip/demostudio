@@ -1,0 +1,23 @@
+<template>
+    <template lwc:if={hasJourneys}>
+        <article class="jt-card">
+            <header class="jt-header">
+                <lightning-icon icon-name="utility:flow" size="small" class="jt-title-icon"></lightning-icon>
+                <h2 class="jt-title">Active Journeys</h2>
+            </header>
+
+            <ul class="jt-list">
+                <template for:each={decoratedJourneys} for:item="j">
+                    <li key={j.Id} class="jt-item" style={j.statusStyle}>
+                        <div class="jt-item-top">
+                            <span class="jt-bu" style={j.buStyle}>{j.Business_Unit__c}</span>
+                            <span class="jt-status">{j.Status__c}</span>
+                        </div>
+                        <h4 class="jt-item-title">{j.Journey_Name__c}</h4>
+                        <p class="jt-item-date">Enrolled {j.Enrolled_Date__c}</p>
+                    </li>
+                </template>
+            </ul>
+        </article>
+    </template>
+</template>

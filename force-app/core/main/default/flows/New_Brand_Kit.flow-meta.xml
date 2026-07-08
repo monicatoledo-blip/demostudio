@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>New Brand Kit {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>New Brand Kit</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value><stringValue>AUTO_LAYOUT_CANVAS</stringValue></value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <recordCreates>
+        <name>Create_Brand_Kit</name>
+        <label>Create Brand Kit</label>
+        <locationX>176</locationX>
+        <locationY>300</locationY>
+        <connector>
+            <targetReference>Done</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>Name</field>
+            <value><elementReference>Brand_Kit_Name</elementReference></value>
+        </inputAssignments>
+        <object>Demo_Theme__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <runInMode>DefaultMode</runInMode>
+    <screens>
+        <name>Ask_Name</name>
+        <label>New Brand Kit</label>
+        <locationX>176</locationX>
+        <locationY>150</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Create_Brand_Kit</targetReference>
+        </connector>
+        <fields>
+            <name>Intro</name>
+            <fieldText>&lt;p&gt;Name your new Brand Kit after the customer it represents. You'll pick colors and a logo in Brand Kit Studio next.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Brand_Kit_Name</name>
+            <dataType>String</dataType>
+            <fieldText>Brand Kit Name</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Usually the customer name. Example: "Cumulus Bank" or "Chase Commercial".</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Done</name>
+        <label>Brand Kit Created</label>
+        <locationX>176</locationX>
+        <locationY>450</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Confirm_Text</name>
+            <fieldText>&lt;p&gt;&lt;b&gt;{!Brand_Kit_Name}&lt;/b&gt; created.&lt;/p&gt;&lt;p&gt;Click &lt;b&gt;Finish&lt;/b&gt; and open it from the Brand Kits tab to auto-fill colors and logo.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Ask_Name</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Category_Label__c</fullName>
+    <label>Category Label</label>
+    <description>Short uppercase-style tag shown before the alert (e.g. "Retirement Gap", "Cash Optimization", "Debt Alert").</description>
+    <length>40</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>Text</type>
+</CustomField>

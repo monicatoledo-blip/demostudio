@@ -1,0 +1,245 @@
+<template>
+    <div class="ts-frame">
+        <header class="ts-toolbar" style={previewGradientStyle}>
+            <div class="ts-toolbar-left">
+                <span class="ts-icon">
+                    <lightning-icon icon-name="utility:brush" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div>
+                    <h1 class="ts-title">Brand Kit Studio</h1>
+                    <p class="ts-subtitle">{theme.Name}</p>
+                </div>
+            </div>
+            <div class="ts-toolbar-right">
+                <lightning-button label="Revert" onclick={handleRevert} disabled={saveDisabled} class="slds-m-right_x-small"></lightning-button>
+                <lightning-button variant="brand" label={saveLabel} onclick={handleSave} disabled={saveDisabled}></lightning-button>
+            </div>
+        </header>
+
+        <c-demo-studio-help heading="How to use Brand Kit Studio" steps={helpSteps}></c-demo-studio-help>
+
+        <div class="ts-split">
+            <!-- Editor -->
+            <section class="ts-editor">
+                <!-- AI brand lookup — fills Name/Colors/Logo from a brand name or URL -->
+                <div class="ts-section ts-ai-section">
+                    <h2 class="ts-h2">
+                        <lightning-icon icon-name="utility:einstein" size="x-small" class="ts-ai-icon"></lightning-icon>
+                        Auto-fill from Brand
+                    </h2>
+                    <p class="ts-hint">Type a customer name or website URL. Einstein looks up brand colors and a logo. You can tweak any field after.</p>
+                    <div class="ts-ai-row">
+                        <lightning-input variant="label-hidden" label="Brand"
+                            placeholder="e.g. Cumulus Bank or cumulusbank.com"
+                            value={aiQuery} onchange={handleAiQueryChange} onkeydown={handleAiKey}></lightning-input>
+                        <lightning-button variant="brand" label="Auto-fill" icon-name="utility:einstein"
+                            disabled={aiBusy} onclick={handleBrandScrape}></lightning-button>
+                    </div>
+                    <template lwc:if={aiBusy}>
+                        <p class="ts-hint ts-hint--busy">
+                            <lightning-icon icon-name="utility:sync" size="xx-small"></lightning-icon>
+                            Einstein is looking up the brand…
+                        </p>
+                    </template>
+                    <template lwc:if={aiNote}>
+                        <p class="ts-hint ts-hint--note">
+                            <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                            {aiNote}
+                        </p>
+                    </template>
+                </div>
+
+                <div class="ts-section">
+                    <h2 class="ts-h2">Name</h2>
+                    <lightning-input label="Brand Kit Name" value={theme.Name} data-field="Name" onchange={handleFieldChange}></lightning-input>
+                </div>
+
+                <div class="ts-section">
+                    <h2 class="ts-h2">Header Style</h2>
+                    <lightning-combobox label="Header Style" value={headerStyle} options={headerStyleOptions} data-field="Header_Style__c" onchange={handleFieldChange}></lightning-combobox>
+                </div>
+
+                <div class="ts-section">
+                    <h2 class="ts-h2">Colors</h2>
+                    <div class="ts-color-grid">
+                        <label class="ts-color-field">
+                            <span class="ts-color-label">Primary</span>
+                            <div class="ts-color-row">
+                                <input type="color" value={primaryColor} data-field="Primary_Color__c" oninput={handleColorInput} class="ts-color-input" />
+                                <lightning-input variant="label-hidden" value={primaryColor} data-field="Primary_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
+                            </div>
+                        </label>
+                        <label class="ts-color-field">
+                            <span class="ts-color-label">Accent</span>
+                            <div class="ts-color-row">
+                                <input type="color" value={accentColor} data-field="Accent_Color__c" oninput={handleColorInput} class="ts-color-input" />
+                                <lightning-input variant="label-hidden" value={accentColor} data-field="Accent_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <template lwc:if={isSolid}>
+                    <div class="ts-section">
+                        <h2 class="ts-h2">Background</h2>
+                        <p class="ts-hint">Solid mode uses the <b>Primary color</b> as the header background.</p>
+                    </div>
+                </template>
+
+                <template lwc:else>
+                    <div class="ts-section">
+                        <h2 class="ts-h2">Gradient</h2>
+                        <p class="ts-hint">Angle + Start / End colors. Or pick a preset below.</p>
+                        <label class="ts-slider-field">
+                            <div class="ts-slider-label-row">
+                                <span>Angle</span>
+                                <span class="ts-slider-value">{gradientAngleLabel}</span>
+                            </div>
+                            <input type="range" min="0" max="360" step="1" value={gradientAngle} oninput={handleGradientAngle} class="ts-slider" />
+                        </label>
+                        <div class="ts-color-grid slds-m-top_small">
+                            <label class="ts-color-field">
+                                <span class="ts-color-label">Start</span>
+                                <div class="ts-color-row">
+                                    <input type="color" value={gradientStart} oninput={handleGradientStart} class="ts-color-input" />
+                                    <span class="ts-color-hex-static">{gradientStart}</span>
+                                </div>
+                            </label>
+                            <label class="ts-color-field">
+                                <span class="ts-color-label">End</span>
+                                <div class="ts-color-row">
+                                    <input type="color" value={gradientEnd} oninput={handleGradientEnd} class="ts-color-input" />
+                                    <span class="ts-color-hex-static">{gradientEnd}</span>
+                                </div>
+                            </label>
+                        </div>
+                        <p class="ts-mini-label">Presets</p>
+                        <div class="ts-preset-grid">
+                            <template for:each={gradientPresetOptions} for:item="g">
+                                <button key={g.value} type="button" class="ts-preset" style={g.styleAttr} data-start={g.start} data-end={g.end} onclick={handlePresetClick}>
+                                    <span class="ts-preset-swatch" style={g.swatchStyle}></span>
+                                    <span class="ts-preset-label">{g.label}</span>
+                                </button>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+
+                <div class="ts-section">
+                    <h2 class="ts-h2">Logo</h2>
+                    <p class="ts-hint">Paste a URL <b>or</b> upload an image file. Uploaded files are stored on the Theme record.</p>
+
+                    <div class="ts-logo-preview-row">
+                        <div class="ts-logo-preview">
+                            <template lwc:if={hasLogo}>
+                                <img src={effectiveLogoSrc} alt="Logo" class="ts-logo-preview-img" onerror={handleLogoLoadError} />
+                            </template>
+                            <template lwc:else>
+                                <span class="ts-logo-placeholder">Logo</span>
+                            </template>
+                        </div>
+                        <div class="ts-logo-inputs">
+                            <lightning-input type="url" label="Logo URL" value={logoUrlField} data-field="Logo_URL__c" onchange={handleFieldChange}
+                                placeholder="https://cdn.example.com/logo.svg"></lightning-input>
+                            <div class="ts-uploader-wrap slds-m-top_x-small">
+                                <lightning-file-upload
+                                    label="Or upload image"
+                                    name="logoUpload"
+                                    accept={acceptedLogoFormats}
+                                    record-id={recordId}
+                                    onuploadfinished={handleLogoUploaded}>
+                                </lightning-file-upload>
+                            </div>
+                            <template lwc:if={hasLogo}>
+                                <lightning-button variant="neutral" label="Derive colors from this logo"
+                                    icon-name="utility:color_swatch"
+                                    disabled={colorSampleBusy}
+                                    onclick={handleDeriveColors}
+                                    class="slds-m-top_x-small ts-derive-btn"></lightning-button>
+                            </template>
+                        </div>
+                    </div>
+
+                    <template lwc:if={needsCspHint}>
+                        <div class="ts-csp-warn">
+                            <lightning-icon icon-name="utility:warning" size="x-small" variant="warning"></lightning-icon>
+                            <div class="ts-csp-body">
+                                <div class="ts-csp-title">
+                                    <b>{cspHost}</b> isn't in this org's CSP Trusted Sites.
+                                </div>
+                                <p class="ts-csp-desc">
+                                    Images from a new host won't render until you add it. Click below to copy an SFDX metadata snippet.
+                                </p>
+                                <lightning-button size="small" label="Copy CSP metadata" icon-name="utility:copy" onclick={handleCopyCsp}></lightning-button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </section>
+
+            <!-- Live preview -->
+            <aside class="ts-preview">
+                <header class="ts-preview-head">
+                    <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                    <span>Live Preview</span>
+                </header>
+                <div class="ts-preview-canvas">
+                    <div class="ts-mini-card" style={miniCardStyle}>
+                        <div class="ts-mini-logo-row">
+                            <template lwc:if={hasLogo}>
+                                <img src={effectiveLogoSrc} alt="Logo" class="ts-mini-logo" onerror={handleLogoLoadError} />
+                            </template>
+                            <template lwc:else>
+                                <span class="ts-mini-logo-placeholder">LOGO</span>
+                            </template>
+                        </div>
+                        <div class="ts-mini-header">
+                            <div class="ts-mini-avatar">SJ</div>
+                            <div>
+                                <h3 class="ts-mini-name">Sample Persona</h3>
+                                <p class="ts-mini-sub">Title | Company</p>
+                                <span class="ts-mini-badge" style={miniBadgeStyle}>PRE-APPROVED</span>
+                            </div>
+                        </div>
+                        <div class="ts-mini-metrics">
+                            <div class="ts-mini-row"><span>Segment</span><b>Cross-Sell Target</b></div>
+                            <div class="ts-mini-row"><span>LTV</span><b>$250,000</b></div>
+                        </div>
+                        <div class="ts-mini-engagement">
+                            <div class="ts-mini-donut">
+                                <svg viewBox="0 0 100 100" class="ts-mini-donut-svg" aria-hidden="true">
+                                    <circle cx="50" cy="50" r="42" class="ts-mini-donut-track" />
+                                    <circle cx="50" cy="50" r="42" class="ts-mini-donut-fill"
+                                        stroke-dasharray="263.89"
+                                        stroke-dashoffset="42.22" />
+                                </svg>
+                                <span class="ts-mini-donut-value">84%</span>
+                            </div>
+                            <div>
+                                <div class="ts-mini-engage-label">Engagement Score</div>
+                                <div class="ts-mini-engage-sub">Highly Engaged</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="ts-swatch-strip">
+                        <div class="ts-swatch">
+                            <span class="ts-swatch-chip" style={primarySwatchStyle}></span>
+                            <div>
+                                <span class="ts-swatch-lbl">Primary</span>
+                                <span class="ts-swatch-hex">{primaryColor}</span>
+                            </div>
+                        </div>
+                        <div class="ts-swatch">
+                            <span class="ts-swatch-chip" style={accentSwatchStyle}></span>
+                            <div>
+                                <span class="ts-swatch-lbl">Accent</span>
+                                <span class="ts-swatch-hex">{accentColor}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+</template>

@@ -1,0 +1,15 @@
+{
+  "packageDirectories": [
+    {
+      "path": "force-app/core",
+      "default": true
+    },
+    {
+      "path": "force-app/segments"
+    }
+  ],
+  "name": "DemoStudio",
+  "namespace": "",
+  "sfdcLoginUrl": "https://login.salesforce.com",
+  "sourceApiVersion": "66.0"
+}

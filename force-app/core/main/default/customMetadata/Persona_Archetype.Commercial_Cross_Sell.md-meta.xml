@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Commercial Cross-Sell</label>
+    <protected>false</protected>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Commercial Banking</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">A commercial banking client mid-onboarding for treasury services, ripe for cross-sell of Commercial Card and FX Hedging products.</value>
+    </values>
+    <values>
+        <field>Sample_Brief__c</field>
+        <value xsi:type="xsd:string">A VP of Treasury at a mid-market logistics company is finalizing Treasury Management services with our bank. They just uploaded underwriting documents. High engagement, pre-approved credit line, active in Commercial + Wealth BUs. Story: cross-sell Commercial Card and FX Hedging.</value>
+    </values>
+    <values>
+        <field>Payload_JSON__c</field>
+        <value xsi:type="xsd:string">{"persona":{"First_Name__c":"Sarah","Last_Name__c":"Jenkins","Title__c":"VP of Treasury","Company__c":"Meridian Logistics","Customer_ID__c":"KB-C-58392","Segment__c":"Commercial Cross-Sell Target","Lifecycle_Stage__c":"Cross-Sell Target","LTV__c":250000,"Propensity__c":"Very High","Engagement_Score__c":84,"Engagement_Label__c":"Highly Engaged","Risk_Tier__c":"Low","Badge_Text__c":"Pre-Approved Buyer","Suggested_Opener__c":"Hi Sarah, I noticed you just uploaded the underwriting documents for Treasury Services — congratulations on progressing that quickly. I want to make sure we finalize your approval today so we can activate the new receivables platform before your Q3 cash flow cycle.","Intent_Summary__c":"Sarah initiated a Treasury Management services expansion and successfully uploaded the required underwriting documents. She is engaging with the Agentforce assistant and is a strong cross-sell target.","Key_Context__c":"Pre-approved for a $500K expanded credit line with an estimated LTV of $250K. SOC-2 attestation and Proof of Funds uploaded. Waiting on underwriter clearance.","Open_Likelihood__c":92,"Click_Likelihood__c":78,"Unsubscribe_Risk__c":4},"insights":[{"Title__c":"Commercial Card Program","Category__c":"Cross-Sell","Why_This_Suggestion__c":"Client processes $4.2M in annual T&amp;E spend through personal cards. Consolidating to a Commercial Card program recovers ~$84K/yr in rebates.","CTA_Label__c":"Present Program","Sort_Order__c":1},{"Title__c":"FX Hedging","Category__c":"Cross-Sell","Why_This_Suggestion__c":"Client imports 22% of parts from Canada and Mexico. FX exposure creates ~$140K annual P&amp;L volatility. Forward contracts lock margins.","CTA_Label__c":"Offer Hedging","Sort_Order__c":2}],"activities":[{"Type__c":"Doc","Title__c":"Uploaded Underwriting Documents","Description__c":"SOC-2 attestation and Proof of Funds uploaded via secure document portal.","Timestamp_Label__c":"Today","Icon__c":"utility:upload","Sort_Order__c":1},{"Type__c":"Email","Title__c":"Replied to Welcome Email","Description__c":"Initiated a real-time conversation with the Agentforce virtual assistant.","Timestamp_Label__c":"Today","Icon__c":"utility:email","Sort_Order__c":2}],"journeys":[{"Journey_Name__c":"Commercial Onboarding — Treasury Services","Business_Unit__c":"Commercial","Status__c":"Active"},{"Journey_Name__c":"Cross-Sell Nurture — Commercial Card","Business_Unit__c":"Commercial","Status__c":"Active"}],"recipe":{"leftRail":[{"component":"demoUnifiedProfileHeader"}],"center":[{"component":"demoAgentforceBrief"},{"component":"demoCrossSellInsights"}],"rightRail":[{"component":"demoActivityTimeline"},{"component":"demoLikelihoodScoreCard"},{"component":"demoActiveJourneyTracker"}]}}</value>
+    </values>
+</CustomMetadata>

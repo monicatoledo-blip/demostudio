@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionCalls>
+        <name>Build_Persona</name>
+        <label>Build Persona</label>
+        <locationX>176</locationX>
+        <locationY>350</locationY>
+        <actionName>DemoStudioPersonaBuilder</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <inputParameters>
+            <name>personaJson</name>
+            <value>
+                <elementReference>Persona_JSON_Input</elementReference>
+            </value>
+        </inputParameters>
+        <nameSegment>DemoStudioPersonaBuilder</nameSegment>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </actionCalls>
+    <apiVersion>62.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>Generate Persona From Brief {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Generate Persona From Brief</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <runInMode>DefaultMode</runInMode>
+    <screens>
+        <name>Paste_Brief_JSON</name>
+        <label>Paste Persona JSON</label>
+        <locationX>176</locationX>
+        <locationY>242</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>false</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Build_Persona</targetReference>
+        </connector>
+        <fields>
+            <name>Instructions</name>
+            <fieldText>&lt;p&gt;Paste a JSON persona spec below. Use an LLM (Claude, ChatGPT, Prompt Builder) with a brief like:&lt;/p&gt;&lt;p&gt;&lt;em&gt;&quot;Cumulus Bank: VP of Treasury at a mid-market logistics company, high engagement, pre-approved credit line, active in Commercial + Wealth BUs. Story: cross-sell TM services.&quot;&lt;/em&gt;&lt;/p&gt;&lt;p&gt;Ask the LLM to return JSON with keys: &lt;code&gt;persona&lt;/code&gt;, &lt;code&gt;themeName&lt;/code&gt;, &lt;code&gt;identities&lt;/code&gt;, &lt;code&gt;insights&lt;/code&gt;, &lt;code&gt;activities&lt;/code&gt;, &lt;code&gt;journeys&lt;/code&gt;, &lt;code&gt;recipe&lt;/code&gt;.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Persona_JSON_Input</name>
+            <dataType>String</dataType>
+            <fieldText>Persona JSON</fieldText>
+            <fieldType>LargeTextArea</fieldType>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Confirmation</name>
+        <label>Persona Created</label>
+        <locationX>176</locationX>
+        <locationY>458</locationY>
+        <allowBack>false</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Confirm_Text</name>
+            <fieldText>&lt;p&gt;&lt;b&gt;Persona created:&lt;/b&gt; {!Build_Persona.personaName}&lt;/p&gt;&lt;p&gt;Assign it to a Contact via the &lt;b&gt;Demo Persona&lt;/b&gt; lookup on any Contact record.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Paste_Brief_JSON</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Demo_Original_Snapshot__c</fullName>
+    <label>Demo Original Snapshot</label>
+    <description>JSON snapshot of the Contact's original FirstName/LastName/Email/Phone before a Demo Persona was assigned. Used by unassign to restore the original values. Managed automatically by Demo Studio.</description>
+    <length>1000</length>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>LongTextArea</type>
+    <visibleLines>3</visibleLines>
+</CustomField>

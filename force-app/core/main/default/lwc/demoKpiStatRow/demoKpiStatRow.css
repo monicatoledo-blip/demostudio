@@ -1,0 +1,63 @@
+/* SLDS-native stat tile row. Container-queried so it stacks in narrow rails
+   and lays out horizontally when there's room. Uses SLDS-shaped chrome —
+   white surface, subtle border, familiar Salesforce spacing/typography. */
+:host {
+    container-type: inline-size;
+    display: block;
+}
+
+.kpi-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+}
+@container (min-width: 420px) {
+    .kpi-row { grid-template-columns: 1fr 1fr; }
+}
+@container (min-width: 720px) {
+    .kpi-row { grid-template-columns: repeat(4, 1fr); }
+}
+
+.kpi-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem 0.85rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    min-width: 0;
+}
+.kpi-tile--highlight {
+    border-color: rgba(31, 95, 191, 0.4);
+    background: #f4f7fb;
+    box-shadow: 0 1px 3px rgba(31, 95, 191, 0.08);
+}
+
+.kpi-label {
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+    line-height: 1.2;
+}
+
+.kpi-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    overflow-wrap: break-word;
+}
+.kpi-value--highlight {
+    color: var(--demo-primary, #1F5FBF);
+}
+
+.kpi-sublabel {
+    font-size: 0.75rem;
+    color: #6b7280;
+    line-height: 1.35;
+}

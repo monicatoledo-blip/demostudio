@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <environments>Default</environments>
+    <interviewLabel>New Demo Persona {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>New Demo Persona</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value><stringValue>AUTO_LAYOUT_CANVAS</stringValue></value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value><stringValue>LightningFlowBuilder</stringValue></value>
+    </processMetadataValues>
+    <processType>Flow</processType>
+    <recordCreates>
+        <name>Create_Persona</name>
+        <label>Create Persona</label>
+        <locationX>176</locationX>
+        <locationY>300</locationY>
+        <connector>
+            <targetReference>Redirect_To_Persona</targetReference>
+        </connector>
+        <inputAssignments>
+            <field>Name</field>
+            <value><elementReference>Persona_Name</elementReference></value>
+        </inputAssignments>
+        <inputAssignments>
+            <field>Brand__c</field>
+            <value><elementReference>Customer_Name</elementReference></value>
+        </inputAssignments>
+        <object>Demo_Persona__c</object>
+        <storeOutputAutomatically>true</storeOutputAutomatically>
+    </recordCreates>
+    <runInMode>DefaultMode</runInMode>
+    <screens>
+        <name>Ask_Name_and_Customer</name>
+        <label>New Demo Persona</label>
+        <locationX>176</locationX>
+        <locationY>150</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <connector>
+            <targetReference>Create_Persona</targetReference>
+        </connector>
+        <fields>
+            <name>Intro</name>
+            <fieldText>&lt;p&gt;Give your new demo persona a name and the customer it belongs to. You'll fill in everything else in Persona Studio.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <fields>
+            <name>Persona_Name</name>
+            <dataType>String</dataType>
+            <fieldText>Persona Name</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>Internal name. Example: "Sarah Chen — VP Treasury"</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <fields>
+            <name>Customer_Name</name>
+            <dataType>String</dataType>
+            <fieldText>Customer Name</fieldText>
+            <fieldType>InputField</fieldType>
+            <helpText>The customer this persona belongs to. Example: "Cumulus Bank"</helpText>
+            <isRequired>true</isRequired>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <screens>
+        <name>Redirect_To_Persona</name>
+        <label>Persona Created</label>
+        <locationX>176</locationX>
+        <locationY>450</locationY>
+        <allowBack>true</allowBack>
+        <allowFinish>true</allowFinish>
+        <allowPause>false</allowPause>
+        <fields>
+            <name>Confirm_Text</name>
+            <fieldText>&lt;p&gt;&lt;b&gt;{!Persona_Name}&lt;/b&gt; created for &lt;b&gt;{!Customer_Name}&lt;/b&gt;.&lt;/p&gt;&lt;p&gt;Click &lt;b&gt;Finish&lt;/b&gt; to open it in Persona Studio.&lt;/p&gt;</fieldText>
+            <fieldType>DisplayText</fieldType>
+        </fields>
+        <showFooter>true</showFooter>
+        <showHeader>true</showHeader>
+    </screens>
+    <start>
+        <locationX>50</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Ask_Name_and_Customer</targetReference>
+        </connector>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,108 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <div class="recipe-section-head-row">
+                <div>
+                    <h2 class="ed-h2">Component Recipe</h2>
+                    <p class="ed-sub">Add components to a slot, then drag by the handle to reorder within a column or move between columns. A component can only live in one slot at a time.</p>
+                </div>
+                <lightning-button-icon icon-name={collapseIcon} alternative-text={collapseAltText}
+                    variant="border-filled" size="medium" onclick={handleCollapseToggle}
+                    class="recipe-collapse-btn"></lightning-button-icon>
+            </div>
+        </header>
+
+        <template lwc:if={showSelector}>
+            <!-- Placed components — reorderable within each slot -->
+            <div class="recipe-slots">
+                <template for:each={slots} for:item="slot">
+                    <div key={slot.key} class="recipe-slot"
+                        data-slot={slot.key}
+                        ondragover={handleDragOverSlot}
+                        ondragleave={handleDragLeaveSlot}
+                        ondrop={handleDropOnSlot}>
+                        <h3 class="recipe-slot-label">{slot.label}</h3>
+
+                        <template lwc:if={slot.hasPlacedItems}>
+                            <ul class="recipe-placed-list">
+                                <template for:each={slot.placedItems} for:item="item">
+                                    <li key={item._key} class="recipe-placed-item"
+                                        draggable="true"
+                                        data-slot={item.slot} data-name={item.name}
+                                        ondragstart={handleDragStart}
+                                        ondragend={handleDragEnd}
+                                        ondragover={handleDragOverItem}
+                                        ondragleave={handleDragLeaveItem}
+                                        ondrop={handleDropOnItem}>
+                                        <span class="recipe-drag-handle" aria-hidden="true" title="Drag to reorder">
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="10" height="16" viewBox="0 0 10 16">
+                                                <circle cx="2" cy="3"  r="1.2"/>
+                                                <circle cx="8" cy="3"  r="1.2"/>
+                                                <circle cx="2" cy="8"  r="1.2"/>
+                                                <circle cx="8" cy="8"  r="1.2"/>
+                                                <circle cx="2" cy="13" r="1.2"/>
+                                                <circle cx="8" cy="13" r="1.2"/>
+                                            </svg>
+                                        </span>
+                                        <span class="recipe-placed-position">{item.position}</span>
+                                        <div class="recipe-placed-body">
+                                            <span class="recipe-placed-title">{item.label}</span>
+                                            <span class="recipe-placed-desc">{item.description}</span>
+                                        </div>
+                                        <div class="recipe-placed-actions">
+                                            <lightning-button-icon icon-name="utility:close" size="small" variant="bare"
+                                                alternative-text="Remove" title="Remove from slot"
+                                                data-slot={item.slot} data-name={item.name}
+                                                onclick={handleRemove}></lightning-button-icon>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </template>
+                        <template lwc:else>
+                            <div class="recipe-slot-empty">Drop a component here, or use "Add to…" below.</div>
+                        </template>
+                    </div>
+                </template>
+            </div>
+
+            <!-- Available components tray -->
+            <div class="recipe-available">
+                <h3 class="recipe-available-label">Available Components</h3>
+                <template lwc:if={hasAvailableComponents}>
+                    <ul class="recipe-available-list">
+                        <template for:each={availableComponents} for:item="c">
+                            <li key={c.name} class="recipe-available-item">
+                                <div class="recipe-available-body">
+                                    <span class="recipe-available-title">{c.label}</span>
+                                    <span class="recipe-available-desc">{c.description}</span>
+                                </div>
+                                <div class="recipe-available-actions">
+                                    <button type="button" class="recipe-add-btn"
+                                        data-target={c.addLeft} onclick={handleAdd}
+                                        title="Add to Left Rail">← Left</button>
+                                    <button type="button" class="recipe-add-btn"
+                                        data-target={c.addCenter} onclick={handleAdd}
+                                        title="Add to Center">Center</button>
+                                    <button type="button" class="recipe-add-btn"
+                                        data-target={c.addRight} onclick={handleAdd}
+                                        title="Add to Right Rail">Right →</button>
+                                </div>
+                            </li>
+                        </template>
+                    </ul>
+                </template>
+                <template lwc:else>
+                    <div class="recipe-available-empty">Every component is placed. Remove one from a slot to move it elsewhere.</div>
+                </template>
+            </div>
+        </template>
+
+        <template lwc:if={showCollapsedHint}>
+            <div class="recipe-collapsed-hint">
+                <lightning-icon icon-name="utility:info" size="x-small"></lightning-icon>
+                <span>Component picker collapsed — the live preview on the right shows your current recipe. Click the arrow to reopen the picker.</span>
+            </div>
+        </template>
+    </section>
+</template>

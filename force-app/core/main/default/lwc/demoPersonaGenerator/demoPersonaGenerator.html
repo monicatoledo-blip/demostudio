@@ -1,0 +1,127 @@
+<template>
+    <template lwc:if={isOpen}>
+        <div class="gen-backdrop" onclick={close}></div>
+        <section role="dialog" tabindex="-1" aria-modal="true" class="gen-modal">
+            <header class="gen-header">
+                <div class="gen-header-left">
+                    <span class="gen-icon">
+                        <lightning-icon icon-name="utility:einstein" size="small" variant="inverse"></lightning-icon>
+                    </span>
+                    <div>
+                        <h2 class="gen-title">Persona Generator</h2>
+                        <p class="gen-subtitle">Paste a transcript, notes, or brief — Einstein builds the persona.</p>
+                    </div>
+                </div>
+                <button class="gen-close" onclick={close} aria-label="Close">
+                    <lightning-icon icon-name="utility:close" size="x-small"></lightning-icon>
+                </button>
+            </header>
+
+            <!-- Input form -->
+            <template lwc:if={showInputForm}>
+                <div class="gen-body">
+                    <div class="gen-field-header">
+                        <label class="gen-field-label">Story context</label>
+                        <button type="button" class="gen-help-toggle" onclick={toggleStoryPromptHelp}>
+                            <lightning-icon icon-name="utility:help" size="xx-small"></lightning-icon>
+                            How to prepare this
+                        </button>
+                    </div>
+                    <p class="gen-field-hint">The deal / champion / narrative you want to demo. Paste champion notes, discovery, or a business-case doc. Einstein uses this to frame the persona — but <b>this is not the persona</b>.</p>
+                    <template lwc:if={showStoryPromptHelp}>
+                        <div class="gen-prompt-help">
+                            <p class="gen-prompt-help-title">Copy this into Granola / Notebook LM / Gemini / ChatGPT / Slack AI, then paste the output below:</p>
+                            <pre class="gen-prompt-code">{storyContextPrompt}</pre>
+                            <lightning-button variant="brand" label="Copy prompt" icon-name="utility:copy" onclick={copyStoryPrompt} class="gen-prompt-copy"></lightning-button>
+                        </div>
+                    </template>
+                    <lightning-textarea variant="label-hidden"
+                        label="Story context"
+                        placeholder="Example: Alex Rivera is the technical Marketing Cloud admin at Cumulus Bank building the business case for MC Next. Use case: banker productivity through unified engagement visibility. Story angle: replace fragmented point solutions with a unified customer profile that drives cross-sell at scale."
+                        value={storyContext}
+                        onchange={handleStoryContextChange}
+                        class="gen-textarea"></lightning-textarea>
+
+                    <div class="gen-field-header slds-m-top_medium">
+                        <label class="gen-field-label">Persona to build <span class="gen-field-optional">(optional)</span></label>
+                        <button type="button" class="gen-help-toggle" onclick={togglePersonaPromptHelp}>
+                            <lightning-icon icon-name="utility:help" size="xx-small"></lightning-icon>
+                            How to prepare this
+                        </button>
+                    </div>
+                    <p class="gen-field-hint">Describe the fictional customer that will appear on the demo Contact record. <b>Leave blank</b> and Einstein will invent one that fits the story context above.</p>
+                    <template lwc:if={showPersonaPromptHelp}>
+                        <div class="gen-prompt-help">
+                            <p class="gen-prompt-help-title">Copy this into your AI tool of choice, then paste the output below:</p>
+                            <pre class="gen-prompt-code">{personaBriefPrompt}</pre>
+                            <lightning-button variant="brand" label="Copy prompt" icon-name="utility:copy" onclick={copyPersonaPrompt} class="gen-prompt-copy"></lightning-button>
+                        </div>
+                    </template>
+                    <lightning-textarea variant="label-hidden"
+                        label="Persona to build"
+                        placeholder="Example: Rachel Adams, VP of Treasury at BrightPath Logistics. Long-time commercial banking client. Currently under-engaged with cross-sell campaigns despite growing spend."
+                        value={personaBrief}
+                        onchange={handlePersonaBriefChange}
+                        class="gen-textarea gen-textarea--short"></lightning-textarea>
+
+                    <div class="gen-hint-row slds-m-top_medium">
+                        <lightning-combobox label="Industry (optional)" value={industry} options={industryOptions}
+                            placeholder="Any" onchange={handleIndustryChange}></lightning-combobox>
+                        <lightning-combobox label="Story angle (optional)" value={storyAngle} options={storyAngleOptions}
+                            placeholder="Any" onchange={handleStoryAngleChange}></lightning-combobox>
+                    </div>
+                </div>
+                <footer class="gen-footer">
+                    <template lwc:if={isBusy}>
+                        <span class="gen-busy">
+                            <lightning-icon icon-name="utility:sync" size="xx-small"></lightning-icon>
+                            Generating…
+                        </span>
+                    </template>
+                    <lightning-button variant="brand" label="Generate Persona" icon-name="utility:einstein"
+                        disabled={generateDisabled} onclick={handleGenerate} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </template>
+
+            <!-- Preview / accept-reject with live composition + per-widget tabs -->
+            <template lwc:if={showPreview}>
+                <div class="gen-body gen-preview-body">
+                    <div class="gen-preview-head">
+                        <lightning-icon icon-name="utility:success" size="small" variant="inverse" class="gen-preview-check"></lightning-icon>
+                        <div class="gen-preview-head-text">
+                            <h3 class="gen-preview-title">Persona ready to apply</h3>
+                            <p class="gen-preview-summary">{candidateSummary}</p>
+                            <template lwc:if={providerBadge}>
+                                <span class="gen-provider-badge">Generated by: {providerBadge}</span>
+                            </template>
+                        </div>
+                    </div>
+
+                    <!-- Tab strip -->
+                    <nav class="pv-tabs">
+                        <template for:each={previewFocusTabs} for:item="pt">
+                            <button key={pt.key} class={pt.className} data-key={pt.key} onclick={handlePreviewTab}>{pt.label}</button>
+                        </template>
+                    </nav>
+
+                    <!-- Live rendering — reuses demoPreviewFrame with the candidate as bundle -->
+                    <div class="pv-canvas">
+                        <c-demo-preview-frame bundle={candidateBundle} focus={previewPassFocus} layout={previewLayout}></c-demo-preview-frame>
+                    </div>
+
+                    <p class="gen-preview-caveat">
+                        <lightning-icon icon-name="utility:info" size="xx-small"></lightning-icon>
+                        Apply merges this into the persona. Your existing Theme and Brand are preserved. Auto-save takes over.
+                    </p>
+                </div>
+                <footer class="gen-footer">
+                    <lightning-button variant="neutral" label="Cancel" onclick={close}></lightning-button>
+                    <lightning-button variant="neutral" label="Regenerate" icon-name="utility:refresh"
+                        onclick={handleRegenerate} class="slds-m-left_x-small"></lightning-button>
+                    <lightning-button variant="brand" label="Apply to Persona" icon-name="utility:check"
+                        onclick={handleApply} class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </template>
+        </section>
+    </template>
+</template>

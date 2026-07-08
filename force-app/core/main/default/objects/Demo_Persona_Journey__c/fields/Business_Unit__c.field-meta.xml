@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Business_Unit__c</fullName>
+    <label>Business Unit</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Commercial</fullName><default>false</default><label>Commercial</label></value>
+            <value><fullName>Wealth</fullName><default>false</default><label>Wealth</label></value>
+            <value><fullName>Retail</fullName><default>false</default><label>Retail</label></value>
+            <value><fullName>Corporate Comms</fullName><default>false</default><label>Corporate Comms</label></value>
+            <value><fullName>Treasury</fullName><default>false</default><label>Treasury</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

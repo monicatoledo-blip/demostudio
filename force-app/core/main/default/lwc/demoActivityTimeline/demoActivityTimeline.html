@@ -1,0 +1,27 @@
+<template>
+    <template lwc:if={hasActivities}>
+        <article class="timeline-card">
+            <header class="timeline-header">
+                <lightning-icon icon-name="utility:date_time" size="small" class="timeline-title-icon"></lightning-icon>
+                <h2 class="timeline-title">Activity Timeline</h2>
+            </header>
+
+            <div class="timeline-body">
+                <ul class="timeline-list">
+                    <template for:each={decoratedActivities} for:item="a">
+                        <li key={a.Id} class="timeline-item">
+                            <span class="timeline-icon" style={a.iconStyle}>
+                                <lightning-icon icon-name={a.iconName} size="x-small" variant="inverse"></lightning-icon>
+                            </span>
+                            <div class="timeline-content">
+                                <h4 class="timeline-item-title">{a.Title__c}</h4>
+                                <p class="timeline-item-body">{a.Description__c}</p>
+                                <span class="timeline-item-stamp">{a.Timestamp_Label__c}</span>
+                            </div>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </article>
+    </template>
+</template>

@@ -1,0 +1,109 @@
+/* Scannable AI-alert list. SLDS-native chrome. Complements demoAgentforceBrief
+   (which renders long paragraphs) with a categorized short-alert shape. */
+:host {
+    container-type: inline-size;
+    display: block;
+}
+
+.alerts-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1rem 1.125rem 0.9rem 1.125rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+}
+
+.alerts-header {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #eef1f4;
+}
+.alerts-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--demo-accent, #0B2A5B);
+    color: #fff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    --sds-c-icon-color-foreground-default: #fff;
+    --slds-c-icon-color-foreground-default: #fff;
+}
+.alerts-header-text { min-width: 0; }
+.alerts-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+    line-height: 1.2;
+}
+.alerts-subtitle {
+    font-size: 0.7rem;
+    color: #6b7280;
+    margin: 0.1rem 0 0 0;
+}
+
+.alerts-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+}
+
+.alerts-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+}
+
+.alerts-item-head {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+.alert-cat {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.25rem;
+    flex: 0 0 auto;
+}
+/* SLDS-inspired semantic tones */
+.alert-cat--info    { background: rgba(1, 118, 211, 0.12);  color: #014486; }
+.alert-cat--success { background: rgba(45, 132, 66, 0.14);  color: #1a5a30; }
+.alert-cat--warning { background: rgba(255, 184, 40, 0.20); color: #7a4d00; }
+.alert-cat--danger  { background: rgba(234, 0, 27, 0.12);   color: #8f0016; }
+
+.alerts-item-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #181818;
+    line-height: 1.3;
+    overflow-wrap: break-word;
+    min-width: 0;
+}
+
+.alerts-item-body {
+    font-size: 0.8125rem;
+    color: #4b5563;
+    line-height: 1.5;
+    margin: 0.1rem 0 0 0;
+    overflow-wrap: break-word;
+}
+@container (max-width: 380px) {
+    .alerts-item-body { font-size: 0.75rem; line-height: 1.45; }
+}

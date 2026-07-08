@@ -1,0 +1,15 @@
+<template>
+    <template lwc:if={hasKpis}>
+        <div class="kpi-row">
+            <template for:each={decoratedKpis} for:item="k">
+                <article key={k._key} class={k._tileClass}>
+                    <span class="kpi-label">{k.Label__c}</span>
+                    <span class={k._valueClass}>{k.Value__c}</span>
+                    <template lwc:if={k.Sublabel__c}>
+                        <span class="kpi-sublabel">{k.Sublabel__c}</span>
+                    </template>
+                </article>
+            </template>
+        </div>
+    </template>
+</template>

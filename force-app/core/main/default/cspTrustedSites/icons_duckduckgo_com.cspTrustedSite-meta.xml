@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CspTrustedSite xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Public icon endpoint used as a fallback when Clearbit logo lookup fails. No API key required. Stable and unlikely to be deprecated.</description>
+    <endpointUrl>https://icons.duckduckgo.com</endpointUrl>
+    <isActive>true</isActive>
+    <isApplicableToConnectSrc>false</isApplicableToConnectSrc>
+    <isApplicableToFrameSrc>false</isApplicableToFrameSrc>
+    <isApplicableToImgSrc>true</isApplicableToImgSrc>
+    <isApplicableToMediaSrc>false</isApplicableToMediaSrc>
+    <isApplicableToStyleSrc>false</isApplicableToStyleSrc>
+    <isApplicableToFontSrc>false</isApplicableToFontSrc>
+</CspTrustedSite>

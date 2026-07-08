@@ -1,0 +1,181 @@
+<template>
+    <div class="demo-profile-card">
+        <!-- UNIFIED CARD TAB -->
+        <template lwc:if={isCardActive}>
+            <div class="demo-card-body demo-card-body--tabbed">
+                <div class="demo-tabs demo-tabs--in-card">
+                    <button type="button" class={cardTabClass} onclick={showCardTab}>Unified Card</button>
+                    <button type="button" class={individualsTabClass} onclick={showIndividualsTab}>Individuals</button>
+                </div>
+                <div class="demo-header">
+                    <div class="demo-avatar-wrap">
+                        <template lwc:if={showAvatarImage}>
+                            <img src={persona.Avatar_URL__c} alt={fullName} class="demo-avatar" onerror={handleAvatarError} />
+                        </template>
+                        <template lwc:else>
+                            <div class="demo-avatar demo-avatar--initials">{avatarInitials}</div>
+                        </template>
+                    </div>
+                    <div class="demo-header-text">
+                        <h2 class="demo-name">{fullName}</h2>
+                        <p class="demo-subtitle">{subtitle}</p>
+                        <template lwc:if={persona.Badge_Text__c}>
+                            <span class="demo-badge">{persona.Badge_Text__c}</span>
+                        </template>
+                    </div>
+                </div>
+
+                <template lwc:if={hasSegments}>
+                    <div class="demo-segments">
+                        <template for:each={decoratedSegments} for:item="s">
+                            <span key={s._key} class="demo-segment-chip">{s.Label__c}</span>
+                        </template>
+                    </div>
+                </template>
+
+                <hr class="demo-divider" />
+
+                <div class="demo-rows">
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:user" alternative-text="Customer ID" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Unified Client ID</span>
+                        <span class="demo-row-value">{persona.Customer_ID__c}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:email" alternative-text="Email" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Email</span>
+                        <span class="demo-row-value">{persona.Primary_Email__c}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:call" alternative-text="Phone" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Phone</span>
+                        <span class="demo-row-value">{persona.Primary_Phone__c}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:checkin" alternative-text="Address" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Address</span>
+                        <span class="demo-row-value">{persona.Primary_Address__c}</span>
+                    </div>
+                </div>
+
+                <hr class="demo-divider" />
+
+                <div class="demo-rows">
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:chart" alternative-text="Segment" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Segment</span>
+                        <span class="demo-row-value">{persona.Segment__c}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:milestone" alternative-text="Lifecycle" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Lifecycle Stage</span>
+                        <span class="demo-row-value">{persona.Lifecycle_Stage__c}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:moneybag" alternative-text="LTV" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">LTV</span>
+                        <span class="demo-row-value">{formattedLTV}</span>
+                    </div>
+                    <div class="demo-row">
+                        <lightning-icon icon-name="utility:trending" alternative-text="Propensity" size="x-small" variant="inverse"></lightning-icon>
+                        <span class="demo-row-label">Propensity to Transact</span>
+                        <span class="demo-row-value">{persona.Propensity__c}</span>
+                    </div>
+                    <div class="demo-propensity-bar" style={propensityBarStyle}>
+                        <div class="demo-propensity-fill"></div>
+                        <div class="demo-propensity-dot"></div>
+                    </div>
+                </div>
+
+                <div class="demo-engagement">
+                    <div class="demo-donut">
+                        <svg viewBox="0 0 100 100" class="demo-donut-svg" aria-hidden="true">
+                            <circle cx="50" cy="50" r="42" class="demo-donut-track" />
+                            <circle cx="50" cy="50" r="42" class="demo-donut-fill"
+                                stroke-dasharray="263.89"
+                                stroke-dashoffset={engagementDashOffset} />
+                        </svg>
+                        <span class="demo-donut-value">{engagementValue}</span>
+                    </div>
+                    <div class="demo-engagement-text">
+                        <span class="demo-engagement-label">Engagement Score</span>
+                        <span class="demo-engagement-subtext">
+                            <template lwc:if={persona.Engagement_Label__c}>{persona.Engagement_Label__c}</template>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <!-- INDIVIDUALS TAB -->
+        <template lwc:if={isIndividualsActive}>
+            <div class="demo-individuals-body">
+                <div class="demo-tabs demo-tabs--in-card demo-tabs--on-white">
+                    <button type="button" class={cardTabClass} onclick={showCardTab}>Unified Card</button>
+                    <button type="button" class={individualsTabClass} onclick={showIndividualsTab}>Individuals</button>
+                </div>
+                <template lwc:if={hasEmails}>
+                    <section class="ind-section">
+                        <header class="ind-head">
+                            <span class="ind-icon ind-icon--email">
+                                <lightning-icon icon-name="utility:email" size="x-small" variant="inverse"></lightning-icon>
+                            </span>
+                            <h3 class="ind-title">Email Addresses ({emailCount})</h3>
+                        </header>
+                        <ul class="ind-list">
+                            <template for:each={emails} for:item="e">
+                                <li key={e.Id} class="ind-row">
+                                    <a href="javascript:void(0)" class="ind-value">{e.Value__c}</a>
+                                    <span class="ind-label">{e.Label__c}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </section>
+                </template>
+
+                <template lwc:if={hasPhones}>
+                    <section class="ind-section">
+                        <header class="ind-head">
+                            <span class="ind-icon ind-icon--phone">
+                                <lightning-icon icon-name="utility:call" size="x-small" variant="inverse"></lightning-icon>
+                            </span>
+                            <h3 class="ind-title">Phone Numbers ({phoneCount})</h3>
+                        </header>
+                        <ul class="ind-list">
+                            <template for:each={phones} for:item="p">
+                                <li key={p.Id} class="ind-row">
+                                    <span class="ind-value">{p.Value__c}</span>
+                                    <span class="ind-label">{p.Label__c}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </section>
+                </template>
+
+                <template lwc:if={hasAddresses}>
+                    <section class="ind-section">
+                        <header class="ind-head">
+                            <span class="ind-icon ind-icon--address">
+                                <lightning-icon icon-name="utility:checkin" size="x-small" variant="inverse"></lightning-icon>
+                            </span>
+                            <h3 class="ind-title">Addresses ({addressCount})</h3>
+                        </header>
+                        <ul class="ind-list">
+                            <template for:each={addresses} for:item="a">
+                                <li key={a.Id} class="ind-row">
+                                    <span class="ind-value">{a.Value__c}</span>
+                                    <span class="ind-label">{a.Label__c}</span>
+                                </li>
+                            </template>
+                        </ul>
+                    </section>
+                </template>
+
+                <template lwc:if={individualCount}></template>
+                <template lwc:else>
+                    <div class="ind-empty">No identity records for this persona yet.</div>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

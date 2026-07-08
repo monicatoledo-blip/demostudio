@@ -1,0 +1,29 @@
+<template>
+    <template lwc:if={hasAlerts}>
+        <article class="alerts-card">
+            <header class="alerts-header">
+                <span class="alerts-icon">
+                    <lightning-icon icon-name="utility:notification" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="alerts-header-text">
+                    <h2 class="alerts-title">AI Alerts</h2>
+                    <p class="alerts-subtitle">Flags & signals from Data Cloud</p>
+                </div>
+            </header>
+
+            <ul class="alerts-list">
+                <template for:each={decoratedAlerts} for:item="a">
+                    <li key={a._key} class="alerts-item">
+                        <div class="alerts-item-head">
+                            <span class={a._catClass}>{a.Category_Label__c}</span>
+                            <span class="alerts-item-title">{a.Title__c}</span>
+                        </div>
+                        <template lwc:if={a.Body__c}>
+                            <p class="alerts-item-body">{a.Body__c}</p>
+                        </template>
+                    </li>
+                </template>
+            </ul>
+        </article>
+    </template>
+</template>

@@ -1,0 +1,369 @@
+.demo-tabs {
+    display: flex;
+    gap: 1.5rem;
+    padding: 0 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+/* Tabs rendered inside the theme-colored card. Foreground color follows the
+   theme's derived --demo-fg so light themes get dark text, dark themes get
+   white. Falls back to white if --demo-fg isn't set. */
+.demo-tabs--in-card {
+    margin: -0.5rem -0.5rem 1rem -0.5rem;
+    padding: 0 0.5rem;
+    border-bottom: 1px solid var(--demo-fg-divider, rgba(255, 255, 255, 0.18));
+}
+.demo-tabs--in-card .demo-tab {
+    color: var(--demo-fg-muted, rgba(255, 255, 255, 0.7));
+}
+.demo-tabs--in-card .demo-tab--active {
+    color: var(--demo-fg, #fff);
+    border-bottom-color: var(--demo-fg, #fff);
+}
+
+/* Tabs rendered inside the white Individuals body: dark on white. */
+.demo-tabs--on-white {
+    border-bottom: 1px solid #eef1f4;
+}
+.demo-tabs--on-white .demo-tab { color: #6b7280; }
+.demo-tabs--on-white .demo-tab--active {
+    color: #0176d3;
+    border-bottom-color: #0176d3;
+}
+
+.demo-tab {
+    padding: 0.5rem 0 0.75rem 0;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    color: inherit;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-bottom: -1px;
+}
+
+.demo-profile-card {
+    display: block;
+}
+
+.demo-card-body {
+    background: var(--demo-bg-gradient);
+    color: var(--demo-fg, #fff);
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.demo-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.demo-avatar-wrap {
+    flex: 0 0 auto;
+}
+
+.demo-avatar {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--demo-fg-chip-border, rgba(255, 255, 255, 0.35));
+}
+
+.demo-avatar--initials {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--demo-fg-chip-bg, rgba(255, 255, 255, 0.15));
+    color: var(--demo-fg, #fff);
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.demo-header-text {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.demo-name {
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--demo-fg, #fff);
+    line-height: 1.15;
+    margin: 0;
+}
+
+.demo-subtitle {
+    font-size: 0.8125rem;
+    color: var(--demo-fg-muted, rgba(255, 255, 255, 0.75));
+    margin: 0.15rem 0 0.5rem 0;
+}
+
+.demo-badge {
+    display: inline-block;
+    background: var(--demo-primary);
+    /* --demo-primary-fg is computed at applyTheme time from the primary's
+       luminance so yellow/white primaries get dark text. */
+    color: var(--demo-primary-fg, #fff);
+    font-size: 0.6875rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 0.25rem 0.6rem;
+    border-radius: 0.25rem;
+}
+
+.demo-divider {
+    border: none;
+    border-top: 1px solid var(--demo-fg-divider, rgba(255, 255, 255, 0.15));
+    margin: 1rem 0;
+}
+
+.demo-segments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1rem;
+}
+.demo-segment-chip {
+    display: inline-block;
+    padding: 0.3rem 0.65rem;
+    background: var(--demo-fg-chip-bg, rgba(255, 255, 255, 0.08));
+    border: 1px solid var(--demo-fg-chip-border, rgba(255, 255, 255, 0.22));
+    border-radius: 0.375rem;
+    color: var(--demo-fg, #fff);
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.demo-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+}
+
+.demo-row {
+    display: grid;
+    grid-template-columns: 20px 1fr auto;
+    align-items: center;
+    gap: 0.55rem;
+    font-size: 0.8125rem;
+}
+
+.demo-row lightning-icon {
+    --sds-c-icon-color-foreground: var(--demo-fg, #fff);
+    --sds-c-icon-color-foreground-default: var(--demo-fg, #fff);
+    --slds-c-icon-color-foreground: var(--demo-fg, #fff);
+    --slds-c-icon-color-foreground-default: var(--demo-fg, #fff);
+}
+
+.demo-row-label {
+    color: var(--demo-fg-muted, rgba(255, 255, 255, 0.7));
+}
+
+.demo-row-value {
+    color: var(--demo-fg, #fff);
+    font-weight: 500;
+    text-align: right;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 220px;
+}
+
+.demo-propensity-bar {
+    --propensity-pct: 50%;
+    position: relative;
+    height: 6px;
+    background: var(--demo-fg-chip-bg, rgba(255, 255, 255, 0.15));
+    border-radius: 999px;
+    margin-top: 0.5rem;
+    overflow: visible;
+}
+
+.demo-propensity-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--propensity-pct);
+    background: linear-gradient(90deg, var(--demo-primary), var(--demo-fg, #fff));
+    border-radius: 999px;
+}
+
+.demo-propensity-dot {
+    position: absolute;
+    top: 50%;
+    left: var(--propensity-pct);
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: var(--demo-fg, #fff);
+    border: 2px solid var(--demo-primary);
+    border-radius: 50%;
+}
+
+.demo-engagement {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+/* SVG donut chart */
+.demo-donut {
+    width: 88px;
+    height: 88px;
+    position: relative;
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.demo-donut-svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+.demo-donut-track {
+    fill: none;
+    stroke: var(--demo-fg-chip-bg, rgba(0, 0, 0, 0.22));
+    stroke-width: 10;
+}
+/* Ring stroke follows the theme's foreground color so it stays legible
+   on both dark gradients (white stroke) and light gradients (dark stroke). */
+.demo-donut-fill {
+    fill: none;
+    stroke: var(--demo-fg, #ffffff);
+    stroke-width: 10;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease-out;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.15));
+}
+.demo-donut-value {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--demo-fg, #fff);
+    line-height: 1;
+    letter-spacing: -0.02em;
+}
+
+
+.demo-engagement-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.demo-engagement-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.demo-engagement-subtext {
+    font-size: 0.75rem;
+    color: var(--demo-fg-muted, rgba(255, 255, 255, 0.7));
+}
+
+/* Individuals tab body */
+.demo-individuals-body {
+    background: #fff;
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    border: 1px solid #e5e7eb;
+}
+
+.ind-section {
+    padding-bottom: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #f0f2f5;
+}
+.ind-section:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.ind-head {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+}
+
+.ind-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    --sds-c-icon-color-foreground-default: #fff;
+    --slds-c-icon-color-foreground-default: #fff;
+}
+.ind-icon--email   { background: #1e88e5; }
+.ind-icon--phone   { background: #f57c00; }
+.ind-icon--address { background: var(--demo-primary); }
+
+.ind-title {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    color: #181818;
+    margin: 0;
+}
+
+.ind-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+.ind-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    font-size: 0.8125rem;
+    border-bottom: 1px dashed #eef0f3;
+}
+.ind-row:last-child { border-bottom: none; }
+.ind-value {
+    color: #0176d3;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
+    margin-right: 0.75rem;
+}
+.ind-label {
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-size: 0.6875rem;
+    font-weight: 600;
+    color: #6b7280;
+    flex: 0 0 auto;
+}
+.ind-empty {
+    padding: 1.5rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+}

@@ -1,0 +1,14 @@
+{
+  "required" : [ "brief" ],
+  "unevaluatedProperties" : false,
+  "properties" : {
+    "brief" : {
+      "title" : "Brief",
+      "description" : "The natural-language brief describing the persona and story.",
+      "lightning:type" : "lightning__textType",
+      "lightning:isPII" : false,
+      "copilotAction:isUserInput" : false
+    }
+  },
+  "lightning:type" : "lightning__objectType"
+}

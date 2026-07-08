@@ -1,0 +1,4 @@
+<aura:component implements="lightning:actionOverride,force:hasRecordId,force:hasSObjectName" description="Overrides the New action on Demo_Theme__c (Brand Kit) to launch the New Brand Kit screen flow instead of the standard create form.">
+    <lightning:flow aura:id="flow" onstatuschange="{!c.handleStatus}"/>
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+</aura:component>

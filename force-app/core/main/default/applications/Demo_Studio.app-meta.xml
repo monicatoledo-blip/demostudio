@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomApplication xmlns="http://soap.sforce.com/2006/04/metadata">
+    <brand>
+        <headerColor>#0A1F44</headerColor>
+        <shouldOverrideOrgTheme>false</shouldOverrideOrgTheme>
+    </brand>
+    <formFactors>Large</formFactors>
+    <isNavAutoTempTabsDisabled>false</isNavAutoTempTabsDisabled>
+    <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
+    <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
+    <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
+    <label>Demo Studio</label>
+    <navType>Standard</navType>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <content>Contact_Demo_Studio_Record_Page</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Contact</pageOrSobjectType>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <content>Persona_Studio_Record_Page</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Demo_Persona__c</pageOrSobjectType>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <content>Theme_Studio_Record_Page</content>
+        <formFactor>Large</formFactor>
+        <pageOrSobjectType>Demo_Theme__c</pageOrSobjectType>
+        <type>Flexipage</type>
+    </actionOverrides>
+    <tabs>Demo_Persona__c</tabs>
+    <tabs>Demo_Theme__c</tabs>
+    <tabs>standard-Contact</tabs>
+    <uiType>Lightning</uiType>
+</CustomApplication>

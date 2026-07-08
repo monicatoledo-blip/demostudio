@@ -1,0 +1,190 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <div class="ed-section-head-row">
+                <div>
+                    <h2 class="ed-h2">{title}</h2>
+                    <p class="ed-sub">Add, edit, or reorder rows below. Sort Order controls display order.</p>
+                </div>
+                <div class="ed-section-actions">
+                    <template lwc:if={canSparkle}>
+                        <lightning-button-group>
+                            <lightning-button label="Regenerate All" icon-name="utility:einstein"
+                                title="Ask Einstein to replace these rows based on this persona's story."
+                                disabled={isSparkling} onclick={handleSparkleRegenerate}></lightning-button>
+                            <lightning-button label="Add More" icon-name="utility:add"
+                                title="Ask Einstein to append 2-3 fresh rows, keeping what's already here."
+                                disabled={isSparkling} onclick={handleSparkleAdd}></lightning-button>
+                        </lightning-button-group>
+                    </template>
+                    <lightning-button variant="brand" label="Add Row" icon-name="utility:add" onclick={onAdd} class="slds-m-left_x-small"></lightning-button>
+                </div>
+            </div>
+            <template lwc:if={isSparkling}>
+                <p class="ed-sparkling">
+                    <lightning-icon icon-name="utility:sync" size="xx-small"></lightning-icon>
+                    Einstein is generating…
+                </p>
+            </template>
+        </header>
+
+        <div class="ed-rows">
+            <template for:each={rows} for:item="row">
+                <article key={row._key} class="ed-row-card">
+                    <header class="ed-row-head">
+                        <span class="ed-row-num">#{row.Sort_Order__c}</span>
+                        <button class="ed-row-delete" data-index={row._index} onclick={onRemove} title="Remove">
+                            <lightning-icon icon-name="utility:delete" size="x-small" alternative-text="Remove"></lightning-icon>
+                        </button>
+                    </header>
+
+                    <template lwc:if={isIdentities}>
+                        <div class="ed-grid ed-grid-3">
+                            <lightning-combobox label="Type"  value={row.Type__c}  options={typeOptions}
+                                data-index={row._index} data-field="Type__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-input    label="Value" value={row.Value__c}
+                                data-index={row._index} data-field="Value__c" onchange={onFieldChange} class="ed-col-span-2"></lightning-input>
+                            <lightning-input    label="Label (e.g. Primary, Work)" value={row.Label__c}
+                                data-index={row._index} data-field="Label__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-input    type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isInsights}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Title" value={row.Title__c}
+                                data-index={row._index} data-field="Title__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-combobox label="Category" value={row.Category__c} options={typeOptions}
+                                data-index={row._index} data-field="Category__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-textarea label="Why This Suggestion?" value={row.Why_This_Suggestion__c}
+                                data-index={row._index} data-field="Why_This_Suggestion__c" onchange={onFieldChange} class="ed-col-span-2"></lightning-textarea>
+                            <lightning-input label="CTA Label" value={row.CTA_Label__c}
+                                data-index={row._index} data-field="CTA_Label__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isNbas}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Title" value={row.Title__c}
+                                data-index={row._index} data-field="Title__c" onchange={onFieldChange}
+                                placeholder="e.g. Discuss Loan Approval Path"></lightning-input>
+                            <lightning-input label="Category" value={row.Category__c}
+                                data-index={row._index} data-field="Category__c" onchange={onFieldChange}
+                                placeholder="e.g. Direct Action / Cross-Sell"></lightning-input>
+                            <lightning-textarea label="Why This Action?" value={row.Why_This_Suggestion__c}
+                                data-index={row._index} data-field="Why_This_Suggestion__c" onchange={onFieldChange} class="ed-col-span-2"
+                                placeholder="One or two sentences justifying this NBA."></lightning-textarea>
+                            <div class="ed-col-span-2 nba-image-block">
+                                <lightning-input type="url" label="Hero Image URL" value={row.Image_URL__c}
+                                    data-index={row._index} data-field="Image_URL__c" onchange={onFieldChange}
+                                    placeholder="https://images.unsplash.com/photo-..."
+                                    field-level-help="Paste a public URL, or upload an image below. If the URL is blocked by CSP or fails to load, the card falls back to a colored initial tile."></lightning-input>
+                                <div class="nba-upload-row">
+                                    <lightning-file-upload
+                                        label="Or upload an image"
+                                        name={row._key}
+                                        accept={acceptedImageFormats}
+                                        record-id={personaId}
+                                        data-index={row._index}
+                                        onuploadfinished={onNbaImageUpload}>
+                                    </lightning-file-upload>
+                                </div>
+                            </div>
+                            <lightning-input label="CTA Label" value={row.CTA_Label__c}
+                                data-index={row._index} data-field="CTA_Label__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isActivities}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-combobox label="Type" value={row.Type__c} options={typeOptions}
+                                data-index={row._index} data-field="Type__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-input label="Title" value={row.Title__c}
+                                data-index={row._index} data-field="Title__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-textarea label="Description" value={row.Description__c}
+                                data-index={row._index} data-field="Description__c" onchange={onFieldChange} class="ed-col-span-2"></lightning-textarea>
+                            <lightning-input label="Timestamp Label (free text)" value={row.Timestamp_Label__c}
+                                data-index={row._index} data-field="Timestamp_Label__c" onchange={onFieldChange}></lightning-input>
+                            <c-demo-icon-picker label="Icon" value={row.Icon__c}
+                                row-index={row._index} field-name="Icon__c"
+                                onchange={onIconPick}></c-demo-icon-picker>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isJourneys}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Journey Name" value={row.Journey_Name__c}
+                                data-index={row._index} data-field="Journey_Name__c" onchange={onFieldChange} class="ed-col-span-2"></lightning-input>
+                            <lightning-combobox label="Business Unit" value={row.Business_Unit__c} options={typeOptions}
+                                data-index={row._index} data-field="Business_Unit__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-combobox label="Status" value={row.Status__c} options={statusOptions}
+                                data-index={row._index} data-field="Status__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-input type="date" label="Enrolled Date" value={row.Enrolled_Date__c}
+                                data-index={row._index} data-field="Enrolled_Date__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isKpis}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Label" value={row.Label__c}
+                                data-index={row._index} data-field="Label__c" onchange={onFieldChange}
+                                placeholder="e.g. Assets"></lightning-input>
+                            <lightning-input label="Value" value={row.Value__c}
+                                data-index={row._index} data-field="Value__c" onchange={onFieldChange}
+                                placeholder="e.g. $1,326,969"></lightning-input>
+                            <lightning-input label="Sublabel" value={row.Sublabel__c}
+                                data-index={row._index} data-field="Sublabel__c" onchange={onFieldChange} class="ed-col-span-2"
+                                placeholder="e.g. 6 Accounts"></lightning-input>
+                            <lightning-input type="checkbox" label="Highlight this tile" checked={row.Is_Highlighted__c}
+                                data-index={row._index} data-field="Is_Highlighted__c" onchange={onFieldChange}></lightning-input>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isAlerts}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Category Label" value={row.Category_Label__c}
+                                data-index={row._index} data-field="Category_Label__c" onchange={onFieldChange}
+                                placeholder="e.g. Retirement Gap"></lightning-input>
+                            <lightning-combobox label="Category Style" value={row.Category_Style__c} options={typeOptions}
+                                data-index={row._index} data-field="Category_Style__c" onchange={onFieldChange}></lightning-combobox>
+                            <lightning-input label="Title" value={row.Title__c}
+                                data-index={row._index} data-field="Title__c" onchange={onFieldChange} class="ed-col-span-2"
+                                placeholder="e.g. Behind Retirement Savings Target"></lightning-input>
+                            <lightning-textarea label="Body" value={row.Body__c}
+                                data-index={row._index} data-field="Body__c" onchange={onFieldChange} class="ed-col-span-2"
+                                placeholder="One or two sentences describing why this alert matters."></lightning-textarea>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+
+                    <template lwc:if={isSegments}>
+                        <div class="ed-grid ed-grid-2">
+                            <lightning-input label="Segment Label" value={row.Label__c}
+                                data-index={row._index} data-field="Label__c" onchange={onFieldChange}
+                                placeholder="e.g. High Spender"></lightning-input>
+                            <lightning-input type="number" label="Sort Order" value={row.Sort_Order__c}
+                                data-index={row._index} data-field="Sort_Order__c" onchange={onFieldChange}></lightning-input>
+                        </div>
+                    </template>
+                </article>
+            </template>
+
+            <template lwc:if={rows.length}></template>
+            <template lwc:else>
+                <div class="ed-empty">
+                    <p>No rows yet — click <b>Add Row</b> to create one.</p>
+                </div>
+            </template>
+        </div>
+    </section>
+</template>

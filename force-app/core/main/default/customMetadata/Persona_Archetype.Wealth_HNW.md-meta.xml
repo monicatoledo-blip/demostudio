@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomMetadata xmlns="http://soap.sforce.com/2006/04/metadata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <label>Wealth HNW Prospect</label>
+    <protected>false</protected>
+    <values>
+        <field>Category__c</field>
+        <value xsi:type="xsd:string">Wealth Management</value>
+    </values>
+    <values>
+        <field>Description__c</field>
+        <value xsi:type="xsd:string">A high-net-worth individual recently onboarded, exploring wealth advisory + estate planning services.</value>
+    </values>
+    <values>
+        <field>Sample_Brief__c</field>
+        <value xsi:type="xsd:string">A recently retired executive (55-65) with $8M investable assets exploring wealth management. Just downloaded our estate planning guide. Story: introduce dedicated advisor and cross-sell trust services.</value>
+    </values>
+    <values>
+        <field>Payload_JSON__c</field>
+        <value xsi:type="xsd:string">{"persona":{"First_Name__c":"David","Last_Name__c":"Chen","Title__c":"Retired CFO","Company__c":"Independent","Customer_ID__c":"WM-88104","Segment__c":"Wealth HNW Prospect","Lifecycle_Stage__c":"Engaged NDR","LTV__c":8000000,"Propensity__c":"High","Engagement_Score__c":76,"Engagement_Label__c":"Actively Researching","Risk_Tier__c":"Low","Badge_Text__c":"HNW Prospect","Suggested_Opener__c":"Hi David, I saw you downloaded our estate planning guide — impressive timing given the current tax landscape. I would love to introduce you to Marcus, one of our senior advisors who works with families in similar circumstances.","Intent_Summary__c":"David recently retired and is actively researching wealth advisory options. Downloaded our estate planning white paper and spent 12 minutes on the trust services page.","Key_Context__c":"Estimated investable assets of $8M based on prior transfers. High-engagement web signals over 30 days. No advisor assigned yet.","Open_Likelihood__c":88,"Click_Likelihood__c":72,"Unsubscribe_Risk__c":6},"insights":[{"Title__c":"Introduce Senior Advisor","Category__c":"Next-Best-Action","Why_This_Suggestion__c":"HNW prospects convert 3x higher when introduced to a named advisor within 7 days of initial engagement.","CTA_Label__c":"Assign Advisor","Sort_Order__c":1},{"Title__c":"Trust &amp; Estate Services","Category__c":"Cross-Sell","Why_This_Suggestion__c":"Downloaded estate planning content signals a Q4 wealth-transfer window. Trust services attach rate for HNW is ~40%.","CTA_Label__c":"Send Trust Deck","Sort_Order__c":2}],"activities":[{"Type__c":"Doc","Title__c":"Downloaded Estate Planning Guide","Description__c":"12-page white paper on multi-generational wealth transfer.","Timestamp_Label__c":"Yesterday","Icon__c":"utility:download","Sort_Order__c":1},{"Type__c":"Web","Title__c":"Visited Trust Services Page","Description__c":"Spent 12 minutes on the trust services product page.","Timestamp_Label__c":"3 days ago","Icon__c":"utility:world","Sort_Order__c":2}],"journeys":[{"Journey_Name__c":"Wealth Onboarding — HNW","Business_Unit__c":"Wealth","Status__c":"Active"}],"recipe":{"leftRail":[{"component":"demoUnifiedProfileHeader"}],"center":[{"component":"demoAgentforceBrief"},{"component":"demoCrossSellInsights"}],"rightRail":[{"component":"demoActivityTimeline"},{"component":"demoLikelihoodScoreCard"}]}}</value>
+    </values>
+</CustomMetadata>

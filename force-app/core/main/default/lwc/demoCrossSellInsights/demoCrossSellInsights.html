@@ -1,0 +1,37 @@
+<template>
+    <template lwc:if={hasInsights}>
+        <article class="xs-card">
+            <header class="xs-header">
+                <span class="xs-icon">
+                    <lightning-icon icon-name="utility:einstein" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="xs-header-text">
+                    <h2 class="xs-title">Cross-Sell Insights</h2>
+                    <p class="xs-subtitle">AI-driven recommendations</p>
+                </div>
+            </header>
+
+            <div class="xs-grid">
+                <template for:each={insights} for:item="ins">
+                    <div key={ins.Id} class="xs-item">
+                        <div class="xs-item-body">
+                            <span class="xs-cat">{ins.Category__c}</span>
+                            <h3 class="xs-item-title">{ins.Title__c}</h3>
+                            <div class="xs-reason">
+                                <span class="xs-reason-tag">
+                                    <span class="xs-dot"></span>
+                                    Why this suggestion?
+                                </span>
+                                <p class="xs-reason-text">{ins.Why_This_Suggestion__c}</p>
+                            </div>
+                        </div>
+                        <div class="xs-item-actions">
+                            <lightning-button variant="brand" label={ins.CTA_Label__c}></lightning-button>
+                            <lightning-button variant="neutral" label="Dismiss"></lightning-button>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </article>
+    </template>
+</template>

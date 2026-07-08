@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ListView xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>All_Demo_Contacts</fullName>
+    <columns>FULL_NAME</columns>
+    <columns>Demo_Persona__c</columns>
+    <columns>Demo_Assigned_By__c</columns>
+    <columns>ACCOUNT.NAME</columns>
+    <columns>LAST_UPDATE</columns>
+    <filterScope>Everything</filterScope>
+    <filters>
+        <field>Demo_Persona__c</field>
+        <operation>notEqual</operation>
+    </filters>
+    <label>All Demo Contacts</label>
+    <sharedTo>
+        <allInternalUsers></allInternalUsers>
+    </sharedTo>
+</ListView>

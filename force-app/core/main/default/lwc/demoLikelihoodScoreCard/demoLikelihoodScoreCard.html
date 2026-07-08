@@ -1,0 +1,47 @@
+<template>
+    <article class="lk-card">
+        <header class="lk-header">
+            <lightning-icon icon-name="utility:trending" size="small" class="lk-title-icon"></lightning-icon>
+            <h2 class="lk-title">Engagement Likelihood</h2>
+        </header>
+
+        <div class="lk-body">
+            <div class="lk-metric" style={openStyle}>
+                <div class="lk-metric-header">
+                    <span class="lk-metric-label">Open</span>
+                    <span class="lk-metric-value">{openLabel}</span>
+                </div>
+                <div class="lk-bar">
+                    <div class="lk-bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="lk-metric" style={clickStyle}>
+                <div class="lk-metric-header">
+                    <span class="lk-metric-label">Click</span>
+                    <span class="lk-metric-value">{clickLabel}</span>
+                </div>
+                <div class="lk-bar">
+                    <div class="lk-bar-fill"></div>
+                </div>
+            </div>
+
+            <div class="lk-metric" style={unsubStyle}>
+                <div class="lk-metric-header">
+                    <span class="lk-metric-label">Unsubscribe Risk</span>
+                    <span class="lk-metric-value">{unsubLabel}</span>
+                </div>
+                <div class="lk-bar">
+                    <div class="lk-bar-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="lk-footer">
+            <span class="lk-badge">
+                <lightning-icon icon-name="utility:einstein" size="xx-small" variant="inverse"></lightning-icon>
+                AI-predicted from Data Cloud engagement history
+            </span>
+        </footer>
+    </article>
+</template>

@@ -1,0 +1,224 @@
+<template>
+    <div class="studio-frame">
+        <!-- Toolbar -->
+        <header class="studio-toolbar">
+            <div class="studio-toolbar-left">
+                <span class="studio-logo">
+                    <lightning-icon icon-name="utility:magicwand" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="studio-title-wrap">
+                    <h1 class="studio-title">Persona Studio</h1>
+                    <p class="studio-subtitle">{studioSubtitle}</p>
+                </div>
+            </div>
+            <div class="studio-toolbar-right">
+                <!-- Auto-save status. Persona changes save ~1.5s after the last edit; -->
+                <!-- this pill communicates state so users don't wonder if changes stuck. -->
+                <span class={saveStatusPillClass}>
+                    <template lwc:if={saveStatusIcon}>
+                        <lightning-icon icon-name={saveStatusIcon} size="xx-small" variant="inverse" class="save-status-icon"></lightning-icon>
+                    </template>
+                    <span class="save-status-text">{saveStatusText}</span>
+                </span>
+                <lightning-button label="Revert" variant="neutral" onclick={handleRevert}
+                    class="slds-m-left_small"></lightning-button>
+                <template lwc:if={showManualSave}>
+                    <lightning-button variant="brand" label="Save Now" onclick={handleManualSave}
+                        class="slds-m-left_x-small"></lightning-button>
+                </template>
+            </div>
+        </header>
+
+        <c-demo-persona-generator lwc:ref="generator" brand={persona.Brand__c} onapply={handleGeneratorApply}></c-demo-persona-generator>
+
+        <div class="generate-banner">
+            <div class="generate-banner-body">
+                <span class="generate-banner-icon">
+                    <lightning-icon icon-name="utility:magicwand" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="generate-banner-text">
+                    <h3 class="generate-banner-title">Start with a story, not a form</h3>
+                    <p class="generate-banner-sub">Pick an archetype or describe your persona — we'll pre-fill Identity, Story, Insights, Activities, Journeys, and Recipe. Then edit anything you want.</p>
+                </div>
+            </div>
+            <lightning-button variant="brand" label="✨ Generate Persona" icon-name="utility:magicwand" onclick={openGenerator} class="generate-banner-btn"></lightning-button>
+        </div>
+
+        <c-demo-studio-help heading="Or start from scratch — how to use Persona Studio" steps={helpSteps}></c-demo-studio-help>
+
+        <!-- Split view: tabs + editor on left, preview on right -->
+        <div class={splitClass}>
+            <!-- Tab rail — flat items + one group parent (Identity) with sub-items -->
+            <nav class="studio-rail">
+                <template for:each={tabs} for:item="t">
+                    <template lwc:if={t.isGroup}>
+                        <div key={t.key} class="studio-tab-group">
+                            <button class={t.className} data-key={t.key} onclick={handleTabClick}>
+                                <lightning-icon icon-name={t.icon} size="x-small" class="rail-icon"></lightning-icon>
+                                <span class="rail-label">{t.label}</span>
+                            </button>
+                            <template for:each={t.decoratedChildren} for:item="c">
+                                <button key={c.key} class={c.className} data-key={c.key} onclick={handleTabClick}>
+                                    <lightning-icon icon-name={c.icon} size="x-small" class="rail-icon"></lightning-icon>
+                                    <span class="rail-label">{c.label}</span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
+                    <template lwc:else>
+                        <button key={t.key} class={t.className} data-key={t.key} onclick={handleTabClick}>
+                            <lightning-icon icon-name={t.icon} size="x-small" class="rail-icon"></lightning-icon>
+                            <span class="rail-label">{t.label}</span>
+                        </button>
+                    </template>
+                </template>
+            </nav>
+
+            <!-- Editor pane -->
+            <section class="studio-editor">
+                <template lwc:if={showIdentity}>
+                    <c-demo-persona-studio-identity persona={persona}
+                        propensity-options={propensityOptions}
+                        risk-options={riskOptions}
+                        lifecycle-options={lifecycleOptions}
+                        onchange={handlePersonaChange}></c-demo-persona-studio-identity>
+                </template>
+
+                <template lwc:if={showStory}>
+                    <c-demo-persona-studio-story persona={persona}
+                        onchange={handlePersonaChange}></c-demo-persona-studio-story>
+                </template>
+
+                <template lwc:if={showIdentities}>
+                    <c-demo-persona-studio-collection
+                        title="Individuals"
+                        collection="identities"
+                        rows={decoratedIdentities}
+                        type-options={identityTypeOptions}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showInsights}>
+                    <c-demo-persona-studio-collection
+                        title="Cross-Sell Insights"
+                        collection="insights"
+                        rows={decoratedInsights}
+                        type-options={insightCategoryOptions}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showActivities}>
+                    <c-demo-persona-studio-collection
+                        title="Activity Timeline"
+                        collection="activities"
+                        rows={decoratedActivities}
+                        type-options={activityTypeOptions}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showJourneys}>
+                    <c-demo-persona-studio-collection
+                        title="Active Journeys"
+                        collection="journeys"
+                        rows={decoratedJourneys}
+                        type-options={buOptions}
+                        status-options={journeyStatusOptions}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showKpis}>
+                    <c-demo-persona-studio-collection
+                        title="KPI Tiles"
+                        collection="kpis"
+                        rows={decoratedKpis}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showAlerts}>
+                    <c-demo-persona-studio-collection
+                        title="AI Alerts"
+                        collection="alerts"
+                        rows={decoratedAlerts}
+                        type-options={alertStyleOptions}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showSegments}>
+                    <c-demo-persona-studio-collection
+                        title="Segments"
+                        collection="segments"
+                        rows={decoratedSegments}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showNbas}>
+                    <c-demo-persona-studio-collection
+                        title="Next Best Actions"
+                        collection="nbas"
+                        rows={decoratedNbas}
+                        persona-id={recordId}
+                        onchange={handleChildChange}
+                        onadd={handleAddChild}
+                        onremove={handleRemoveChild}
+                        onsparkle={handleSparkleMerge}></c-demo-persona-studio-collection>
+                </template>
+
+                <template lwc:if={showTheme}>
+                    <c-demo-persona-studio-theme theme={theme} persona={persona}
+                        onchange={handlePersonaChange}></c-demo-persona-studio-theme>
+                </template>
+
+                <template lwc:if={showRecipe}>
+                    <c-demo-persona-studio-recipe persona={persona}
+                        onchange={handlePersonaChange}
+                        oncollapse={handleRecipeCollapse}></c-demo-persona-studio-recipe>
+                </template>
+
+                <template lwc:if={showContacts}>
+                    <c-demo-persona-studio-contacts persona-id={recordId} persona-name={personaName}></c-demo-persona-studio-contacts>
+                </template>
+            </section>
+
+            <!-- Live preview pane -->
+            <template lwc:if={showPreview}>
+                <aside class="studio-preview">
+                    <header class="preview-header">
+                        <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                        <span>Live Preview · {previewLabel}</span>
+                    </header>
+                    <div class="preview-canvas">
+                        <c-demo-preview-frame bundle={working} focus={previewFocus} layout={previewLayout}></c-demo-preview-frame>
+                    </div>
+                </aside>
+            </template>
+        </div>
+    </div>
+</template>

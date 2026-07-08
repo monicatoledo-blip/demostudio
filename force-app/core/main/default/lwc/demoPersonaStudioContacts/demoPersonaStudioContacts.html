@@ -1,0 +1,81 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <h2 class="ed-h2">Assigned Contacts</h2>
+            <p class="ed-sub">Any Contact assigned to this persona will render its branded profile page. One persona can be shared across many Contacts.</p>
+        </header>
+
+        <div class="ac-currently">
+            <h3 class="ac-h3">Currently assigned ({assignedCount})</h3>
+            <template lwc:if={hasAssigned}>
+                <ul class="ac-list">
+                    <template for:each={decoratedAssigned} for:item="c">
+                        <li key={c.Id} class="ac-item">
+                            <div class="ac-item-main">
+                                <a href={c.recordUrl} class="ac-name" target="_blank" rel="noopener">
+                                    {c.Name}
+                                    <lightning-icon icon-name="utility:new_window" size="xx-small" class="ac-name-icon"></lightning-icon>
+                                </a>
+                                <div class="ac-sub">
+                                    <template lwc:if={c.Email}><span>{c.Email}</span></template>
+                                    <template lwc:if={c.accountName}><span class="ac-dot">·</span><span>{c.accountName}</span></template>
+                                </div>
+                            </div>
+                            <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign} icon-name="utility:close"></lightning-button>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template lwc:else>
+                <div class="ac-empty">No Contacts assigned yet. Use the search below to add one.</div>
+            </template>
+        </div>
+
+        <div class="ac-search">
+            <div class="ac-search-head">
+                <h3 class="ac-h3">Assign a Contact</h3>
+                <lightning-radio-group
+                    label="Show"
+                    variant="label-hidden"
+                    type="button"
+                    options={scopeOptions}
+                    value={scope}
+                    onchange={handleScopeChange}
+                    class="ac-scope"></lightning-radio-group>
+            </div>
+            <lightning-input type="search" label="Search Contacts" placeholder="Type name or email…"
+                value={searchTerm} onchange={handleSearchChange}></lightning-input>
+
+            <template lwc:if={hasResults}>
+                <ul class="ac-list ac-list--results slds-m-top_small">
+                    <template for:each={decoratedResults} for:item="c">
+                        <li key={c.Id} class="ac-item">
+                            <div class="ac-item-main">
+                                <a href={c.recordUrl} class="ac-name" target="_blank" rel="noopener">
+                                    {c.Name}
+                                    <lightning-icon icon-name="utility:new_window" size="xx-small" class="ac-name-icon"></lightning-icon>
+                                </a>
+                                <div class="ac-sub">
+                                    <template lwc:if={c.Email}><span>{c.Email}</span></template>
+                                    <template lwc:if={c.accountName}><span class="ac-dot">·</span><span>{c.accountName}</span></template>
+                                </div>
+                                <template lwc:if={c.statusLabel}>
+                                    <span class={c.statusClass}>{c.statusLabel}</span>
+                                </template>
+                            </div>
+                            <template lwc:if={c.alreadyAssigned}>
+                                <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign}></lightning-button>
+                            </template>
+                            <template lwc:else>
+                                <lightning-button variant="brand" label="Assign" icon-name="utility:add" data-id={c.Id} onclick={handleAssign}></lightning-button>
+                            </template>
+                        </li>
+                    </template>
+                </ul>
+            </template>
+            <template lwc:else>
+                <div class="ac-empty slds-m-top_small">{scopeEmptyCopy}</div>
+            </template>
+        </div>
+    </section>
+</template>

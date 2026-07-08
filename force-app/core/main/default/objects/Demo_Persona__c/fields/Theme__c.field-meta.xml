@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Theme__c</fullName>
+    <label>Theme</label>
+    <referenceTo>Demo_Theme__c</referenceTo>
+    <relationshipLabel>Personas</relationshipLabel>
+    <relationshipName>Personas</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+    <deleteConstraint>SetNull</deleteConstraint>
+</CustomField>

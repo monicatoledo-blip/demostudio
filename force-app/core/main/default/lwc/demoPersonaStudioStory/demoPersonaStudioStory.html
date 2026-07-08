@@ -1,0 +1,30 @@
+<template>
+    <section class="ed-section">
+        <header class="ed-section-head">
+            <h2 class="ed-h2">Story</h2>
+            <p class="ed-sub">The Agentforce brief — the paragraphs Sales sees on the record page.</p>
+        </header>
+
+        <div class="ed-stack">
+            <lightning-textarea label="Intent Summary" value={persona.Intent_Summary__c} data-field="Intent_Summary__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Rachel submitted a small business loan application at Cumulus Bank this morning and successfully uploaded her tax returns. She is actively engaging with the Agentforce virtual assistant regarding approval timelines and is a strong cross-sell target for our merchant services bundle."></lightning-textarea>
+            <lightning-textarea label="Key Context" value={persona.Key_Context__c} data-field="Key_Context__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Rachel is pre-approved for a $150K line of credit for BrightPath Logistics. Her unified profile synced instantly via Data Cloud, showing she has successfully uploaded her SOC-2 attestation and Proof of Funds. She is waiting on final underwriter clearance."></lightning-textarea>
+            <lightning-textarea label="Suggested Opener (rep first-person)" value={persona.Suggested_Opener__c} data-field="Suggested_Opener__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. Hi Rachel, I noticed you just uploaded your tax returns for the line of credit application — congratulations on progressing that quickly. I want to make sure we finalize your approval today so you can activate your business banking package before your Q3 growth cycle."></lightning-textarea>
+        </div>
+
+        <header class="ed-section-head" style="margin-top:1.5rem;">
+            <h2 class="ed-h2">Likelihood Scores</h2>
+            <p class="ed-sub">Powers the Engagement Likelihood card in the right rail.</p>
+        </header>
+        <div class="ed-grid ed-grid-3">
+            <lightning-input type="number" min="0" max="100" label="Open %" value={persona.Open_Likelihood__c} data-field="Open_Likelihood__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. 92"></lightning-input>
+            <lightning-input type="number" min="0" max="100" label="Click %" value={persona.Click_Likelihood__c} data-field="Click_Likelihood__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. 78"></lightning-input>
+            <lightning-input type="number" min="0" max="100" label="Unsubscribe Risk %" value={persona.Unsubscribe_Risk__c} data-field="Unsubscribe_Risk__c" onchange={bubbleChange} class="ed-input-hint"
+                placeholder="e.g. 4"></lightning-input>
+        </div>
+    </section>
+</template>
