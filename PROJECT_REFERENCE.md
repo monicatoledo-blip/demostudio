@@ -138,7 +138,7 @@ Under `force-app/segments/main/default/objects/`:
 
 ### App / permission set
 
-- Custom app `Data_Cloud_Studio` OR new nav item on existing `Demo_Studio` app (decide at build time).
+- Custom app `Data_Cloud_Studio` (label: **Segment Studio**) — separate from Demo Studio app.
 - Tabs: `Demo_Segment__c`, `Demo_DMO_Individual__c`, `Demo_DMO_Event__c`, `Demo_DMO_Transaction__c`, `dcSeedAdmin`.
 - FlexiPages: `Segment_Builder_Record_Page`, `Segments_Home_Page`.
 - Permission set: `Data_Cloud_Studio_Admin`.

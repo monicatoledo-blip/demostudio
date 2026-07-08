@@ -9,7 +9,7 @@
     <isNavPersonalizationDisabled>false</isNavPersonalizationDisabled>
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
-    <label>Data Cloud Studio</label>
+    <label>Segment Studio</label>
     <navType>Standard</navType>
     <actionOverrides>
         <actionName>View</actionName>
