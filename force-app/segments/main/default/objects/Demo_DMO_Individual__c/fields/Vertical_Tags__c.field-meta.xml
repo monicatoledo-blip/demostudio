@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Vertical_Tags__c</fullName>
+    <label>Vertical Tags</label>
+    <required>false</required>
+    <type>MultiselectPicklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>FINS-Banking</fullName><default>false</default><label>FINS - Banking</label></value>
+            <value><fullName>FINS-Wealth</fullName><default>false</default><label>FINS - Wealth</label></value>
+            <value><fullName>FINS-Insurance</fullName><default>false</default><label>FINS - Insurance</label></value>
+            <value><fullName>FINS-AssetMgmt</fullName><default>false</default><label>FINS - Asset Mgmt</label></value>
+            <value><fullName>Healthcare</fullName><default>false</default><label>Healthcare</label></value>
+            <value><fullName>Retail</fullName><default>false</default><label>Retail</label></value>
+            <value><fullName>Onboarding</fullName><default>false</default><label>Onboarding</label></value>
+        </valueSetDefinition>
+    </valueSet>
+    <visibleLines>4</visibleLines>
+</CustomField>

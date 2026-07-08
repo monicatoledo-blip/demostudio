@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Publish_Schedule__c</fullName>
+    <label>Publish Schedule</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>Real-time</fullName><default>false</default><label>Real-time</label></value>
+            <value><fullName>Daily</fullName><default>true</default><label>Daily</label></value>
+            <value><fullName>Weekly</fullName><default>false</default><label>Weekly</label></value>
+            <value><fullName>On-demand</fullName><default>false</default><label>On-demand</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>

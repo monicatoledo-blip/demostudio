@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Owner_Persona__c</fullName>
+    <label>Owner Persona</label>
+    <referenceTo>Demo_Persona__c</referenceTo>
+    <relationshipLabel>Owned Segments</relationshipLabel>
+    <relationshipName>Owned_Segments</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+</CustomField>

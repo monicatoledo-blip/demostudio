@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Event_Type__c</fullName>
+    <label>Event Type</label>
+    <required>false</required>
+    <type>Picklist</type>
+    <valueSet>
+        <restricted>false</restricted>
+        <valueSetDefinition>
+            <sorted>false</sorted>
+            <value><fullName>EmailOpen</fullName><default>false</default><label>Email Open</label></value>
+            <value><fullName>EmailClick</fullName><default>false</default><label>Email Click</label></value>
+            <value><fullName>SmsClick</fullName><default>false</default><label>SMS Click</label></value>
+            <value><fullName>PageView</fullName><default>false</default><label>Page View</label></value>
+            <value><fullName>FormSubmit</fullName><default>false</default><label>Form Submit</label></value>
+            <value><fullName>Login</fullName><default>false</default><label>Login</label></value>
+            <value><fullName>AppointmentBooked</fullName><default>false</default><label>Appointment Booked</label></value>
+            <value><fullName>PurchaseCompleted</fullName><default>false</default><label>Purchase Completed</label></value>
+            <value><fullName>OnboardingStepComplete</fullName><default>false</default><label>Onboarding Step Complete</label></value>
+        </valueSetDefinition>
+    </valueSet>
+</CustomField>
