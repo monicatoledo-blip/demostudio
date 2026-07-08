@@ -32,21 +32,8 @@
         <pageOrSobjectType>Demo_Theme__c</pageOrSobjectType>
         <type>Flexipage</type>
     </actionOverrides>
-    <actionOverrides>
-        <actionName>View</actionName>
-        <content>Segment_Builder_Record_Page</content>
-        <formFactor>Large</formFactor>
-        <pageOrSobjectType>Demo_Segment__c</pageOrSobjectType>
-        <type>Flexipage</type>
-    </actionOverrides>
     <tabs>Demo_Persona__c</tabs>
     <tabs>Demo_Theme__c</tabs>
     <tabs>standard-Contact</tabs>
-    <tabs>Segments_Home</tabs>
-    <tabs>Demo_Segment__c</tabs>
-    <tabs>Demo_DMO_Individual__c</tabs>
-    <tabs>Demo_DMO_Event__c</tabs>
-    <tabs>Demo_DMO_Transaction__c</tabs>
-    <tabs>Seed_Admin</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>
