@@ -218,11 +218,6 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>Demo_DMO_Event__c.Individual__c</field>
-        <editable>true</editable>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <field>Demo_DMO_Event__c.Source__c</field>
         <editable>true</editable>
         <readable>true</readable>
@@ -234,11 +229,6 @@
     </fieldPermissions>
     <fieldPermissions>
         <field>Demo_DMO_Transaction__c.Category__c</field>
-        <editable>true</editable>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <field>Demo_DMO_Transaction__c.Individual__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>
@@ -298,17 +288,7 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <field>Demo_Segment_Membership__c.Individual__c</field>
-        <editable>true</editable>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
         <field>Demo_Segment_Membership__c.Qualified_Date__c</field>
-        <editable>true</editable>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <field>Demo_Segment_Membership__c.Segment__c</field>
         <editable>true</editable>
         <readable>true</readable>
     </fieldPermissions>

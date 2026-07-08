@@ -1,17 +1,6 @@
 @isTest
 private class DmoSeedRunnerTest {
 
-    private static StaticResource makePack(String name, String json) {
-        StaticResource sr = new StaticResource(
-            Name = name,
-            Body = Blob.valueOf(json),
-            ContentType = 'application/json',
-            CacheControl = 'Public'
-        );
-        insert sr;
-        return sr;
-    }
-
     @isTest
     static void seed_inserts_individuals_events_transactions() {
         String pack = '{'
@@ -27,9 +16,8 @@ private class DmoSeedRunnerTest {
             +   '{"individualRef":0,"Amount__c":100.00,"Category__c":"Banking","Status__c":"Complete"}'
             + ']'
             + '}';
-        makePack('demoDmoSeedTest', pack);
 
-        DmoSeedRunner.SeedResult r = DmoSeedRunner.runSeed('demoDmoSeedTest', false);
+        DmoSeedRunner.SeedResult r = DmoSeedRunner.runSeedFromJson('demoDmoSeedTest', pack, false);
 
         System.assertEquals(2, r.individuals);
         System.assertEquals(2, r.events);
@@ -45,9 +33,8 @@ private class DmoSeedRunnerTest {
     static void wipeExisting_deletes_prior_rows() {
         insert new Demo_DMO_Individual__c(First_Name__c='OldAlice', Last_Name__c='X');
         String pack = '{"individuals":[{"First_Name__c":"New","Last_Name__c":"N"}],"events":[],"transactions":[]}';
-        makePack('demoDmoSeedWipeTest', pack);
 
-        DmoSeedRunner.runSeed('demoDmoSeedWipeTest', true);
+        DmoSeedRunner.runSeedFromJson('demoDmoSeedWipeTest', pack, true);
 
         List<Demo_DMO_Individual__c> remaining = [SELECT First_Name__c FROM Demo_DMO_Individual__c];
         System.assertEquals(1, remaining.size());
@@ -67,10 +54,9 @@ private class DmoSeedRunnerTest {
 
     @isTest
     static void bad_json_throws_aura_exception() {
-        makePack('demoDmoSeedBad', 'not valid json {');
         Boolean threw = false;
         try {
-            DmoSeedRunner.runSeed('demoDmoSeedBad', false);
+            DmoSeedRunner.runSeedFromJson('bad', 'not valid json {', false);
         } catch (AuraHandledException e) {
             threw = true;
         }
@@ -82,9 +68,8 @@ private class DmoSeedRunnerTest {
         String pack = '{"individuals":[' +
             '{"First_Name__c":"D","Last_Name__c":"D","Date_of_Birth__c":"1990-05-15"}' +
             '],"events":[],"transactions":[]}';
-        makePack('demoDmoSeedDate', pack);
 
-        DmoSeedRunner.runSeed('demoDmoSeedDate', false);
+        DmoSeedRunner.runSeedFromJson('demoDmoSeedDate', pack, false);
 
         Demo_DMO_Individual__c ind = [SELECT Date_of_Birth__c FROM Demo_DMO_Individual__c WHERE First_Name__c='D'];
         System.assertEquals(Date.newInstance(1990, 5, 15), ind.Date_of_Birth__c);

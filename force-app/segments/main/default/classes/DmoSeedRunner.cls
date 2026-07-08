@@ -29,24 +29,26 @@ public with sharing class DmoSeedRunner {
 
     @AuraEnabled
     public static SeedResult runSeed(String packName, Boolean wipeExisting) {
-        Long startMs = System.now().getTime();
-
         if (String.isBlank(packName)) {
             throw new AuraHandledException('packName is required');
         }
-
-        StaticResource sr;
-        try {
-            sr = [SELECT Id, Body FROM StaticResource WHERE Name = :packName LIMIT 1];
-        } catch (Exception e) {
+        List<StaticResource> rs = [SELECT Id, Body FROM StaticResource WHERE Name = :packName LIMIT 1];
+        if (rs.isEmpty()) {
             throw new AuraHandledException('Static Resource not found: ' + packName);
         }
+        return runSeedFromJson(packName, rs[0].Body.toString(), wipeExisting);
+    }
+
+    // Test hook — tests can't insert StaticResource, so feed raw JSON directly.
+    @TestVisible
+    private static SeedResult runSeedFromJson(String packName, String bodyJson, Boolean wipeExisting) {
+        Long startMs = System.now().getTime();
 
         Map<String, Object> pack;
         try {
-            pack = (Map<String, Object>) JSON.deserializeUntyped(sr.Body.toString());
+            pack = (Map<String, Object>) JSON.deserializeUntyped(bodyJson);
         } catch (Exception e) {
-            throw new AuraHandledException('Static Resource body is not valid JSON: ' + e.getMessage());
+            throw new AuraHandledException('Seed body is not valid JSON: ' + e.getMessage());
         }
 
         if (wipeExisting == true) {
@@ -155,9 +157,9 @@ public with sharing class DmoSeedRunner {
 
     private static void insertInChunks(List<SObject> rows, Integer chunkSize) {
         for (Integer i = 0; i < rows.size(); i += chunkSize) {
-            Integer end = Math.min(i + chunkSize, rows.size());
+            Integer stopAt = Math.min(i + chunkSize, rows.size());
             List<SObject> slice = new List<SObject>();
-            for (Integer j = i; j < end; j++) slice.add(rows[j]);
+            for (Integer j = i; j < stopAt; j++) slice.add(rows[j]);
             insert slice;
         }
     }
