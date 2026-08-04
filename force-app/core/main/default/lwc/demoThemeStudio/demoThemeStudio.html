@@ -59,37 +59,17 @@
                     <lightning-combobox label="Header Style" value={headerStyle} options={headerStyleOptions} data-field="Header_Style__c" onchange={handleFieldChange}></lightning-combobox>
                 </div>
 
-                <div class="ts-section">
-                    <h2 class="ts-h2">Colors</h2>
-                    <div class="ts-color-grid">
-                        <label class="ts-color-field">
-                            <span class="ts-color-label">Primary</span>
-                            <div class="ts-color-row">
-                                <input type="color" value={primaryColor} data-field="Primary_Color__c" oninput={handleColorInput} class="ts-color-input" />
-                                <lightning-input variant="label-hidden" value={primaryColor} data-field="Primary_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
-                            </div>
-                        </label>
-                        <label class="ts-color-field">
-                            <span class="ts-color-label">Accent</span>
-                            <div class="ts-color-row">
-                                <input type="color" value={accentColor} data-field="Accent_Color__c" oninput={handleColorInput} class="ts-color-input" />
-                                <lightning-input variant="label-hidden" value={accentColor} data-field="Accent_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
                 <template lwc:if={isSolid}>
                     <div class="ts-section">
-                        <h2 class="ts-h2">Background</h2>
-                        <p class="ts-hint">Solid mode uses the <b>Primary color</b> as the header background.</p>
+                        <h2 class="ts-h2">Header background</h2>
+                        <p class="ts-hint">Solid mode uses the <b>Primary color</b> below as the header background. Switch to Gradient for a two-color header.</p>
                     </div>
                 </template>
 
                 <template lwc:else>
                     <div class="ts-section">
-                        <h2 class="ts-h2">Gradient</h2>
-                        <p class="ts-hint">Angle + Start / End colors. Or pick a preset below.</p>
+                        <h2 class="ts-h2">Header background</h2>
+                        <p class="ts-hint">Pick the two colors that make up the header gradient. Or choose a preset below.</p>
                         <label class="ts-slider-field">
                             <div class="ts-slider-label-row">
                                 <span>Angle</span>
@@ -124,6 +104,27 @@
                         </div>
                     </div>
                 </template>
+
+                <div class="ts-section">
+                    <h2 class="ts-h2">Button + accent colors</h2>
+                    <p class="ts-hint">Used across the whole UI — buttons, badges, chips, alert icons. Independent from the header background above.</p>
+                    <div class="ts-color-grid">
+                        <label class="ts-color-field">
+                            <span class="ts-color-label">Primary</span>
+                            <div class="ts-color-row">
+                                <input type="color" value={primaryColor} data-field="Primary_Color__c" oninput={handleColorInput} class="ts-color-input" />
+                                <lightning-input variant="label-hidden" value={primaryColor} data-field="Primary_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
+                            </div>
+                        </label>
+                        <label class="ts-color-field">
+                            <span class="ts-color-label">Accent</span>
+                            <div class="ts-color-row">
+                                <input type="color" value={accentColor} data-field="Accent_Color__c" oninput={handleColorInput} class="ts-color-input" />
+                                <lightning-input variant="label-hidden" value={accentColor} data-field="Accent_Color__c" onchange={handleFieldChange} class="ts-color-hex"></lightning-input>
+                            </div>
+                        </label>
+                    </div>
+                </div>
 
                 <div class="ts-section">
                     <h2 class="ts-h2">Logo</h2>

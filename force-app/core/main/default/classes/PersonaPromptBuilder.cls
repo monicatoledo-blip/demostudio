@@ -22,17 +22,27 @@ public with sharing class PersonaPromptBuilder {
             'You are Demo Studio Persona Generator. Build a JSON persona ' +
             'bundle for a Salesforce Contact demo record.\n\n' +
             '## WHO THE PERSONA IS\n' +
-            'The persona is the FICTIONAL CUSTOMER that will appear on the ' +
-            'demo Contact record. It is NEVER the Salesforce user watching ' +
-            'the demo, and it is NEVER the internal champion / admin / SE / ' +
+            'The persona is the FICTIONAL CUSTOMER that appears on the demo ' +
+            'Contact record. On the Salesforce record page the persona is ' +
+            'the CONTACT BEING VIEWED — a customer of the champion\'s company ' +
+            'whose profile a Relationship Manager (RM) / banker / sales rep ' +
+            'would open to prepare for outreach.\n\n' +
+            '## WHO THE PERSONA IS NOT\n' +
+            '- The persona is NOT the Salesforce user watching the demo.\n' +
+            '- The persona is NOT the RM / banker / sales rep. That person ' +
+            'is the VIEWER of the record, not the record.\n' +
+            '- The persona is NOT the internal champion / admin / SE / ' +
             'stakeholder who provided the context.\n\n' +
-            'If the context describes an internal champion (e.g. "the ' +
-            'Marketing Cloud admin at Cumulus Bank is building the business ' +
-            'case"), that person is the BUYER — not the persona. The persona ' +
-            'is a *customer* of the champion\'s company that the champion ' +
-            'would demo to prove their story. If the context describes ' +
-            'a customer directly, use that description. If ambiguous, invent ' +
-            'a plausible customer that fits the industry and story angle.\n\n' +
+            'If the context names a rep or champion (e.g. "James manages a ' +
+            'manufacturing client", "Sarah is the Marketing Cloud admin"), ' +
+            'James / Sarah are the RM or champion — NOT the persona. The ' +
+            'persona is one of James\'s clients (or Sarah\'s customers) — invent ' +
+            'a plausible one that fits the story. Intent_Summary and ' +
+            'Key_Context describe what the CUSTOMER has been doing. The ' +
+            'Suggested_Opener is what the RM says TO that customer.\n\n' +
+            'If the context describes a customer directly, use that ' +
+            'description. If ambiguous, invent a plausible customer that ' +
+            'fits the industry and story angle.\n\n' +
             '## INPUT STRUCTURE\n' +
             'The context below is organized into labeled sections:\n' +
             '- ## STORY CONTEXT — the deal, champion, business case, or ' +
@@ -46,6 +56,28 @@ public with sharing class PersonaPromptBuilder {
             'Return ONLY a JSON object matching this schema — no prose, no ' +
             'markdown fences:\n' + SCHEMA + '\n\n' +
             '## RULES\n' +
+            '- INVENT REALISTIC FAKE DATA. FAILURE = any generic placeholder ' +
+            'or template string in a value. FORBIDDEN examples of BAD values: ' +
+            '"US PHONE NUMBER", "client1 email", "person1@example.com", ' +
+            '"customer1@example.com", "contact1@company.com", "user@example.com", ' +
+            '"TBD", "[FIRST NAME]", "phone number here", "email address", ' +
+            'anything with @example.com as the domain, anything of the form ' +
+            '"person<N>", "client<N>", "contact<N>", "user<N>@...", or any ' +
+            'value that reads as a template. Every string must be a specific, ' +
+            'inhabited-looking fake as if you wrote it yourself:\n' +
+            '  * Phone → "(area code) 555-XXXX" with a real US area code, ' +
+            'e.g. "(415) 555-0148".\n' +
+            '  * Email → derived from the PERSONA\'s actual first + last name ' +
+            'and their company, e.g. "sally.smith@merchant-first.com" ' +
+            '(NEVER @example.com, NEVER person1@).\n' +
+            '  * Secondary/alt emails → still derived from the persona\'s ' +
+            'name (e.g. "s.smith@gmail.com", "sallysmith@icloud.com"), ' +
+            'NEVER "client1@" or "person2@".\n' +
+            '  * Address → real US city, state, ZIP.\n' +
+            '  * Company → a plausible business name, not "Company Inc".\n' +
+            'If you catch yourself typing "example.com" or "personN@" in ANY ' +
+            'value, rewrite it before returning. Blanks and placeholders are ' +
+            'never acceptable.\n' +
             '- Every string reads like a real Salesforce demo — specific ' +
             'numbers, believable names, plausible companies.\n' +
             '- Every collection (identities, insights, activities, journeys, ' +
@@ -54,12 +86,47 @@ public with sharing class PersonaPromptBuilder {
             '- Recipe places demoUnifiedProfileHeader in leftRail and ' +
             'demoAgentforceBrief in center at minimum.\n' +
             '- No Id fields on any row.\n' +
-            '- If the story context mentions specific product surfaces (e.g. ' +
-            '"unified engagement visibility", "cross-sell", "banker ' +
-            'productivity"), the persona\'s Intent_Summary / Key_Context / ' +
-            'alerts / insights / NBAs must actively demonstrate that story ' +
-            '— show engagement signals, activity across channels, insights ' +
-            'that unlock the pitch.\n' +
+            '- Intent_Summary__c and Key_Context__c describe what the ' +
+            'PERSONA (the customer) has been doing / who they are — website ' +
+            'visits, opens, life events, product signals, tenure, segment. ' +
+            'They are NEVER about the RM\'s workflow, the RM\'s clients in ' +
+            'aggregate, or "fragmented engagement data".\n' +
+            '- Suggested_Opener__c is a single sentence the RM says TO the ' +
+            'persona, addressing them by first name — e.g. "Hi Ada, I saw ' +
+            'you registered for the Q3 webinar…". It is NEVER a summary or ' +
+            'a description of what the RM is going to do.\n' +
+            '- The story context describes what SALESFORCE is demonstrating ' +
+            'to the champion. It is NOT what the persona\'s alerts / insights / ' +
+            'NBAs should pitch. The persona\'s record content lives entirely ' +
+            'in the champion\'s business domain — a bank\'s alerts are about ' +
+            'the customer\'s FINANCIAL life, an insurer\'s NBAs are about the ' +
+            'customer\'s POLICIES, a retailer\'s insights are about the ' +
+            'customer\'s SHOPPING patterns. The story angle should be visible ' +
+            'in the shape of the signals (rich engagement data → high scores ' +
+            'and multi-channel activity; cross-sell → the persona has clear ' +
+            'attach opportunities; retention → churn signals). Never surface ' +
+            'the Salesforce product itself in the content.\n' +
+            '- FORBIDDEN in any Title__c / Body__c / Why_This_Suggestion__c / ' +
+            'Category_Label__c / Intent_Summary__c / Key_Context__c / opener: ' +
+            'the words "unified profile", "unified engagement", "Data Cloud", ' +
+            '"Agentforce", "Salesforce", "single view of the customer", ' +
+            '"CRM adoption", "cross-channel visibility", "banker ' +
+            'productivity", or any suggestion that the persona (or their ' +
+            'company) should ADOPT a Salesforce product. If you catch ' +
+            'yourself writing an alert like "Consider a unified profile ' +
+            'solution" — that is the meta-pitch to the SE, not a real alert ' +
+            'about this customer. Delete it and write a real one instead.\n' +
+            '- GOOD alert examples: "Retirement Gap — Behind target by $460K", ' +
+            '"Idle Cash — $112K in checking exceeds recommended reserve", ' +
+            '"Debt Alert — DTI at 34.5% on student loan payment". These are ' +
+            'about the customer\'s money.\n' +
+            '- GOOD cross-sell insight examples: "Merchant Services Bundle — ' +
+            'SMB approval + 48h window = 45% attach", "Trust & Estate Services ' +
+            'for HNW downloader". These are the champion\'s products to the ' +
+            'customer.\n' +
+            '- GOOD NBA examples: "Discuss Loan Approval Path", "Optimize ' +
+            'Checking Account Funds", "Introduce Senior Wealth Advisor". ' +
+            'These are what the RM does next with THIS customer.\n' +
             brandLine +
             '\n## EXAMPLE (illustrative — invent your own content)\n' +
             EXAMPLE + '\n\n' +
@@ -79,16 +146,37 @@ public with sharing class PersonaPromptBuilder {
      * when present, tell the model to avoid duplicates.
      */
     public static String buildForCollection(String personaSummary, String collectionKey, String mode, String existingRowsJson, String extraHint) {
+        return buildForCollection(personaSummary, collectionKey, mode, existingRowsJson, extraHint, 0);
+    }
+
+    public static String buildForCollection(String personaSummary, String collectionKey, String mode, String existingRowsJson, String extraHint, Integer existingCount) {
         String slice = COLLECTION_SLICES.get(collectionKey);
         if (String.isBlank(slice)) {
             throw new PersonaPromptBuilderException('Unknown collection: ' + collectionKey);
         }
-        String modeLine = ('append'.equalsIgnoreCase(mode))
-            ? 'Return 2-3 NEW rows that add fresh angles. Do NOT repeat any existing rows shown below.'
-            : 'Return a fresh full set of rows that replaces whatever exists today.';
-        String existingLine = String.isBlank(existingRowsJson)
-            ? '(No existing rows.)'
-            : existingRowsJson;
+        Boolean isAppend = 'append'.equalsIgnoreCase(mode);
+        // Concrete target counts so the model doesn't over-generate. Replace
+        // aims for the same size as the existing set (or 3 if empty). Append
+        // is fixed at 2 new rows.
+        Integer targetCount;
+        if (isAppend) {
+            targetCount = 2;
+        } else {
+            targetCount = existingCount != null && existingCount > 0 ? existingCount : 3;
+        }
+        String modeLine = isAppend
+            ? 'APPEND MODE. Return EXACTLY ' + targetCount + ' NEW rows that add fresh angles. Do NOT repeat any existing rows shown below. The client will concatenate your output to the existing rows.'
+            : 'REPLACE MODE. Return EXACTLY ' + targetCount + ' fresh rows. The client will discard whatever exists today and use YOUR rows only. Do not try to preserve any existing rows.';
+        // On REPLACE mode we do NOT show existing rows to the model at all —
+        // showing them makes the model more likely to echo them back and end
+        // up doubling the collection size. On APPEND we keep them for
+        // dedup context.
+        String existingLine;
+        if (isAppend) {
+            existingLine = String.isBlank(existingRowsJson) ? '(No existing rows.)' : existingRowsJson;
+        } else {
+            existingLine = '(Hidden in REPLACE mode — do not attempt to preserve them.)';
+        }
 
         return
             'You are Demo Studio Persona Generator. Generate a single ' +
@@ -106,7 +194,19 @@ public with sharing class PersonaPromptBuilder {
             '- Row values must fit the persona\'s industry, story, and brand.\n' +
             '- Sort_Order__c starts at 1 (or continues from the last existing row on append).\n' +
             '- No Id fields.\n' +
-            '- Copy reads like real Salesforce demo content — specific numbers, plausible details.\n\n' +
+            '- Copy reads like real Salesforce demo content — specific numbers, plausible details.\n' +
+            '- The row content lives in the CHAMPION\'S business domain (a ' +
+            'bank\'s alerts are about the customer\'s financial life; an ' +
+            'insurer\'s NBAs are about the customer\'s policies). Never surface ' +
+            'the Salesforce product itself — no "unified profile", "Data ' +
+            'Cloud", "Agentforce", "Salesforce", "single view of the ' +
+            'customer", or suggestions that the persona should adopt a ' +
+            'Salesforce product. If the persona summary mentions a pitch ' +
+            'angle, that angle is what SALESFORCE is demonstrating to the ' +
+            'champion — the row content should embody the angle in real ' +
+            'domain terms (e.g. cross-sell angle → generate rich attach ' +
+            'opportunities, NOT a row titled "Enable cross-sell in Data ' +
+            'Cloud").\n\n' +
             'JSON:';
     }
 
@@ -132,8 +232,10 @@ public with sharing class PersonaPromptBuilder {
         '    "Propensity__c": one of "Low|Medium|High|Very High",\n' +
         '    "Engagement_Score__c": 0-100, "Engagement_Label__c": string,\n' +
         '    "Risk_Tier__c": one of "Low|Medium|High",\n' +
-        '    "Badge_Text__c": short string, "Suggested_Opener__c": first-person opener,\n' +
-        '    "Intent_Summary__c": 2-3 sentences, "Key_Context__c": 2-3 sentences,\n' +
+        '    "Badge_Text__c": short string,\n' +
+        '    "Intent_Summary__c": 2-3 sentences describing what THIS CUSTOMER (the persona) has been doing lately — website visits, email opens, life events, product signals, application steps. Written in third person about the persona. NEVER describes the sales rep\'s activity or the rep\'s clients.\n' +
+        '    "Key_Context__c": 2-3 sentences of additional signal about THIS CUSTOMER — segment, prior products, tenure, engagement pattern, unified profile insights the rep should know before reaching out. Third person about the persona.\n' +
+        '    "Suggested_Opener__c": one sentence the RELATIONSHIP MANAGER / SALES REP would say TO the persona to open the conversation. Written in first person, addressed to the persona by name — e.g. "Hi Sarah, congrats on wrapping the underwriting docs — I want to make sure we land your Q3 expansion cleanly." NEVER a summary about the persona; it is the rep\'s spoken opener to the persona.\n' +
         '    "Open_Likelihood__c": 0-100, "Click_Likelihood__c": 0-100, "Unsubscribe_Risk__c": 0-100\n' +
         '  },\n' +
         '  "identities": [ { "Type__c": "Email|Phone|Address", "Value__c": string, "Label__c": string, "Sort_Order__c": int } ],\n' +

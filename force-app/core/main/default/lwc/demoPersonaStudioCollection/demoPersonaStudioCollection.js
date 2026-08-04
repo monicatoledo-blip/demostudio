@@ -1,6 +1,7 @@
 import { LightningElement, api, track } from 'lwc';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import generateCollectionForPersona from '@salesforce/apex/DemoStudioPersonaGenerator.generateCollectionForPersona';
+import { listImagesForCategory } from 'c/demoNbaImageLibrary';
 
 export default class DemoPersonaStudioCollection extends LightningElement {
     @api title;
@@ -19,8 +20,20 @@ export default class DemoPersonaStudioCollection extends LightningElement {
         return !!this.personaId && ['kpis','alerts','segments','nbas','insights','activities','journeys'].includes(this.collection);
     }
 
-    async handleSparkleRegenerate() { await this._sparkle('replace'); }
-    async handleSparkleAdd()        { await this._sparkle('append'); }
+    async handleSparkleRegenerate() {
+        // Confirm before wiping rows — this is destructive and easy to hit
+        // accidentally next to "Add More".
+        const count = (this.rows || []).length;
+        if (count > 0) {
+            const ok = window.confirm(
+                `Replace all ${count} row${count === 1 ? '' : 's'} in "${this.title}" with a fresh AI-generated set?\n\n` +
+                `Click Cancel to keep the current rows. Use "Add More" instead if you just want to append.`
+            );
+            if (!ok) return;
+        }
+        await this._sparkle('replace');
+    }
+    async handleSparkleAdd() { await this._sparkle('append'); }
 
     async _sparkle(mode) {
         if (!this.personaId) return;
@@ -126,6 +139,64 @@ export default class DemoPersonaStudioCollection extends LightningElement {
                 value: url
             }
         }));
+    }
+
+    // ---- NBA image library picker ----
+    // Opens a modal filtered by the row's Category__c and lets the user pick
+    // a curated Cloudinary image. Clicking a tile writes the URL back to the
+    // row via the standard 'change' event, same shape as onFieldChange.
+    @track pickerOpen = false;
+    @track pickerRowIndex = -1;
+    @track pickerImages = [];
+    @track pickerCategory = '';
+
+    _stopPropagation(e) { e.stopPropagation(); }
+
+    onPickImageOpen(e) {
+        const idx = parseInt(e.currentTarget.dataset.index, 10);
+        const row = (this.rows || []).find((r) => r._index === idx);
+        const category = (row && row.Category__c) || '';
+        this.pickerRowIndex = idx;
+        this.pickerCategory = category;
+        this.pickerImages = listImagesForCategory(category).map((img) => ({
+            ...img,
+            _key: img.id
+        }));
+    }
+
+    get isPickerOpen() {
+        return this.pickerRowIndex >= 0;
+    }
+
+    get pickerHeadline() {
+        return this.pickerCategory
+            ? `Image library — ${this.pickerCategory}`
+            : 'Image library';
+    }
+
+    get pickerCount() {
+        return this.pickerImages ? this.pickerImages.length : 0;
+    }
+
+    onPickImageClose() {
+        this.pickerRowIndex = -1;
+        this.pickerImages = [];
+        this.pickerCategory = '';
+    }
+
+    onPickImageSelect(e) {
+        const url = e.currentTarget.dataset.url;
+        const idx = this.pickerRowIndex;
+        if (idx < 0 || !url) return;
+        this.dispatchEvent(new CustomEvent('change', {
+            detail: {
+                collection: this.collection,
+                index: idx,
+                field: 'Image_URL__c',
+                value: url
+            }
+        }));
+        this.onPickImageClose();
     }
 
     onAdd() {

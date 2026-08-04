@@ -2,7 +2,7 @@
     <section class="ed-section">
         <header class="ed-section-head">
             <h2 class="ed-h2">Assigned Contacts</h2>
-            <p class="ed-sub">Any Contact assigned to this persona will render its branded profile page. One persona can be shared across many Contacts.</p>
+            <p class="ed-sub">Any Contact assigned to this persona will render its branded profile page. Use the refresh icon on any row to push the latest persona / theme to an open Contact tab.</p>
         </header>
 
         <div class="ac-currently">
@@ -21,7 +21,13 @@
                                     <template lwc:if={c.accountName}><span class="ac-dot">·</span><span>{c.accountName}</span></template>
                                 </div>
                             </div>
-                            <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign} icon-name="utility:close"></lightning-button>
+                            <div class="ac-row-actions">
+                                <lightning-button-icon icon-name="utility:refresh" variant="border-filled" size="small"
+                                    alternative-text="Refresh this contact preview"
+                                    title="Refresh this contact preview"
+                                    data-id={c.Id} onclick={handleRefreshContact}></lightning-button-icon>
+                                <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign} icon-name="utility:close"></lightning-button>
+                            </div>
                         </li>
                     </template>
                 </ul>
@@ -43,8 +49,13 @@
                     onchange={handleScopeChange}
                     class="ac-scope"></lightning-radio-group>
             </div>
-            <lightning-input type="search" label="Search Contacts" placeholder="Type name or email…"
-                value={searchTerm} onchange={handleSearchChange}></lightning-input>
+            <div class="ac-search-actions">
+                <lightning-input type="search" label="Search Contacts" placeholder="Type name or email…"
+                    value={searchTerm} onchange={handleSearchChange} class="ac-search-input"></lightning-input>
+                <lightning-button variant="brand-outline" label="New Contact" icon-name="utility:new"
+                    title="Create a new Contact with this persona already assigned"
+                    onclick={handleCreateAndAssign} class="ac-new-btn"></lightning-button>
+            </div>
 
             <template lwc:if={hasResults}>
                 <ul class="ac-list ac-list--results slds-m-top_small">
@@ -63,12 +74,18 @@
                                     <span class={c.statusClass}>{c.statusLabel}</span>
                                 </template>
                             </div>
-                            <template lwc:if={c.alreadyAssigned}>
-                                <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign}></lightning-button>
-                            </template>
-                            <template lwc:else>
-                                <lightning-button variant="brand" label="Assign" icon-name="utility:add" data-id={c.Id} onclick={handleAssign}></lightning-button>
-                            </template>
+                            <div class="ac-row-actions">
+                                <template lwc:if={c.alreadyAssigned}>
+                                    <lightning-button-icon icon-name="utility:refresh" variant="border-filled" size="small"
+                                        alternative-text="Refresh this contact preview"
+                                        title="Refresh this contact preview"
+                                        data-id={c.Id} onclick={handleRefreshContact}></lightning-button-icon>
+                                    <lightning-button variant="destructive-text" label="Unassign" data-id={c.Id} onclick={handleUnassign}></lightning-button>
+                                </template>
+                                <template lwc:else>
+                                    <lightning-button variant="brand" label="Assign" icon-name="utility:add" data-id={c.Id} onclick={handleAssign}></lightning-button>
+                                </template>
+                            </div>
                         </li>
                     </template>
                 </ul>

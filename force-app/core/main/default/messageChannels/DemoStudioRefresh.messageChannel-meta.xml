@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningMessageChannel xmlns="http://soap.sforce.com/2006/04/metadata">
+    <isExposed>true</isExposed>
+    <description>Broadcast when a persona or theme is saved so open Contact pages can refresh their bundle.</description>
+    <masterLabel>Demo Studio Refresh</masterLabel>
+    <lightningMessageFields>
+        <description>personaId | themeId | 'all'</description>
+        <fieldName>scope</fieldName>
+    </lightningMessageFields>
+    <lightningMessageFields>
+        <description>Optional record Id that changed.</description>
+        <fieldName>recordId</fieldName>
+    </lightningMessageFields>
+</LightningMessageChannel>

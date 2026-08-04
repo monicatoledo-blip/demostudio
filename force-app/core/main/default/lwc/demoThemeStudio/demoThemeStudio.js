@@ -1,10 +1,12 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { publish, MessageContext } from 'lightning/messageService';
+import DEMO_STUDIO_REFRESH from '@salesforce/messageChannel/DemoStudioRefresh__c';
 import getTheme from '@salesforce/apex/DemoStudioService.getTheme';
 import saveTheme from '@salesforce/apex/DemoStudioService.saveTheme';
 import scrapeBrand from '@salesforce/apex/BrandScraper.scrape';
-import { extractDominantColors } from 'c/demoLogoColorExtractor';
+import { extractDominantColors, cloudinaryFetchUrl } from 'c/demoLogoColorExtractor';
 
 const HEADER_STYLES = ['Gradient', 'Solid'];
 
@@ -27,7 +29,9 @@ const PRE_ALLOWED_HOSTS = new Set([
     'images.unsplash.com',
     'www.gravatar.com',
     'logo.clearbit.com',
-    'icons.duckduckgo.com'
+    'icons.duckduckgo.com',
+    'res.cloudinary.com',
+    'images.weserv.nl'
 ]);
 
 function buildGradient(angle, start, end) {
@@ -159,6 +163,7 @@ export default class DemoThemeStudio extends LightningElement {
         this.working = { ...this.working, Logo_URL__c: url };
         this.isDirty = true;
         this.logoFallbackStage = 0; // uploaded a real file — start the cascade over
+        this._deriveColorsFromLogo(url, { silent: true });
     }
 
     // CSP hint for URL logos
@@ -244,12 +249,29 @@ export default class DemoThemeStudio extends LightningElement {
 
     handleFieldChange(e) {
         const field = e.target.dataset.field;
-        const value = e.detail.value !== undefined ? e.detail.value : e.target.value;
+        let value = e.detail.value !== undefined ? e.detail.value : e.target.value;
+        let logoUrlChanged = false;
+        // Auto-rewrite external logo URLs to Cloudinary Fetch so they render
+        // through res.cloudinary.com (already CSP-trusted). Skip URLs that
+        // are already Cloudinary, already Salesforce Files, or non-http.
+        if (field === 'Logo_URL__c') {
+            if (value && /^https?:\/\//i.test(value)) {
+                const isCloudinary = /^https:\/\/res\.cloudinary\.com\//i.test(value);
+                const isShepherd   = value.startsWith('/sfc/servlet.shepherd');
+                if (!isCloudinary && !isShepherd) {
+                    value = cloudinaryFetchUrl(value);
+                }
+            }
+            logoUrlChanged = value !== (this.working && this.working.Logo_URL__c);
+        }
         this.working = { ...this.working, [field]: value };
         this.isDirty = true;
-        // If the user just changed the logo URL, reset the cascade so we try
-        // the new URL from stage 0.
         if (field === 'Logo_URL__c') this.logoFallbackStage = 0;
+        // Automatically derive brand colors when the user pastes a new logo URL,
+        // matching the behavior of the AI auto-fill flow.
+        if (field === 'Logo_URL__c' && logoUrlChanged && value) {
+            this._deriveColorsFromLogo(value, { silent: true });
+        }
     }
 
     handleColorInput(e) {
@@ -318,7 +340,13 @@ export default class DemoThemeStudio extends LightningElement {
                 if (r.accentColor)  this.gradientEnd   = r.accentColor;
                 this.gradientAngle = 135;
             }
-            if (r.logoUrl) next.Logo_URL__c = r.logoUrl;
+            if (r.logoUrl) {
+                const url = r.logoUrl;
+                const isCloudinary = /^https:\/\/res\.cloudinary\.com\//i.test(url);
+                next.Logo_URL__c = (isCloudinary || !/^https?:\/\//i.test(url))
+                    ? url
+                    : cloudinaryFetchUrl(url);
+            }
             this.working = next;
             this.isDirty = true;
             this.logoFallbackStage = 0; // fresh URL — start the cascade over
@@ -424,11 +452,19 @@ export default class DemoThemeStudio extends LightningElement {
         }));
     }
 
+    @wire(MessageContext) messageContext;
+
     async handleSave() {
         this.isSaving = true;
         try {
             await saveTheme({ payloadJson: JSON.stringify(this.working) });
             await refreshApex(this.wiredResult);
+            try {
+                publish(this.messageContext, DEMO_STUDIO_REFRESH, {
+                    scope: 'theme',
+                    recordId: this.recordId
+                });
+            } catch (e) { /* messageContext not yet wired */ }
             this.isDirty = false;
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Theme saved',

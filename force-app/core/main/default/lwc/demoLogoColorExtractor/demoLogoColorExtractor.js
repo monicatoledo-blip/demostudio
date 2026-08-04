@@ -12,14 +12,27 @@ export default class DemoLogoColorExtractor extends LightningElement {}
 // image — deterministic, factual, way more accurate than asking an LLM
 // to remember which shade of yellow Edward Jones uses.
 
-const PROXY_BASE = 'https://images.weserv.nl/?url=';
+// Cloudinary Fetch: a CDN URL that fetches, caches, and serves any public
+// image URL through res.cloudinary.com — which is already in DemoStudio's CSP
+// trusted sites. Any arbitrary logo URL becomes a res.cloudinary.com URL that
+// CSP allows for both display and canvas color extraction.
+const CLOUDINARY_CLOUD_NAME = 'dfx98jgdc';
+const CLOUDINARY_FETCH_BASE = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/fetch/`;
+
+// Kept as a secondary fallback if Cloudinary Fetch ever chokes on a URL.
+const WESERV_BASE = 'https://images.weserv.nl/?url=';
 
 function stripProtocol(url) {
     return (url || '').replace(/^https?:\/\//, '');
 }
 
-function proxied(url) {
-    return PROXY_BASE + encodeURIComponent(stripProtocol(url));
+export function cloudinaryFetchUrl(url) {
+    if (!url) return null;
+    return CLOUDINARY_FETCH_BASE + encodeURIComponent(url);
+}
+
+function weservProxied(url) {
+    return WESERV_BASE + encodeURIComponent(stripProtocol(url));
 }
 
 // Load an image element, wait for it, resolve to the element. Rejects on error/timeout.
@@ -80,25 +93,59 @@ function bucketToRgb(key) {
     return { r: (r << 3) + 4, g: (g << 3) + 4, b: (b << 3) + 4 };
 }
 
+// For same-origin Salesforce Files (/sfc/servlet.shepherd/*) the response
+// doesn't include Access-Control-Allow-Origin, so an <img crossOrigin="anonymous">
+// taints the canvas and getImageData throws. Fetch the bytes ourselves and
+// convert to a blob: URL — blob URLs are same-origin and don't taint.
+async function shepherdToBlobUrl(url) {
+    const res = await fetch(url, { credentials: 'include' });
+    if (!res.ok) throw new Error('logo fetch failed: ' + res.status);
+    const blob = await res.blob();
+    return URL.createObjectURL(blob);
+}
+
 // Return {primary, accent} hex strings or null if extraction fails.
 export async function extractDominantColors(logoUrl) {
     if (!logoUrl) return null;
-    // Try proxied first (CORS-safe). Fall back to raw URL (may still work
-    // for same-origin uploads via /sfc/servlet.shepherd).
-    const attempts = logoUrl.startsWith('/sfc/servlet.shepherd')
-        ? [logoUrl]
-        : [proxied(logoUrl), logoUrl];
 
-    for (const src of attempts) {
+    // Salesforce Files: fetch as blob (bypasses tainted-canvas problem).
+    // Already-Cloudinary URLs: use as-is (res.cloudinary.com is CSP-trusted
+    // and serves with proper CORS headers).
+    // Other external URLs: try Cloudinary Fetch first (CSP-safe + CORS),
+    // then images.weserv.nl as a fallback, then raw URL as last resort.
+    let attempts;
+    if (logoUrl.startsWith('/sfc/servlet.shepherd')) {
         try {
-            const img = await loadImage(src);
-            const result = sampleImage(img);
-            if (result) return result;
+            const blobUrl = await shepherdToBlobUrl(logoUrl);
+            attempts = [blobUrl];
         } catch (e) {
-            // Try next attempt
+            attempts = [logoUrl];
         }
+    } else if (logoUrl.startsWith('https://res.cloudinary.com/')) {
+        attempts = [logoUrl];
+    } else {
+        attempts = [cloudinaryFetchUrl(logoUrl), weservProxied(logoUrl), logoUrl];
     }
-    return null;
+
+    let blobUrlToRevoke = null;
+    if (logoUrl.startsWith('/sfc/servlet.shepherd') && attempts[0].startsWith('blob:')) {
+        blobUrlToRevoke = attempts[0];
+    }
+
+    try {
+        for (const src of attempts) {
+            try {
+                const img = await loadImage(src);
+                const result = sampleImage(img);
+                if (result) return result;
+            } catch (e) {
+                // Try next attempt
+            }
+        }
+        return null;
+    } finally {
+        if (blobUrlToRevoke) URL.revokeObjectURL(blobUrlToRevoke);
+    }
 }
 
 function sampleImage(img) {

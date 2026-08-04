@@ -76,7 +76,7 @@ Everything that shipped in DemoStudio v1. Under `force-app/core/main/default/`.
 
 - **`demoPersonaStudio`** — Persona record-page shell (Story / Identity / Contacts / Collection / Recipe / Theme tabs). Custom CSS + SLDS icons, not `lightning-tabset`. Theme injected via CSS vars.
 - **Persona tabs:** `demoPersonaStudioStory`, `demoPersonaStudioIdentity`, `demoPersonaStudioContacts`, `demoPersonaStudioCollection`, `demoPersonaStudioRecipe`, `demoPersonaStudioTheme`.
-- **`demoPersonaGenerator`** — chat modal for archetype-based generation.
+- **`demoPersonaGenerator`** — chat modal for archetype-based generation. Receives `brand`, `personaName`, `company`, and `theme` from the parent so (a) the preview renders in the record's current brand kit and (b) locked persona identity fields (name / company / brand) are injected into the LLM brief as a `## LOCKED PERSONA FIELDS` block, preventing the model from renaming the persona. On apply, `demoPersonaStudio.handleGeneratorApply` preserves `Id`, `Theme__c`, `First_Name__c`, `Last_Name__c`, `Company__c`, `Brand__c` from the working record so generation enriches without overwriting who the persona is.
 - **Profile widgets:** `demoUnifiedProfileHeader`, `demoUnifiedProfileShell`, `demoActivityTimeline`, `demoActiveJourneyTracker`, `demoAgentforceBrief`, `demoAiInsightsAlerts`, `demoCrossSellInsights`, `demoKpiStatRow`, `demoLikelihoodScoreCard`, `demoNextBestActions`, `demoRelatedIdentities`.
 - **`demoThemeStudio`** — brand kit editor.
 - **`demoPreviewFrame`** — live preview shell.
@@ -153,6 +153,80 @@ Static Resources at `force-app/segments/main/default/staticresources/`:
 - `demoDmoSeedOnboarding.resource` — new-user cohort, step completion, activation
 
 Generated offline by `scripts/generate-seed.js` (dev-time only, not deployed).
+
+## Distribution
+
+Two supported paths, pick based on your audience:
+
+- **CLI + `sf project deploy`** — for teammates comfortable with the Salesforce CLI. See "Deploying to a shared / teammate org" below.
+- **Unlocked Packages (recommended for updates)** — for versioned installs, upgrades, and push-upgrades to multiple orgs. See `RELEASING.md` for the packaging runbook. The repo is pre-configured for two packages: `DemoStudio Core` and `DemoStudio Segments` (declared in `sfdx-project.json`). Segments declares a dependency on Core.
+
+## Deploying to a shared / teammate org
+
+DemoStudio is designed to be **supplemental and low-risk** in a shared demo org — it adds functionality without displacing whatever unified-profile / Tampermonkey / Saleo setup the team already runs. This section covers how that isolation actually works and how to hand the project to someone else.
+
+### Why it's low-risk in a shared org
+
+- **The Contact page override is app-scoped, not org-wide.** `applications/Demo_Studio.app-meta.xml` declares `<actionOverrides>` that routes `Contact.View` to `Contact_Demo_Studio_Record_Page` **only when the user is in the Demo Studio app**. In any other Lightning app (Sales, Service, the team's shared custom app), Contact keeps whatever record page / layout it uses today. Users switching back to their normal app see zero visible change.
+- **No page layouts are modified.** `force-app/core/main/default/layouts/` is empty. The project does not overwrite standard Contact / Account / Opportunity layouts.
+- **All Contact schema changes are additive.** Four new custom fields on Contact: `Demo_Persona__c` (lookup), `Demo_Assigned_By__c` (lookup), `Is_My_Demo_Contact__c` (formula), `Demo_Original_Snapshot__c` (long text). Nothing renamed, nothing removed.
+- **Access is permission-set-gated.** Without `Demo_Studio_Admin` assigned, a user won't see the Demo Studio app, its tabs, the Demo_Persona / Demo_Theme objects, or the custom Contact fields. Unassigned users are unaffected.
+- **The Agentforce agent is self-contained.** `bots/Demo_Studio_Persona_Agent` + `genAiPlannerBundles/Demo_Studio_Persona_Agent_v1` deploy alongside the rest but only run when someone explicitly invokes them from the Demo Studio app. They don't override any org-level Agentforce configuration.
+
+### The one caveat SEs should know
+
+When you **assign a persona to a real Contact** via Demo Studio → Contact Assignment, `DemoStudioService` writes FirstName / LastName / Email / Phone onto that Contact. The original values are captured in `Demo_Original_Snapshot__c` and restored when you Unassign. This means:
+
+- Assign personas to demo contacts you own, not shared prod-lookalike records that other teammates rely on.
+- If a shared record needs its original identity back, use the Unassign action in Demo Studio — do not clear the Persona lookup directly (that loses the snapshot restore path).
+
+### Deploying to a teammate's org
+
+The whole project is a source-format SFDX repo. Any teammate can point it at their own org:
+
+```bash
+# 1. Clone and authenticate their org
+git clone <this-repo-url> DemoStudio
+cd DemoStudio
+sf org login web --alias my-demo-org
+
+# 2. Deploy (Core only, or everything)
+sf project deploy start --source-dir force-app/core --target-org my-demo-org
+# Or: sf project deploy start --target-org my-demo-org  (deploys all modules)
+
+# 3. Assign the permission set to themselves
+sf org assign permset --name Demo_Studio_Admin --target-org my-demo-org
+
+# 4. (Optional) Assign to teammates who should also use it
+sf org assign permset --name Demo_Studio_Admin --on-behalf-of user1@example.com user2@example.com --target-org my-demo-org
+
+# 5. Post-deploy: activate the agent
+# In Setup → Agents, open Demo_Studio_Persona_Agent and click Activate.
+# The bot metadata deploys inactive by default so it doesn't auto-run in an org that's not ready for it.
+```
+
+### Coexistence with an existing unified-profile setup
+
+If the shared org already has:
+
+- **A custom Contact record page with the team's own unified-profile LWCs, Tampermonkey injections, or Saleo overlays** → those keep working. Users see the Demo Studio version only when they switch to the Demo Studio app; they see the team's original setup everywhere else.
+- **A different Contact layout / different record page assigned via App Builder** → untouched. Demo Studio does not modify `Layout` metadata or reassign existing FlexiPage bindings outside its own app.
+- **Their own Agentforce agents** → untouched. Demo Studio's agent has its own developer name and won't collide.
+
+### Un-deploying / rolling back
+
+If a teammate wants to remove DemoStudio from their org:
+
+```bash
+# Remove the app + permission set + FlexiPages (users lose access first)
+sf project delete source --source-dir force-app/core/main/default/applications --target-org my-demo-org
+sf project delete source --source-dir force-app/core/main/default/permissionsets --target-org my-demo-org
+sf project delete source --source-dir force-app/core/main/default/flexipages --target-org my-demo-org
+# Then optionally remove the custom objects and Contact fields
+sf project delete source --source-dir force-app/core/main/default/objects --target-org my-demo-org
+```
+
+The additive-only design means removal is clean: no standard-object schema to un-mangle, no page layouts to restore.
 
 ## Development workflow
 

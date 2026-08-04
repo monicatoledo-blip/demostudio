@@ -1,10 +1,13 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { publish, MessageContext } from 'lightning/messageService';
+import DEMO_STUDIO_REFRESH from '@salesforce/messageChannel/DemoStudioRefresh__c';
 import getContactsForPersona from '@salesforce/apex/DemoStudioService.getContactsForPersona';
 import searchContacts from '@salesforce/apex/DemoStudioService.searchContacts';
 import assignContactsToPersona from '@salesforce/apex/DemoStudioService.assignContactsToPersona';
 import unassignContacts from '@salesforce/apex/DemoStudioService.unassignContacts';
+import createContactForPersona from '@salesforce/apex/DemoStudioService.createContactForPersona';
 
 export default class DemoPersonaStudioContacts extends LightningElement {
     @api personaId;
@@ -16,6 +19,27 @@ export default class DemoPersonaStudioContacts extends LightningElement {
     @track isSearching = false;
     @track scope = 'mine'; // 'mine' | 'all'
     wiredResult;
+
+    @wire(MessageContext) messageContext;
+
+    // Publish a targeted refresh for one Contact so an open Contact tab
+    // for that person picks up the latest persona and theme. Called from
+    // the small refresh icon next to each row's Assign / Unassign button.
+    handleRefreshContact(e) {
+        const contactId = e.currentTarget.dataset.id;
+        if (!contactId) return;
+        try {
+            publish(this.messageContext, DEMO_STUDIO_REFRESH, {
+                scope: 'contact',
+                recordId: contactId
+            });
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Refresh sent',
+                message: 'If this Contact is open in another tab, it will pull the latest persona and theme.',
+                variant: 'success'
+            }));
+        } catch (err) { /* messageContext not ready */ }
+    }
 
     @wire(getContactsForPersona, { personaId: '$personaId', scope: '$scope' })
     wired(result) {
@@ -121,6 +145,28 @@ export default class DemoPersonaStudioContacts extends LightningElement {
         } catch (err) {
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Assignment failed',
+                message: (err && err.body && err.body.message) || err.message || 'Unknown error',
+                variant: 'error'
+            }));
+        }
+    }
+
+    async handleCreateAndAssign() {
+        try {
+            const newId = await createContactForPersona({ personaId: this.personaId });
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Contact created',
+                message: 'New Contact created with this persona already assigned.',
+                variant: 'success'
+            }));
+            await refreshApex(this.wiredResult);
+            this.doSearch();
+            if (newId) {
+                window.open(`/lightning/r/Contact/${newId}/view`, '_blank', 'noopener');
+            }
+        } catch (err) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Contact creation failed',
                 message: (err && err.body && err.body.message) || err.message || 'Unknown error',
                 variant: 'error'
             }));

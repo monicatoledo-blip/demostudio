@@ -1,4 +1,7 @@
 import { LightningElement, api, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
+import { subscribe, unsubscribe, APPLICATION_SCOPE, MessageContext } from 'lightning/messageService';
+import DEMO_STUDIO_REFRESH from '@salesforce/messageChannel/DemoStudioRefresh__c';
 import getPersonaBundleForContact from '@salesforce/apex/DemoStudioService.getPersonaBundleForContact';
 import {
     withPersonaDefaults,
@@ -59,8 +62,15 @@ export default class DemoUnifiedProfileShell extends LightningElement {
     bundle;
     error;
 
+    _wiredResult;
+
     @wire(getPersonaBundleForContact, { contactId: '$recordId' })
-    wiredBundle({ data, error }) {
+    wiredBundle(result) {
+        // Capture the full wired result so LMS-triggered refreshes can call
+        // refreshApex on it. Destructuring inline (as before) discards the
+        // reference and makes refresh impossible.
+        this._wiredResult = result;
+        const { data, error } = result;
         if (data) {
             this.bundle = data;
             this.error = undefined;
@@ -69,6 +79,38 @@ export default class DemoUnifiedProfileShell extends LightningElement {
             this.bundle = undefined;
             this.error = error;
         }
+    }
+
+    @wire(MessageContext) messageContext;
+    _refreshSubscription;
+
+    connectedCallback() {
+        if (!this._refreshSubscription) {
+            // Silent listener — no UI. Any persona/theme save in another tab
+            // triggers a fresh fetch so the Contact record keeps looking
+            // like a native, live page.
+            this._refreshSubscription = subscribe(
+                this.messageContext,
+                DEMO_STUDIO_REFRESH,
+                () => this._handleRefreshMessage(),
+                { scope: APPLICATION_SCOPE }
+            );
+        }
+    }
+
+    disconnectedCallback() {
+        if (this._refreshSubscription) {
+            unsubscribe(this._refreshSubscription);
+            this._refreshSubscription = null;
+        }
+    }
+
+    async _handleRefreshMessage() {
+        if (!this._wiredResult) return;
+        try {
+            await refreshApex(this._wiredResult);
+            this.applyTheme();
+        } catch (e) { /* transient — next fetch will recover */ }
     }
 
     get hasPersona() {

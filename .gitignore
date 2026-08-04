@@ -8,6 +8,14 @@
 .localdevserver/
 deploy-options.json
 
+# Local agent config (Claude Code) — not for the shared repo
+.claude/
+
+# autoCumulus parked metadata + local rollout docs — not for the shared repo
+.autoCumulus-parked/
+docs/
+RELEASING.md
+
 # LWC VSCode autocomplete
 **/lwc/jsconfig.json
 

@@ -1,15 +1,37 @@
 {
   "packageDirectories": [
     {
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
       "path": "force-app/core",
-      "default": true
+      "default": true,
+      "package": "DemoStudio Core",
+      "versionDescription": "DemoStudio Core: Persona Studio, Theme Studio, Unified Profile widgets, Persona Agent."
     },
     {
-      "path": "force-app/segments"
+      "versionName": "ver 0.1",
+      "versionNumber": "0.1.0.NEXT",
+      "path": "force-app/segments",
+      "default": false,
+      "package": "DemoStudio Segments",
+      "versionDescription": "DemoStudio Segments: Data Cloud Segment Simulator. Depends on DemoStudio Core.",
+      "dependencies": [
+        {
+          "package": "DemoStudio Core"
+        }
+      ]
+    },
+    {
+      "path": "force-app/agent"
     }
   ],
   "name": "DemoStudio",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "66.0"
+  "sourceApiVersion": "66.0",
+  "packageAliases": {
+    "DemoStudio Core": "0HoKh000000k9fjKAA",
+    "DemoStudio Segments": "0HoKh000000k9foKAA",
+    "DemoStudio Core@0.1.0-1": "04tKh000001lrU2IAI"
+  }
 }

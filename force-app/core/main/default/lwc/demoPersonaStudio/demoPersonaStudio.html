@@ -29,7 +29,7 @@
             </div>
         </header>
 
-        <c-demo-persona-generator lwc:ref="generator" brand={persona.Brand__c} onapply={handleGeneratorApply}></c-demo-persona-generator>
+        <c-demo-persona-generator lwc:ref="generator" brand={persona.Brand__c} persona-name={personaName} company={persona.Company__c} theme={theme} onapply={handleGeneratorApply}></c-demo-persona-generator>
 
         <div class="generate-banner">
             <div class="generate-banner-body">

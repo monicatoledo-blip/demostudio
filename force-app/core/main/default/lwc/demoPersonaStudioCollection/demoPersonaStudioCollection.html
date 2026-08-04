@@ -80,8 +80,13 @@
                             <div class="ed-col-span-2 nba-image-block">
                                 <lightning-input type="url" label="Hero Image URL" value={row.Image_URL__c}
                                     data-index={row._index} data-field="Image_URL__c" onchange={onFieldChange}
-                                    placeholder="https://images.unsplash.com/photo-..."
-                                    field-level-help="Paste a public URL, or upload an image below. If the URL is blocked by CSP or fails to load, the card falls back to a colored initial tile."></lightning-input>
+                                    placeholder="Leave blank to auto-pick from the curated library"
+                                    field-level-help="Paste a public URL, upload an image, or use 'Choose from library' to pick a curated stock photo. If left blank, the card auto-picks a category-appropriate image."></lightning-input>
+                                <div class="nba-image-actions">
+                                    <lightning-button variant="neutral" label="Choose from library"
+                                        icon-name="utility:image" icon-position="left"
+                                        data-index={row._index} onclick={onPickImageOpen}></lightning-button>
+                                </div>
                                 <div class="nba-upload-row">
                                     <lightning-file-upload
                                         label="Or upload an image"
@@ -186,5 +191,31 @@
                 </div>
             </template>
         </div>
+
+        <!-- Image library picker (NBA rows only, but harmless when closed on others) -->
+        <template lwc:if={isPickerOpen}>
+            <div class="picker-backdrop" onclick={onPickImageClose}>
+                <div class="picker-card" onclick={_stopPropagation}>
+                    <header class="picker-head">
+                        <div>
+                            <h2 class="picker-title">{pickerHeadline}</h2>
+                            <p class="picker-sub">{pickerCount} curated images. Click any tile to use it.</p>
+                        </div>
+                        <lightning-button-icon icon-name="utility:close" variant="bare"
+                            alternative-text="Close picker" onclick={onPickImageClose}></lightning-button-icon>
+                    </header>
+                    <div class="picker-grid">
+                        <template for:each={pickerImages} for:item="img">
+                            <button key={img._key} type="button" class="picker-tile"
+                                data-url={img.url} onclick={onPickImageSelect}
+                                title={img.description}>
+                                <img src={img.url} alt={img.description} class="picker-img" loading="lazy"/>
+                                <span class="picker-caption">{img.description}</span>
+                            </button>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </template>
     </section>
 </template>

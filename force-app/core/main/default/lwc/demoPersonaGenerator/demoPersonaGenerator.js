@@ -16,6 +16,9 @@ import generatePersona from '@salesforce/apex/DemoStudioPersonaGenerator.generat
  */
 export default class DemoPersonaGenerator extends LightningElement {
     @api brand;
+    @api personaName;
+    @api company;
+    @api theme;
     isOpen = false;
     isBusy = false;
 
@@ -29,10 +32,27 @@ export default class DemoPersonaGenerator extends LightningElement {
 
     // Copy-to-clipboard prompts. Paste into Granola / Notebook LM / Gemini /
     // ChatGPT / Claude / whatever the SE uses, then paste the output back here.
+    //
+    // When the parent has already created the persona on the record (First +
+    // Last Name populated), we suffix "for the persona [Name]" so the AI tool
+    // frames its output around the exact persona the user is authoring — no
+    // more name mismatches on paste-back.
+    get _personaSuffix() {
+        const n = (this.personaName || '').trim();
+        return n ? ` Frame this for the persona ${n}.` : '';
+    }
+    get _storyContextSuffix() {
+        const b = (this.brand || '').trim();
+        return b ? ` The customer/brand is ${b}.` : '';
+    }
     get storyContextPrompt() {
-        return 'Summarize the deal I\'m working on into a "story context" for a Salesforce demo. Include: the customer, the internal champion (name + role), what they\'re trying to solve, the specific use case, and the pitch angle (cross-sell, retention, unified profile, etc.). Ignore anything that sounds like a to-do or blocker. Keep it under 200 words. Write it as one continuous paragraph, not bullets.';
+        return 'Summarize the deal I\'m working on into a "story context" for a Salesforce demo. Include: the customer, the internal champion (name + role), what they\'re trying to solve, the specific use case, and the pitch angle (cross-sell, retention, unified profile, etc.). Ignore anything that sounds like a to-do or blocker. Keep it under 200 words. Write it as one continuous paragraph, not bullets.' + this._storyContextSuffix;
     }
     get personaBriefPrompt() {
+        const n = (this.personaName || '').trim();
+        if (n) {
+            return `Create the persona ${n} for a Salesforce demo. Describe them so a champion would show them off: role, company, tenure, one distinctive engagement or product signal, and why they are a great example of the story angle. NOT the champion themselves — a customer THEIR bankers/reps would work with. Keep it under 100 words.`;
+        }
         return 'Based on what you know about the customer and the deal, describe ONE fictional customer that the champion would show off in a demo. Include: name, role, company, tenure, one distinctive engagement or product signal, and why they are a great example of the story angle. NOT the champion themselves — a customer THEIR bankers/reps would work. Keep it under 100 words.';
     }
     toggleStoryPromptHelp()  { this.showStoryPromptHelp = !this.showStoryPromptHelp; }
@@ -91,7 +111,7 @@ export default class DemoPersonaGenerator extends LightningElement {
         }
         return {
             persona,
-            theme: null,
+            theme: this.theme || null,
             identities: c.identities || [],
             insights: c.insights || [],
             activities: c.activities || [],
@@ -172,6 +192,29 @@ export default class DemoPersonaGenerator extends LightningElement {
         if (this.industry) parts.push(`Industry: ${this.industry}.`);
         if (this.storyAngle) parts.push(`Story angle: ${this.storyAngle}.`);
         if (this.brand) parts.push(`Brand: ${this.brand}.`);
+        // Lock persona identity when the record already has it. The provider
+        // otherwise invents its own name/company, blowing away the persona
+        // the user just typed on the record page.
+        const name = (this.personaName || '').trim();
+        const co = (this.company || '').trim();
+        const brand = (this.brand || '').trim();
+        if (name || co || brand) {
+            const locks = [
+                '## LOCKED PERSONA FIELDS (use these EXACTLY — do not invent alternatives, do not combine them, do not repeat one field into another)'
+            ];
+            if (name) {
+                const [first, ...rest] = name.split(/\s+/);
+                const last = rest.join(' ');
+                locks.push(`- persona.First_Name__c must equal exactly this string and nothing more: "${first}"`);
+                if (last) {
+                    locks.push(`- persona.Last_Name__c must equal exactly this string and nothing more: "${last}"`);
+                    locks.push(`  (Do NOT put the full name "${first} ${last}" into either First_Name__c or Last_Name__c. First name goes in First_Name__c only. Last name goes in Last_Name__c only.)`);
+                }
+            }
+            if (co) locks.push(`- persona.Company__c must equal exactly: "${co}"`);
+            if (brand) locks.push(`- persona.Brand__c must equal exactly: "${brand}"`);
+            parts.push(locks.join('\n'));
+        }
         parts.push('## STORY CONTEXT (deal framing, champion notes, business case — this is the SETTING, not the persona)');
         parts.push(this.storyContext.trim());
         if (this.personaBrief && this.personaBrief.trim()) {
@@ -197,6 +240,9 @@ export default class DemoPersonaGenerator extends LightningElement {
                 if (payload && this.brand && payload.persona) {
                     payload.persona.Brand__c = this.brand;
                 }
+                if (payload && payload.persona) {
+                    this._reconcilePersonaNameFields(payload.persona);
+                }
             }
 
             this.candidate = { ...result, payload };
@@ -221,6 +267,38 @@ export default class DemoPersonaGenerator extends LightningElement {
             }));
         } finally {
             this.isBusy = false;
+        }
+    }
+
+    // Safety net for LLMs that occasionally repeat the full "First Last" into
+    // both First_Name__c and Last_Name__c (or into either one twice). If the
+    // parent has typed a personaName, we trust that split as the source of
+    // truth. Otherwise we detect a duplicated name pattern in the payload and
+    // split it. Preserves the LLM's intent when values look clean.
+    _reconcilePersonaNameFields(persona) {
+        const typed = (this.personaName || '').trim();
+        if (typed) {
+            const [tf, ...trest] = typed.split(/\s+/);
+            const tl = trest.join(' ');
+            persona.First_Name__c = tf;
+            if (tl) persona.Last_Name__c = tl;
+            return;
+        }
+        const first = (persona.First_Name__c || '').trim();
+        const last  = (persona.Last_Name__c  || '').trim();
+        // Case 1: both fields contain the same "First Last" string.
+        if (first && first === last && /\s/.test(first)) {
+            const [f, ...rest] = first.split(/\s+/);
+            persona.First_Name__c = f;
+            persona.Last_Name__c  = rest.join(' ');
+            return;
+        }
+        // Case 2: First_Name__c contains the full name and Last_Name__c is
+        // blank or a repeat of the whole thing.
+        if (/\s/.test(first) && (!last || last === first)) {
+            const [f, ...rest] = first.split(/\s+/);
+            persona.First_Name__c = f;
+            persona.Last_Name__c  = rest.join(' ');
         }
     }
 

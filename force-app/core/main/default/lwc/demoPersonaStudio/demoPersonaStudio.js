@@ -1,6 +1,8 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import { publish, subscribe, unsubscribe, APPLICATION_SCOPE, MessageContext } from 'lightning/messageService';
+import DEMO_STUDIO_REFRESH from '@salesforce/messageChannel/DemoStudioRefresh__c';
 import getPersonaBundle from '@salesforce/apex/DemoStudioService.getPersonaBundle';
 import savePersonaBundle from '@salesforce/apex/DemoStudioService.savePersonaBundle';
 import {
@@ -65,6 +67,44 @@ export default class DemoPersonaStudio extends LightningElement {
     saveStatus = 'idle'; // 'idle' | 'pending' | 'saving' | 'saved' | 'error'
     saveError;
 
+    @wire(MessageContext) messageContext;
+    _refreshSubscription;
+
+    _publishRefresh() {
+        try {
+            publish(this.messageContext, DEMO_STUDIO_REFRESH, {
+                scope: 'persona',
+                recordId: this.recordId
+            });
+        } catch (e) { /* messageContext may not yet be wired in tests */ }
+    }
+
+    // Subscribe to sibling saves (specifically theme edits from Theme Studio
+    // in another tab) so the Brand Kit tab reflects the latest theme values
+    // without a page reload. Persona-scope messages we published ourselves
+    // are ignored — refreshApex has already run in that path.
+    _connectRefreshBus() {
+        if (this._refreshSubscription) return;
+        this._refreshSubscription = subscribe(
+            this.messageContext,
+            DEMO_STUDIO_REFRESH,
+            (msg) => this._onRefreshMessage(msg),
+            { scope: APPLICATION_SCOPE }
+        );
+    }
+
+    async _onRefreshMessage(msg) {
+        if (!msg || msg.scope === 'persona') return;
+        if (!this.wiredResult) return;
+        // Don't clobber unsaved edits — a theme-refresh mid-typing would be
+        // startling. The user can re-open the tab to force a fresh load.
+        if (this.isDirty || this.isSaving) return;
+        try {
+            await refreshApex(this.wiredResult);
+            this.applyTheme();
+        } catch (e) { /* transient */ }
+    }
+
     @wire(getPersonaBundle, { personaId: '$recordId' })
     wired(result) {
         this.wiredResult = result;
@@ -115,6 +155,7 @@ export default class DemoPersonaStudio extends LightningElement {
             this.saveStatus = 'saved';
             this.saveError = undefined;
             await refreshApex(this.wiredResult);
+            this._publishRefresh();
         } catch (err) {
             this.saveStatus = 'error';
             this.saveError = (err && err.body && err.body.message) || err.message || 'Unknown error';
@@ -123,8 +164,16 @@ export default class DemoPersonaStudio extends LightningElement {
         }
     }
 
+    connectedCallback() {
+        this._connectRefreshBus();
+    }
+
     disconnectedCallback() {
         if (this.autoSaveTimer) clearTimeout(this.autoSaveTimer);
+        if (this._refreshSubscription) {
+            unsubscribe(this._refreshSubscription);
+            this._refreshSubscription = null;
+        }
     }
 
     _seedEmptyCollections(bundle) {
@@ -324,13 +373,19 @@ export default class DemoPersonaStudio extends LightningElement {
     }
 
     // Sparkle merge — Einstein returned new rows for one collection.
-    // mode='replace' wipes the old rows; mode='append' concatenates.
+    // mode='replace' wipes the old rows completely (Ids and all); mode='append'
+    // concatenates. Strips Id off incoming rows so the save-path treats them
+    // as fresh inserts and syncChildren cleans up the old records by delta.
     handleSparkleMerge(e) {
         const { collection, mode, rows } = e.detail || {};
-        if (!collection || !rows) return;
-        const clean = (rows || []).map(({ Id, ...rest }) => rest);
+        if (!collection || !Array.isArray(rows)) return;
+        const clean = rows.map(({ Id, _index, _key, ...rest }) => rest);
+        // Explicit mode gate. Anything other than 'append' — including
+        // 'replace', undefined, or a typo — replaces so a stray value
+        // never accidentally duplicates the existing rows.
+        const isAppend = mode === 'append';
         const current = (this.working && this.working[collection]) || [];
-        const next = mode === 'append' ? [...current, ...clean] : clean;
+        const next = isAppend ? [...current, ...clean] : clean.slice();
         this.working = { ...(this.working || {}), [collection]: next };
         this._markDirty();
     }
@@ -474,6 +529,7 @@ export default class DemoPersonaStudio extends LightningElement {
         try {
             await savePersonaBundle({ payloadJson: JSON.stringify(this.working) });
             await refreshApex(this.wiredResult);
+            this._publishRefresh();
             this.isDirty = false;
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Persona saved',
@@ -506,13 +562,24 @@ export default class DemoPersonaStudio extends LightningElement {
     handleGeneratorApply(e) {
         const payload = e.detail || {};
         const w = this.working || {};
-        // Merge persona fields, preserve Id and Theme lookup
+        // Merge persona fields. Preserve Id, Theme lookup, and any identity
+        // fields the user already set on the record (name / company / brand) —
+        // the generator is meant to enrich, not overwrite who this persona is.
         if (payload.persona) {
-            const keptId = w.persona && w.persona.Id;
-            const keptTheme = w.persona && w.persona.Theme__c;
-            w.persona = { ...(w.persona || {}), ...payload.persona };
-            if (keptId) w.persona.Id = keptId;
-            if (keptTheme && !w.persona.Theme__c) w.persona.Theme__c = keptTheme;
+            const prev = w.persona || {};
+            const kept = {
+                Id: prev.Id,
+                Theme__c: prev.Theme__c,
+                First_Name__c: prev.First_Name__c,
+                Last_Name__c: prev.Last_Name__c,
+                Company__c: prev.Company__c,
+                Brand__c: prev.Brand__c
+            };
+            w.persona = { ...prev, ...payload.persona };
+            Object.keys(kept).forEach((k) => {
+                const v = kept[k];
+                if (v !== undefined && v !== null && v !== '') w.persona[k] = v;
+            });
         }
         if (payload.recipe) {
             w.persona.Component_Recipe__c = JSON.stringify(payload.recipe);

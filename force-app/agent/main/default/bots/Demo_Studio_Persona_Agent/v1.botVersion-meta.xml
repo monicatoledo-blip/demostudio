@@ -6,13 +6,13 @@
         <botSteps>
             <botMessages>
                 <message>Hi — describe the persona and story you want to demo. I&apos;ll build the full profile.</message>
-                <messageIdentifier>f0ad0286-ac68-4f44-9a53-cab1f660e645</messageIdentifier>
+                <messageIdentifier>bda97c34-14d3-4b90-9ae7-5ba256112976</messageIdentifier>
             </botMessages>
-            <stepIdentifier>879f3633-1384-4656-937c-65b6d8aa75d5</stepIdentifier>
+            <stepIdentifier>4d6d97b2-2975-4f01-9196-7169ab85bf52</stepIdentifier>
             <type>Message</type>
         </botSteps>
         <botSteps>
-            <stepIdentifier>cb4719ae-9f17-4b1f-85e7-899bd3d0c695</stepIdentifier>
+            <stepIdentifier>ab336b01-4bee-435d-a543-a2217622ac74</stepIdentifier>
             <type>Wait</type>
         </botSteps>
         <developerName>Welcome</developerName>
@@ -24,13 +24,13 @@
         <botSteps>
             <botMessages>
                 <message>Something went wrong. Please try again.</message>
-                <messageIdentifier>aacc3108-e05f-4c6f-8308-cf64bf19bed6</messageIdentifier>
+                <messageIdentifier>c6457992-89f3-4d9a-92df-b0846c874b83</messageIdentifier>
             </botMessages>
-            <stepIdentifier>e3eee3fd-1d98-412e-9489-3c08db389847</stepIdentifier>
+            <stepIdentifier>b06419e8-8d62-4f3a-ac87-df07e0defefc</stepIdentifier>
             <type>Message</type>
         </botSteps>
         <botSteps>
-            <stepIdentifier>27b78009-7526-4f44-a154-c097214cc702</stepIdentifier>
+            <stepIdentifier>22451534-6128-42b6-81a3-af40a23fdca0</stepIdentifier>
             <type>Wait</type>
         </botSteps>
         <developerName>Rich_Content_Error_Handling</developerName>

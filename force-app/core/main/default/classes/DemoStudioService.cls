@@ -267,6 +267,36 @@ public with sharing class DemoStudioService {
         ];
     }
 
+    /**
+     * Create a fresh Contact seeded with the persona's identity, then assign
+     * that persona to it. Returns the new Contact Id. Used from the persona
+     * studio "New Contact" button so SEs don't have to reskin an existing
+     * teammate's Contact to demo a persona.
+     */
+    @AuraEnabled
+    public static Id createContactForPersona(Id personaId) {
+        if (personaId == null) return null;
+
+        Demo_Persona__c persona = [
+            SELECT Id, First_Name__c, Last_Name__c, Primary_Email__c, Primary_Phone__c
+            FROM Demo_Persona__c WHERE Id = :personaId LIMIT 1
+        ];
+        String pFirst = String.isBlank(persona.First_Name__c) ? '' : persona.First_Name__c;
+        String pLast  = String.isBlank(persona.Last_Name__c)  ? 'Demo Contact' : persona.Last_Name__c;
+
+        Id me = UserInfo.getUserId();
+        Contact c = new Contact(
+            FirstName          = pFirst,
+            LastName           = pLast,
+            Email              = persona.Primary_Email__c,
+            Phone              = persona.Primary_Phone__c,
+            Demo_Persona__c    = personaId,
+            Demo_Assigned_By__c = me
+        );
+        insert c;
+        return c.Id;
+    }
+
     @AuraEnabled
     public static void assignContactsToPersona(List<Id> contactIds, Id personaId) {
         if (contactIds == null || contactIds.isEmpty() || personaId == null) return;

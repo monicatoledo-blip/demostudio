@@ -103,9 +103,18 @@ public with sharing class DemoStudioPersonaGenerator {
         CollectionResult out = new CollectionResult();
         out.collectionKey = collectionKey;
         try {
+            Integer existingCount = 0;
+            if (String.isNotBlank(existingRowsJson)) {
+                try {
+                    Object parsedExisting = JSON.deserializeUntyped(existingRowsJson);
+                    if (parsedExisting instanceof List<Object>) {
+                        existingCount = ((List<Object>) parsedExisting).size();
+                    }
+                } catch (Exception ignored) { /* leave at 0 */ }
+            }
             String personaSummary = summarizePersona(personaId);
             String prompt = PersonaPromptBuilder.buildForCollection(
-                personaSummary, collectionKey, mode, existingRowsJson, extraHint
+                personaSummary, collectionKey, mode, existingRowsJson, extraHint, existingCount
             );
             String raw = EinsteinProvider.callAndExtractJson(prompt);
             // Response is like {"kpis":[...]}. Pull the array out and re-emit as raw JSON string.
@@ -114,7 +123,17 @@ public with sharing class DemoStudioPersonaGenerator {
             if (arr == null) {
                 throw new AuraHandledException('Model response did not include "' + collectionKey + '".');
             }
-            out.rowsJson = JSON.serialize(arr);
+            List<Object> rowsList = (List<Object>) arr;
+            // Hard cap so a misbehaving model can't double up the working set.
+            // Replace mode: at most max(existingCount, 4) rows so the section
+            // stays roughly the same size. Append mode: at most 3 rows.
+            Integer cap = 'append'.equalsIgnoreCase(mode) ? 3 : Math.max(existingCount, 4);
+            if (rowsList.size() > cap) {
+                List<Object> trimmed = new List<Object>();
+                for (Integer i = 0; i < cap; i++) trimmed.add(rowsList[i]);
+                rowsList = trimmed;
+            }
+            out.rowsJson = JSON.serialize(rowsList);
             out.providerUsed = 'Einstein';
             return out;
         } catch (Exception e) {
