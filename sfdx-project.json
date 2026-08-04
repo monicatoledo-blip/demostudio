@@ -9,19 +9,6 @@
       "versionDescription": "DemoStudio Core: Persona Studio, Theme Studio, Unified Profile widgets, Persona Agent."
     },
     {
-      "versionName": "ver 0.1",
-      "versionNumber": "0.1.0.NEXT",
-      "path": "force-app/segments",
-      "default": false,
-      "package": "DemoStudio Segments",
-      "versionDescription": "DemoStudio Segments: Data Cloud Segment Simulator. Depends on DemoStudio Core.",
-      "dependencies": [
-        {
-          "package": "DemoStudio Core"
-        }
-      ]
-    },
-    {
       "path": "force-app/agent"
     }
   ],
@@ -31,7 +18,6 @@
   "sourceApiVersion": "66.0",
   "packageAliases": {
     "DemoStudio Core": "0HoKh000000k9fjKAA",
-    "DemoStudio Segments": "0HoKh000000k9foKAA",
     "DemoStudio Core@0.1.0-1": "04tKh000001lrU2IAI"
   }
 }
