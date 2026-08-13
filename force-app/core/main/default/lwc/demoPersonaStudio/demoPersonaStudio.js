@@ -565,6 +565,26 @@ export default class DemoPersonaStudio extends LightningElement {
         if (g) g.open();
     }
 
+    // Build a predictable work email: firstname.lastname@companyslug.com.
+    // Falls back to brand for the domain, and to sensible defaults when name
+    // or company are missing. Strips accents, spaces, and punctuation so the
+    // result is always a valid address.
+    _deriveWorkEmail(persona) {
+        const p = persona || {};
+        const slug = (s) => (s || '')
+            .toString()
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '') // strip accent marks
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '');      // drop spaces & punctuation
+        const first = slug(p.First_Name__c);
+        const last = slug(p.Last_Name__c);
+        const local = [first, last].filter(Boolean).join('.') || 'contact';
+        const domainSlug = slug(p.Company__c) || slug(p.Brand__c);
+        const domain = domainSlug ? `${domainSlug}.com` : 'example.com';
+        return `${local}@${domain}`;
+    }
+
     handleGeneratorApply(e) {
         const payload = e.detail || {};
         const w = this.working || {};
@@ -586,6 +606,12 @@ export default class DemoPersonaStudio extends LightningElement {
                 const v = kept[k];
                 if (v !== undefined && v !== null && v !== '') w.persona[k] = v;
             });
+            // The model tends to invent a random-looking email
+            // (e.g. "contact@Jennifer Travissomething.com"). Derive a
+            // predictable work address from the FINAL name + company instead,
+            // so it reads like firstname.lastname@company.com. Runs after the
+            // kept-values merge so it reflects what the user actually sees.
+            w.persona.Primary_Email__c = this._deriveWorkEmail(w.persona);
         }
         if (payload.recipe) {
             w.persona.Component_Recipe__c = JSON.stringify(payload.recipe);
