@@ -293,8 +293,24 @@ public with sharing class DemoStudioService {
             Demo_Persona__c    = personaId,
             Demo_Assigned_By__c = me
         );
-        insert c;
+        // Demo contacts are intentionally clones of a persona, so a second
+        // contact for the same persona matches the Standard Contact Duplicate
+        // Rule and the insert is blocked with DUPLICATES_DETECTED (surfaced as
+        // an "Unknown error" toast). Save through the duplicate alert so demo
+        // contact creation is deterministic regardless of existing matches.
+        // Note: the DuplicateRuleHeader is only honored via the
+        // Database.insert(record, dmlOptions) form — setOptions() does not
+        // carry it.
+        Database.insert(c, allowDuplicatesDmlOptions());
         return c.Id;
+    }
+
+    // DML options that let a save proceed past duplicate-rule alerts. Used for
+    // demo contact create/assign, where duplicate-looking records are expected.
+    private static Database.DMLOptions allowDuplicatesDmlOptions() {
+        Database.DMLOptions dml = new Database.DMLOptions();
+        dml.DuplicateRuleHeader.AllowSave = true;
+        return dml;
     }
 
     @AuraEnabled
@@ -351,7 +367,9 @@ public with sharing class DemoStudioService {
             }
             updates.add(u);
         }
-        if (!updates.isEmpty()) update updates;
+        // Renaming a Contact to match a persona can also trip the duplicate
+        // rule; save through it via the dmlOptions form (see createContactForPersona).
+        if (!updates.isEmpty()) Database.update(updates, allowDuplicatesDmlOptions());
     }
 
     private static String buildInitials(String first, String last) {
