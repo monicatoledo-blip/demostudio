@@ -1,4 +1,5 @@
 import { LightningElement, api, wire, track } from 'lwc';
+import { NavigationMixin } from 'lightning/navigation';
 import { refreshApex } from '@salesforce/apex';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { publish, MessageContext } from 'lightning/messageService';
@@ -9,7 +10,7 @@ import assignContactsToPersona from '@salesforce/apex/DemoStudioService.assignCo
 import unassignContacts from '@salesforce/apex/DemoStudioService.unassignContacts';
 import createContactForPersona from '@salesforce/apex/DemoStudioService.createContactForPersona';
 
-export default class DemoPersonaStudioContacts extends LightningElement {
+export default class DemoPersonaStudioContacts extends NavigationMixin(LightningElement) {
     @api personaId;
     @api personaName;
 
@@ -152,23 +153,61 @@ export default class DemoPersonaStudioContacts extends LightningElement {
     }
 
     async handleCreateAndAssign() {
+        // Step 1: create + assign the Contact. This is the only step that can
+        // legitimately fail as "Contact creation failed".
+        let newId;
         try {
-            const newId = await createContactForPersona({ personaId: this.personaId });
-            this.dispatchEvent(new ShowToastEvent({
-                title: 'Contact created',
-                message: 'New Contact created with this persona already assigned.',
-                variant: 'success'
-            }));
-            await refreshApex(this.wiredResult);
-            this.doSearch();
-            if (newId) {
-                window.open(`/lightning/r/Contact/${newId}/view`, '_blank', 'noopener');
-            }
+            newId = await createContactForPersona({ personaId: this.personaId });
         } catch (err) {
             this.dispatchEvent(new ShowToastEvent({
                 title: 'Contact creation failed',
                 message: (err && err.body && err.body.message) || err.message || 'Unknown error',
                 variant: 'error'
+            }));
+            return;
+        }
+
+        // Step 2: refresh the assigned list. Non-critical — a refresh hiccup
+        // must never be reported as a creation failure.
+        try {
+            await refreshApex(this.wiredResult);
+            this.doSearch();
+        } catch (e) { /* list refresh is best-effort */ }
+
+        // Step 3: offer a jump to the new Contact. We must NOT use
+        // window.open() here — Lightning Web Security blocks opening a
+        // same-origin URL in a new browsing context ("Cannot open same-origin
+        // URL in a new browsing context"), which previously threw and surfaced
+        // a misleading "Contact creation failed" toast even though the Contact
+        // was created fine. Use lightning/navigation to build a safe URL and
+        // expose it as a clickable link in a sticky toast so the user stays in
+        // Persona Studio but can open the Contact in one click.
+        if (!newId) {
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Contact created',
+                message: 'New Contact created with this persona already assigned.',
+                variant: 'success'
+            }));
+            return;
+        }
+        try {
+            const url = await this[NavigationMixin.GenerateUrl]({
+                type: 'standard__recordPage',
+                attributes: { recordId: newId, objectApiName: 'Contact', actionName: 'view' }
+            });
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Contact created',
+                message: 'New Contact created with this persona already assigned. {0}',
+                messageData: [{ url, label: 'Open the new Contact' }],
+                variant: 'success',
+                mode: 'sticky'
+            }));
+        } catch (e) {
+            // Couldn't build a nav URL — still confirm the Contact exists.
+            this.dispatchEvent(new ShowToastEvent({
+                title: 'Contact created',
+                message: 'New Contact created with this persona already assigned.',
+                variant: 'success'
             }));
         }
     }

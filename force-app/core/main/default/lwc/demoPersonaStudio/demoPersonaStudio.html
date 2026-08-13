@@ -14,12 +14,15 @@
             <div class="studio-toolbar-right">
                 <!-- Auto-save status. Persona changes save ~1.5s after the last edit; -->
                 <!-- this pill communicates state so users don't wonder if changes stuck. -->
-                <span class={saveStatusPillClass}>
+                <span class={saveStatusPillClass} title={saveError}>
                     <template lwc:if={saveStatusIcon}>
                         <lightning-icon icon-name={saveStatusIcon} size="xx-small" variant="inverse" class="save-status-icon"></lightning-icon>
                     </template>
                     <span class="save-status-text">{saveStatusText}</span>
                 </span>
+                <template lwc:if={hasSaveError}>
+                    <span class="save-error-detail" title={saveError}>{saveError}</span>
+                </template>
                 <lightning-button label="Revert" variant="neutral" onclick={handleRevert}
                     class="slds-m-left_small"></lightning-button>
                 <template lwc:if={showManualSave}>

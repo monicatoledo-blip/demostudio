@@ -66,6 +66,17 @@
 .save-status--pending { background: rgba(255, 184, 40, 0.35); color: #fff5d1; }
 .save-status--error   { background: rgba(234, 0, 27, 0.45);   color: #ffe1e5; }
 .save-status--idle    { background: rgba(255, 255, 255, 0.10); color: rgba(255, 255, 255, 0.7); }
+/* Failure detail beside the pill so a failed save shows its cause, not just "Save failed" */
+.save-error-detail {
+    margin-left: 0.5rem;
+    max-width: 22rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+    color: #ffe1e5;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 /* Gentle spin on the syncing icon so users know something's happening */
 .save-status--saving .save-status-icon {
     animation: save-spin 1s linear infinite;

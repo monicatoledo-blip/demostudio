@@ -637,6 +637,15 @@ public with sharing class DemoStudioService {
                     record.put(key, Integer.valueOf(String.valueOf(v)));
                 } else if (t == Schema.DisplayType.DATE) {
                     record.put(key, Date.valueOf(String.valueOf(v)));
+                } else if (t == Schema.DisplayType.EMAIL) {
+                    // Generated personas can carry a malformed email (e.g. the
+                    // model builds a domain from the persona name and leaves a
+                    // space: "contact@Jennifer Travisarchitecture.com"). An
+                    // invalid EMAIL value makes the *entire* save throw
+                    // INVALID_EMAIL_ADDRESS. Auto-clean it: strip whitespace,
+                    // validate, and if it still isn't a valid address, drop the
+                    // field rather than aborting the whole persona save.
+                    record.put(key, sanitizeEmail(String.valueOf(v)));
                 } else {
                     record.put(key, v);
                 }
@@ -644,5 +653,23 @@ public with sharing class DemoStudioService {
                 // Best-effort: skip a field that fails coercion rather than aborting the whole save
             }
         }
+    }
+
+    // Basic RFC-ish email shape. Salesforce's own EMAIL validation is stricter
+    // about some edge cases, but this catches the common failure (whitespace,
+    // missing @, missing TLD) that breaks generated personas.
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+        '^[a-zA-Z0-9._%+\\-]+@[a-zA-Z0-9.\\-]+\\.[a-zA-Z]{2,}$'
+    );
+
+    // Returns a cleaned, valid email, or null if the value can't be salvaged.
+    // Null (blank email) saves fine; an invalid string does not.
+    @TestVisible
+    private static String sanitizeEmail(String raw) {
+        if (String.isBlank(raw)) return null;
+        // Remove ALL whitespace (spaces/tabs/newlines) anywhere in the address.
+        String cleaned = raw.replaceAll('\\s+', '').trim();
+        if (String.isBlank(cleaned)) return null;
+        return EMAIL_PATTERN.matcher(cleaned).matches() ? cleaned : null;
     }
 }

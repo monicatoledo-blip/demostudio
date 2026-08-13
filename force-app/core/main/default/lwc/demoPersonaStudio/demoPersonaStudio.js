@@ -483,6 +483,12 @@ export default class DemoPersonaStudio extends LightningElement {
     get saveStatusPillClass() {
         return `save-status save-status--${this.saveStatus || 'idle'}`;
     }
+    // Surface the underlying save error. Previously the detail was captured in
+    // `saveError` but never rendered, so a failed save showed only a generic
+    // "Save failed" pill with no cause.
+    get hasSaveError() {
+        return this.saveStatus === 'error' && !!this.saveError;
+    }
     get showManualSave() {
         // Show a manual save button when auto-save failed or there are pending
         // changes the user might want to commit immediately.
