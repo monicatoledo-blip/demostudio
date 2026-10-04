@@ -111,3 +111,21 @@
 .brand-current-name { font-weight: 600; color: #0A1F44; font-size: 0.9rem; }
 .kit-swatch--sm { width: 48px; height: 32px; border: 1px solid #e6e9ee; border-radius: 6px; flex: 0 0 48px; }
 .kit-swatch--sm img { max-width: 40px; max-height: 24px; object-fit: contain; }
+/* AI Generate modal — richer, Persona-Generator style */
+.gen-modal { width: 560px; padding: 0; overflow: hidden; }
+.gen-header { display: flex; align-items: flex-start; gap: 0.75rem; padding: 1rem 1.25rem;
+    background: linear-gradient(120deg, #0176d3 0%, #032d60 100%); color: #fff; }
+.gen-header-icon { width: 34px; height: 34px; border-radius: 8px; background: rgba(255,255,255,0.18);
+    display: flex; align-items: center; justify-content: center; flex: 0 0 34px; }
+.gen-header-text { flex: 1 1 auto; }
+.gen-header-title { font-size: 1.05rem; font-weight: 700; margin: 0; color: #fff; }
+.gen-header-sub { font-size: 0.78rem; margin: 0.15rem 0 0; color: rgba(255,255,255,0.85); line-height: 1.35; }
+.gen-close { --slds-c-button-text-color: #fff; }
+.gen-body { padding: 1.25rem; }
+.gen-label { display: block; font-size: 0.9rem; font-weight: 700; color: #0A1F44; }
+.gen-help { font-size: 0.78rem; color: #6b7280; margin: 0.2rem 0 0.5rem; line-height: 1.4; }
+.gen-context { display: block; }
+.gen-context .slds-textarea { min-height: 110px; }
+.gen-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
+.gen-footer { display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem;
+    padding: 0.85rem 1.25rem; border-top: 1px solid #e6e9ee; background: #f8fafc; position: relative; }

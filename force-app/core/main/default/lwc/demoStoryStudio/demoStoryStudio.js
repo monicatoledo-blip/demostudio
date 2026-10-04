@@ -339,8 +339,14 @@ export default class DemoStoryStudio extends LightningElement {
     // ---- AI Generate (industry pack + Einstein) ----
     @track showGenerate = false;
     @track genIndustry = 'Financial Services';
-    @track genUseCase = '';
+    @track genContext = '';
+    @track genAngle = '';
     generating = false;
+
+    get angleOptions() {
+        return ['Win-back', 'Cross-sell', 'Onboarding', 'Retention', 'Promotion', 'Re-engagement', 'Nurture', 'Upsell']
+            .map((a) => ({ label: a, value: a }));
+    }
 
     get industryOptions() {
         return [
@@ -351,7 +357,8 @@ export default class DemoStoryStudio extends LightningElement {
     }
     handleGenerate() { this.showGenerate = true; }
     closeGenerate() { this.showGenerate = false; }
-    handleGenUseCase(e) { this.genUseCase = e.target.value; }
+    handleGenContext(e) { this.genContext = e.target.value; }
+    handleGenAngle(e) { this.genAngle = e.detail.value; }
 
     // Picking an industry fills the deterministic starter pack immediately.
     handleGenIndustry(e) {
@@ -363,7 +370,7 @@ export default class DemoStoryStudio extends LightningElement {
     async runGenerate() {
         this.generating = true;
         try {
-            const raw = await generateEmail({ industry: this.genIndustry, brand: this.config.brandName, useCase: this.genUseCase });
+            const raw = await generateEmail({ industry: this.genIndustry, brand: this.config.brandName, context: this.genContext, angle: this.genAngle });
             const gen = JSON.parse(raw);
             const patch = {};
             ['subjectLine', 'headline', 'subHeadline', 'bodyParagraph', 'featureColumn1', 'featureColumn2',

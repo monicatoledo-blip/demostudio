@@ -161,20 +161,37 @@
         <template lwc:if={showGenerate}>
             <section class="gen-backdrop" onclick={closeGenerate}></section>
             <section class="gen-modal">
-                <h3 class="gen-title">✨ Generate with AI</h3>
-                <lightning-combobox label="Industry" options={industryOptions} value={genIndustry}
-                    onchange={handleGenIndustry}></lightning-combobox>
-                <lightning-input label="Brand" value={config.brandName} disabled></lightning-input>
-                <lightning-textarea label="Use case / prompt" value={genUseCase} onchange={handleGenUseCase}
-                    placeholder="e.g. Win back lapsed auto-loan shoppers with a rate-drop offer"></lightning-textarea>
-                <p class="gen-hint">Picking an industry fills a starter pack instantly. Generate uses Einstein to tailor the copy and the 2-way conversation to your use case.</p>
-                <div class="gen-actions">
-                    <lightning-button label="Cancel" onclick={closeGenerate} disabled={generating}></lightning-button>
-                    <lightning-button variant="brand" label="Generate" onclick={runGenerate} disabled={generating}></lightning-button>
+                <header class="gen-header">
+                    <span class="gen-header-icon">
+                        <lightning-icon icon-name="utility:einstein" variant="inverse" size="small"></lightning-icon>
+                    </span>
+                    <div class="gen-header-text">
+                        <h3 class="gen-header-title">Generate Email with AI</h3>
+                        <p class="gen-header-sub">Describe the campaign — Einstein drafts the branded email and the 2-way conversation.</p>
+                    </div>
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse" alternative-text="Close"
+                        class="gen-close" onclick={closeGenerate}></lightning-button-icon>
+                </header>
+                <div class="gen-body">
+                    <label class="gen-label">Campaign context</label>
+                    <p class="gen-help">The offer, the audience, and the angle you want to demo. The more specific, the better the draft — Einstein also uses the Brand Kit and Persona you've set.</p>
+                    <lightning-textarea variant="label-hidden" value={genContext} onchange={handleGenContext}
+                        class="gen-context"
+                        placeholder="Example: Win back lapsed auto-loan shoppers. Rates just dropped 75bps; target members who started an application in the last 90 days but didn't finish. Angle: a time-boxed rate-lock with a nudge to reply for help."></lightning-textarea>
+                    <div class="gen-row">
+                        <lightning-combobox label="Industry" options={industryOptions} value={genIndustry} onchange={handleGenIndustry}></lightning-combobox>
+                        <lightning-combobox label="Angle (optional)" options={angleOptions} value={genAngle} onchange={handleGenAngle} placeholder="Choose an angle…"></lightning-combobox>
+                    </div>
+                    <p class="gen-hint">Brand: <strong>{config.brandName}</strong> · change it by picking a Brand Kit in Branding.</p>
                 </div>
-                <template lwc:if={generating}>
-                    <lightning-spinner alternative-text="Generating..." size="small"></lightning-spinner>
-                </template>
+                <footer class="gen-footer">
+                    <template lwc:if={generating}>
+                        <lightning-spinner alternative-text="Generating..." size="small"></lightning-spinner>
+                    </template>
+                    <lightning-button label="Cancel" onclick={closeGenerate} disabled={generating}></lightning-button>
+                    <lightning-button variant="brand" label="✨ Generate" onclick={runGenerate} disabled={generating}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
             </section>
         </template>
     </div>
