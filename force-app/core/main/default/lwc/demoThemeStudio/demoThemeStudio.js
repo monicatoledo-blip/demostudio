@@ -117,6 +117,7 @@ export default class DemoThemeStudio extends LightningElement {
 
     get logoUrlField() { return this.theme.Logo_URL__c || ''; }
     get secondaryLogoField() { return this.theme.Secondary_Logo_URL__c || ''; }
+    get hasSecondaryLogo() { return !!this.secondaryLogoField; }
 
     get logoSrc() {
         if (this.logoUrlField) return this.logoUrlField;
@@ -165,6 +166,14 @@ export default class DemoThemeStudio extends LightningElement {
         this.isDirty = true;
         this.logoFallbackStage = 0; // uploaded a real file — start the cascade over
         this._deriveColorsFromLogo(url, { silent: true });
+    }
+
+    handleSecondaryLogoUploaded(e) {
+        const files = e.detail.files || [];
+        if (!files.length) return;
+        const cv = files[0].contentVersionId || files[0].contentBodyId;
+        this.working = { ...this.working, Secondary_Logo_URL__c: `/sfc/servlet.shepherd/version/download/${cv}` };
+        this.isDirty = true;
     }
 
     // CSP hint for URL logos

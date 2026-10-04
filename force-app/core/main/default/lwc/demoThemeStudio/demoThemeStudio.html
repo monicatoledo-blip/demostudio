@@ -130,30 +130,23 @@
                     <h2 class="ts-h2">Logo</h2>
                     <p class="ts-hint">Paste a URL <b>or</b> upload an image file. Uploaded files are stored on the Theme record.</p>
 
+                    <p class="ts-logo-label">Primary logo <span class="ts-logo-sub">— full logo, shown large in the email hero/header</span></p>
                     <div class="ts-logo-preview-row">
                         <div class="ts-logo-preview">
                             <template lwc:if={hasLogo}>
                                 <img src={effectiveLogoSrc} alt="Logo" class="ts-logo-preview-img" onerror={handleLogoLoadError} />
                             </template>
                             <template lwc:else>
-                                <span class="ts-logo-placeholder">Logo</span>
+                                <span class="ts-logo-placeholder">Primary</span>
                             </template>
                         </div>
                         <div class="ts-logo-inputs">
                             <lightning-input type="url" label="Primary Logo URL" value={logoUrlField} data-field="Logo_URL__c" onchange={handleFieldChange}
-                                placeholder="https://cdn.example.com/logo.svg"
-                                field-level-help="The full logo — used large in the email hero/header."></lightning-input>
-                            <lightning-input type="url" label="Secondary Logo URL" value={secondaryLogoField} data-field="Secondary_Logo_URL__c" onchange={handleFieldChange}
-                                placeholder="https://cdn.example.com/logo-mark.svg" class="slds-m-top_x-small"
-                                field-level-help="The small mark/icon — used for the sender avatar &amp; footer."></lightning-input>
+                                placeholder="https://cdn.example.com/logo.svg"></lightning-input>
                             <div class="ts-uploader-wrap slds-m-top_x-small">
-                                <lightning-file-upload
-                                    label="Or upload image"
-                                    name="logoUpload"
-                                    accept={acceptedLogoFormats}
-                                    record-id={recordId}
-                                    onuploadfinished={handleLogoUploaded}>
-                                </lightning-file-upload>
+                                <lightning-file-upload label="Or upload primary logo" name="logoUpload"
+                                    accept={acceptedLogoFormats} record-id={recordId}
+                                    onuploadfinished={handleLogoUploaded}></lightning-file-upload>
                             </div>
                             <template lwc:if={hasLogo}>
                                 <lightning-button variant="neutral" label="Derive colors from this logo"
@@ -162,6 +155,27 @@
                                     onclick={handleDeriveColors}
                                     class="slds-m-top_x-small ts-derive-btn"></lightning-button>
                             </template>
+                        </div>
+                    </div>
+
+                    <p class="ts-logo-label slds-m-top_medium">Secondary logo <span class="ts-logo-sub">— small mark/icon, used for the sender avatar &amp; footer</span></p>
+                    <div class="ts-logo-preview-row">
+                        <div class="ts-logo-preview">
+                            <template lwc:if={hasSecondaryLogo}>
+                                <img src={secondaryLogoField} alt="Secondary logo" class="ts-logo-preview-img" />
+                            </template>
+                            <template lwc:else>
+                                <span class="ts-logo-placeholder">Mark</span>
+                            </template>
+                        </div>
+                        <div class="ts-logo-inputs">
+                            <lightning-input type="url" label="Secondary Logo URL" value={secondaryLogoField} data-field="Secondary_Logo_URL__c" onchange={handleFieldChange}
+                                placeholder="https://cdn.example.com/logo-mark.svg"></lightning-input>
+                            <div class="ts-uploader-wrap slds-m-top_x-small">
+                                <lightning-file-upload label="Or upload secondary logo" name="secondaryLogoUpload"
+                                    accept={acceptedLogoFormats} record-id={recordId}
+                                    onuploadfinished={handleSecondaryLogoUploaded}></lightning-file-upload>
+                            </div>
                         </div>
                     </div>
 

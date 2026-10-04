@@ -343,3 +343,5 @@
 }
 .ts-hint--busy lightning-icon { animation: ts-spin 1s linear infinite; }
 @keyframes ts-spin { to { transform: rotate(360deg); } }
+.ts-logo-label { font-size: 0.85rem; font-weight: 700; color: #0A1F44; margin: 0 0 0.4rem; }
+.ts-logo-sub { font-weight: 400; color: #6b7280; font-size: 0.78rem; }
