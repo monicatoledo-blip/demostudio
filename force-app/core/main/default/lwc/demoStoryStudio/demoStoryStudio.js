@@ -302,16 +302,27 @@ export default class DemoStoryStudio extends LightningElement {
         try {
             const p = await getPersona({ personaId });
             const full = ((p.First_Name__c || '') + ' ' + (p.Last_Name__c || '')).trim();
-            this._commit({
+            const prevFirst = this.firstName;
+            const newFirst = p.First_Name__c || this.config.customerFirstName;
+            const patch = {
                 personaId: personaId,
                 customerName: full || this.config.customerName,
-                customerFirstName: p.First_Name__c || this.config.customerFirstName,
+                customerFirstName: newFirst,
                 customerEmail: p.Primary_Email__c || this.config.customerEmail,
                 customerTitle: p.Title__c || this.config.customerTitle,
                 customerCompany: p.Company__c || this.config.customerCompany,
                 customerMobile: p.Primary_Phone__c || this.config.customerMobile,
                 customerAvatarUrl: p.Avatar_URL__c || this.config.customerAvatarUrl
-            });
+            };
+            // Messaging threads bake the first name in (no live token), so when
+            // the persona changes, swap the previously-baked name for the new one.
+            if (this.isMessaging && newFirst && prevFirst && newFirst !== prevFirst) {
+                const re = new RegExp(prevFirst.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                patch.messages = (this.config.messages || []).map((m) => ({
+                    ...m, text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, newFirst).replace(re, newFirst)
+                }));
+            }
+            this._commit(patch);
         } catch (err) {
             this.toast('Persona', (err && err.body && err.body.message) || err.message, 'error');
         }
@@ -343,7 +354,7 @@ export default class DemoStoryStudio extends LightningElement {
         // Fresh messaging record: seed the marketing-first 2-way thread for the
         // record's industry (the email industry packs are recipient-first).
         if (!raw && channel !== 'Email') {
-            this.config = { ...this.config, messages: messagingSeedFor(ind) };
+            this.config = { ...this.config, messages: this.bakeFirstName(messagingSeedFor(ind)) };
         }
         // If the active section isn't valid for this channel (e.g. Email Template
         // on an SMS record), fall back to the first valid section.
@@ -357,6 +368,17 @@ export default class DemoStoryStudio extends LightningElement {
         const pId = getFieldValue(data, PERSONA_FIELD);
         if (pId && !this.config.personaId) { this.applyPersonaById(pId); }
         this.previewVersion++;
+    }
+
+    // Current recipient first name (from persona / customer profile) used to
+    // bake [[CUSTOMER_FIRST_NAME]] into messaging threads so the editor reads
+    // naturally instead of showing a raw token.
+    get firstName() {
+        return this.config.customerFirstName || (this.config.customerName || '').split(' ')[0] || 'there';
+    }
+    bakeFirstName(messages) {
+        const fn = this.firstName;
+        return (messages || []).map((m) => ({ ...m, text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn) }));
     }
 
     // ---- channel ----
@@ -549,7 +571,7 @@ export default class DemoStoryStudio extends LightningElement {
         this.genIndustry = e.detail.value;
         if (this.isMessaging) {
             // Messaging channels only have a thread — swap in that industry's.
-            this._commit({ messages: messagingSeedFor(this.genIndustry) });
+            this._commit({ messages: this.bakeFirstName(messagingSeedFor(this.genIndustry)) });
             return;
         }
         const pack = INDUSTRY_PACKS[this.genIndustry];
@@ -581,8 +603,8 @@ export default class DemoStoryStudio extends LightningElement {
          'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
             .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
         if (Array.isArray(gen.messages) && gen.messages.length) {
-            patch.messages = gen.messages.filter((m) => m && m.text)
-                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' }));
+            patch.messages = this.bakeFirstName(gen.messages.filter((m) => m && m.text)
+                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' })));
         }
         this._commit(patch);
     }
