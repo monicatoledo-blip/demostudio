@@ -18,10 +18,10 @@
     </nameField>
     <pluralLabel>2-Way Simulators</pluralLabel>
     <searchLayouts>
-        <customTabListAdditionalFields>Brand__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Brand_Kit__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>Channel__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>Industry__c</customTabListAdditionalFields>
-        <searchResultsAdditionalFields>Brand__c</searchResultsAdditionalFields>
+        <searchResultsAdditionalFields>Brand_Kit__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Channel__c</searchResultsAdditionalFields>
         <searchResultsAdditionalFields>Industry__c</searchResultsAdditionalFields>
     </searchLayouts>
