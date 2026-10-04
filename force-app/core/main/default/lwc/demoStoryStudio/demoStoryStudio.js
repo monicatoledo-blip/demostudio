@@ -271,13 +271,24 @@ export default class DemoStoryStudio extends LightningElement {
             const primary = k.Primary_Color__c || this.config.primaryColor;
             const accent = k.Accent_Color__c || primary;
             const domain = k.Name ? (k.Name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com') : this.config.brandDomain;
-            this._commit({
-                brandKitId: kitId, brandName: k.Name || this.config.brandName, brandDomain: domain,
+            const prevBrand = this.config.brandName;
+            const newBrand = k.Name || this.config.brandName;
+            const patch = {
+                brandKitId: kitId, brandName: newBrand, brandDomain: domain,
                 primaryColor: primary, ctaButtonColor: primary, logoBgColor: primary,
                 featureSectionColor: accent,
                 logoUrl: k.Logo_URL__c || this.config.logoUrl,
                 marketingAvatarUrl: k.Secondary_Logo_URL__c || k.Logo_URL__c || this.config.marketingAvatarUrl
-            });
+            };
+            // Messaging threads bake the brand name in — swap the old brand for
+            // the new one across the thread so it stays in sync.
+            if (this.isMessaging && newBrand && prevBrand && newBrand !== prevBrand) {
+                const re = new RegExp(prevBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                patch.messages = (this.config.messages || []).map((m) => ({
+                    ...m, text: (m.text || '').replace(/\[\[BRAND_NAME\]\]/g, newBrand).replace(re, newBrand)
+                }));
+            }
+            this._commit(patch);
         } catch (err) {
             this.toast('Brand Kit', (err && err.body && err.body.message) || err.message, 'error');
         }
@@ -354,7 +365,11 @@ export default class DemoStoryStudio extends LightningElement {
         // Fresh messaging record: seed the marketing-first 2-way thread for the
         // record's industry (the email industry packs are recipient-first).
         if (!raw && channel !== 'Email') {
-            this.config = { ...this.config, messages: this.bakeFirstName(messagingSeedFor(ind)) };
+            this.config = { ...this.config, messages: this.bakeTokens(messagingSeedFor(ind)) };
+        } else if (channel !== 'Email' && this.config.messages) {
+            // Existing messaging record: resolve any saved [[TOKENS]] in the
+            // thread so the editor shows real persona/brand values, not tokens.
+            this.config = { ...this.config, messages: this.bakeTokens(this.config.messages) };
         }
         // If the active section isn't valid for this channel (e.g. Email Template
         // on an SMS record), fall back to the first valid section.
@@ -376,9 +391,16 @@ export default class DemoStoryStudio extends LightningElement {
     get firstName() {
         return this.config.customerFirstName || (this.config.customerName || '').split(' ')[0] || 'there';
     }
-    bakeFirstName(messages) {
+    // Bake live tokens into messaging thread text so the editor shows real
+    // values (persona first name + brand) instead of [[TOKENS]]. Re-baked when
+    // the persona or brand kit changes (see applyPersonaById / applyKitById).
+    bakeTokens(messages) {
         const fn = this.firstName;
-        return (messages || []).map((m) => ({ ...m, text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn) }));
+        const br = this.config.brandName || 'the brand';
+        return (messages || []).map((m) => ({
+            ...m,
+            text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn).replace(/\[\[BRAND_NAME\]\]/g, br)
+        }));
     }
 
     // ---- channel ----
@@ -571,7 +593,7 @@ export default class DemoStoryStudio extends LightningElement {
         this.genIndustry = e.detail.value;
         if (this.isMessaging) {
             // Messaging channels only have a thread — swap in that industry's.
-            this._commit({ messages: this.bakeFirstName(messagingSeedFor(this.genIndustry)) });
+            this._commit({ messages: this.bakeTokens(messagingSeedFor(this.genIndustry)) });
             return;
         }
         const pack = INDUSTRY_PACKS[this.genIndustry];
@@ -603,7 +625,7 @@ export default class DemoStoryStudio extends LightningElement {
          'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
             .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
         if (Array.isArray(gen.messages) && gen.messages.length) {
-            patch.messages = this.bakeFirstName(gen.messages.filter((m) => m && m.text)
+            patch.messages = this.bakeTokens(gen.messages.filter((m) => m && m.text)
                 .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' })));
         }
         this._commit(patch);
@@ -614,16 +636,27 @@ export default class DemoStoryStudio extends LightningElement {
     @track showCopyPrompt = false;
     toggleCopyPrompt() { this.showCopyPrompt = !this.showCopyPrompt; }
 
+    // Channel noun used throughout the Generate modal copy.
+    get genNoun() { return this.isEmail ? 'email' : this.channelLabel; }
+    get genModalTitle() { return 'Generate ' + this.channelLabel + ' with AI'; }
+    get genModalSub() {
+        return this.isEmail
+            ? 'Describe the campaign — Einstein drafts the branded email and the 2-way conversation.'
+            : 'Describe the campaign — Einstein drafts the 2-way ' + this.channelLabel + ' conversation.';
+    }
+
     get copyablePrompt() {
         const brand = this.config.brandName || 'the customer';
         const sub = this.config.customerName || 'the primary contact';
         const ind = this.genIndustry;
+        const noun = this.genNoun;
+        const opener = this.isEmail ? 'The email' : 'The opening ' + noun;
         return [
             'Review everything you have on ' + brand + ' — all my meeting notes, call transcripts, and discovery for '
             + 'this account — and research ' + brand + ' on the web if you can (recent news, priorities, products, pains).',
-            'Based on what we have ACTUALLY discussed with them so far, propose a marketing email campaign for ' + brand
+            'Based on what we have ACTUALLY discussed with them so far, propose a marketing ' + noun + ' campaign for ' + brand
             + ' (' + ind + ') that the stakeholders I have been meeting with would resonate with — tied to their real '
-            + 'priorities from our conversations, not a generic pitch. The email should invite a 2-way interaction '
+            + 'priorities from our conversations, not a generic pitch. ' + opener + ' should invite a 2-way interaction '
             + '(the recipient can reply and an AI agent answers follow-up questions).',
             'Write it as a single "campaign context" paragraph I can paste into a demo tool: the offer, the recipient ('
             + sub + '), the angle, and why it lands given our calls. Under ~180 words, one paragraph, no bullets, no '
