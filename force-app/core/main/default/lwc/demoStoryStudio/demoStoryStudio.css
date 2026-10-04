@@ -129,3 +129,17 @@
 .gen-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 0.75rem; }
 .gen-footer { display: flex; align-items: center; justify-content: flex-end; gap: 0.25rem;
     padding: 0.85rem 1.25rem; border-top: 1px solid #e6e9ee; background: #f8fafc; position: relative; }
+/* Bigger generate modal + copy-prompt bridge */
+.gen-modal { width: 720px; max-width: 94vw; max-height: 88vh; display: flex; flex-direction: column; }
+.gen-body { overflow-y: auto; }
+.gen-context .slds-textarea { min-height: 150px; }
+.gen-copy { margin-top: 1rem; border-top: 1px dashed #d8dde6; padding-top: 0.85rem; }
+.gen-copy-toggle { background: none; border: none; color: #0176d3; font-weight: 600; cursor: pointer; font-size: 0.82rem; padding: 0; font-family: inherit; }
+.gen-copy-box { margin-top: 0.6rem; }
+.gen-copy-pre { white-space: pre-wrap; background: #f3f6fb; border: 1px solid #d8e3f0; border-radius: 8px; padding: 0.6rem 0.75rem; font-size: 0.72rem; color: #0A1F44; max-height: 160px; overflow-y: auto; font-family: 'SF Mono', Menlo, monospace; }
+/* Wider modal + "how to prepare" copy box (match Persona Generator) */
+.gen-modal { width: 1040px; }
+.gen-ctx-head { display: flex; align-items: center; justify-content: space-between; }
+.gen-prepare { background: none; border: none; color: #0176d3; font-weight: 600; cursor: pointer; font-size: 0.82rem; font-family: inherit; }
+.gen-copy-callout { background: #eef4fb; border: 1px solid #c6dcf5; border-radius: 8px; padding: 0.75rem 0.85rem; margin: 0.6rem 0; }
+.gen-copy-callout-label { font-size: 0.8rem; font-weight: 600; color: #0A1F44; margin: 0 0 0.5rem; }

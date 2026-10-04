@@ -1,0 +1,25 @@
+<template>
+    <div class="new-wrap">
+        <div class="new-card">
+            <header class="new-header">
+                <span class="new-icon"><lightning-icon icon-name="utility:magicwand" variant="inverse" size="small"></lightning-icon></span>
+                <div>
+                    <h1 class="new-title">New 2-Way Experience</h1>
+                    <p class="new-sub">Pick the basics — we'll name it and open Story Studio. No naming required.</p>
+                </div>
+            </header>
+            <div class="new-body">
+                <lightning-combobox label="Brand Kit" placeholder="Choose a brand…" options={brandKits}
+                    value={brandKitId} onchange={handleBrand}></lightning-combobox>
+                <lightning-combobox label="Channel" options={channelOptions} value={channel} onchange={handleChannel}></lightning-combobox>
+                <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
+                <lightning-combobox label="Persona" placeholder="Choose a persona…" options={personaOptions}
+                    value={personaId} onchange={handlePersona}></lightning-combobox>
+            </div>
+            <footer class="new-footer">
+                <template lwc:if={creating}><lightning-spinner size="small" alternative-text="Creating…"></lightning-spinner></template>
+                <lightning-button variant="brand" label="Create & open" onclick={handleCreate} disabled={creating}></lightning-button>
+            </footer>
+        </div>
+    </div>
+</template>

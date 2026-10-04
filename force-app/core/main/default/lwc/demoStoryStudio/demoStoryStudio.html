@@ -173,8 +173,19 @@
                         class="gen-close" onclick={closeGenerate}></lightning-button-icon>
                 </header>
                 <div class="gen-body">
-                    <label class="gen-label">Campaign context</label>
+                    <div class="gen-ctx-head">
+                        <label class="gen-label">Campaign context</label>
+                        <button class="gen-prepare" onclick={toggleCopyPrompt}>? How to prepare this</button>
+                    </div>
                     <p class="gen-help">The offer, the audience, and the angle you want to demo. The more specific, the better the draft — Einstein also uses the Brand Kit and Persona you've set.</p>
+                    <template lwc:if={showCopyPrompt}>
+                        <div class="gen-copy-callout">
+                            <p class="gen-copy-callout-label">Copy this into Granola / Notebook LM / Gemini / ChatGPT / Slack AI, then paste the paragraph it returns into the box below:</p>
+                            <pre class="gen-copy-pre">{copyablePrompt}</pre>
+                            <lightning-button label="Copy prompt" icon-name="utility:copy"
+                                onclick={handleCopyPrompt} class="slds-m-top_x-small"></lightning-button>
+                        </div>
+                    </template>
                     <lightning-textarea variant="label-hidden" value={genContext} onchange={handleGenContext}
                         class="gen-context"
                         placeholder="Example: Win back lapsed auto-loan shoppers. Rates just dropped 75bps; target members who started an application in the last 90 days but didn't finish. Angle: a time-boxed rate-lock with a nudge to reply for help."></lightning-textarea>

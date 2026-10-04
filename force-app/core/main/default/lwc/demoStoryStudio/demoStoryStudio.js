@@ -371,22 +371,53 @@ export default class DemoStoryStudio extends LightningElement {
         this.generating = true;
         try {
             const raw = await generateEmail({ industry: this.genIndustry, brand: this.config.brandName, context: this.genContext, angle: this.genAngle });
-            const gen = JSON.parse(raw);
-            const patch = {};
-            ['subjectLine', 'headline', 'subHeadline', 'bodyParagraph', 'featureColumn1', 'featureColumn2',
-             'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
-                .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
-            if (Array.isArray(gen.messages) && gen.messages.length) {
-                patch.messages = gen.messages.filter((m) => m && m.text)
-                    .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text }));
-            }
-            this._commit(patch);
+            this.applyGenJson(JSON.parse(raw));
             this.showGenerate = false;
             this.toast('Generated', 'AI drafted your email + conversation. Edit anything.', 'success');
         } catch (err) {
             this.toast('Generate failed', (err && err.body && err.body.message) || err.message || 'Could not parse AI output', 'error');
         } finally {
             this.generating = false;
+        }
+    }
+
+    // Merge an AI JSON payload (from Einstein or pasted-back) into the config.
+    applyGenJson(gen) {
+        const patch = {};
+        ['subjectLine', 'headline', 'subHeadline', 'bodyParagraph', 'featureColumn1', 'featureColumn2',
+         'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
+            .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
+        if (Array.isArray(gen.messages) && gen.messages.length) {
+            patch.messages = gen.messages.filter((m) => m && m.text)
+                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text }));
+        }
+        this._commit(patch);
+    }
+
+    // ---- "How to prepare this" — a prompt that helps the SE WRITE the context ----
+    // (returns plain text to paste into the Campaign context box; no JSON ever).
+    @track showCopyPrompt = false;
+    toggleCopyPrompt() { this.showCopyPrompt = !this.showCopyPrompt; }
+
+    get copyablePrompt() {
+        const brand = this.config.brandName || 'the brand';
+        const sub = this.config.customerName || 'the customer';
+        const ind = this.genIndustry;
+        return 'Summarize the campaign I want to demo into a "campaign context" for a Salesforce email demo. '
+            + 'Include the offer, the target audience, and the angle (win-back, cross-sell, onboarding, retention, etc.). '
+            + 'Ignore anything that sounds like a to-do or blocker. Keep it under 150 words, written as one continuous '
+            + 'paragraph, not bullets. The brand is ' + brand + ' and the customer receiving the email is ' + sub
+            + ' in the ' + ind + ' industry.';
+    }
+
+    handleCopyPrompt() {
+        const text = this.copyablePrompt;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(text).then(
+                () => this.toast('Copied', 'Paste it into your AI, then paste the paragraph it returns into Campaign context.', 'success'),
+                () => this.toast('Copy failed', 'Select the text and copy manually.', 'warning'));
+        } else {
+            this.toast('Copy', 'Select the prompt text and copy manually.', 'info');
         }
     }
 
