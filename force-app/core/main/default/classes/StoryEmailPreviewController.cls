@@ -11,7 +11,26 @@ public with sharing class StoryEmailPreviewController {
     // of rendering it inline (used by the Story Studio "Download HTML" button).
     public String getPageContentType() {
         String dl = ApexPages.currentPage().getParameters().get('download');
-        return dl == '1' ? 'text/html#story-email.html' : 'text/html';
+        if (dl != '1') return 'text/html';
+        String id = ApexPages.currentPage().getParameters().get('id');
+        String brand = 'brand';
+        String channel = 'email';
+        if (String.isNotBlank(id)) {
+            for (Two_Way_Simulator__c s : [SELECT Brand__c, Channel__c, Config_JSON__c FROM Two_Way_Simulator__c WHERE Id = :id LIMIT 1]) {
+                if (String.isNotBlank(s.Brand__c)) {
+                    brand = s.Brand__c;
+                } else if (String.isNotBlank(s.Config_JSON__c)) {
+                    try {
+                        Map<String, Object> c = (Map<String, Object>) JSON.deserializeUntyped(s.Config_JSON__c);
+                        if (c.get('brandName') != null) brand = String.valueOf(c.get('brandName'));
+                    } catch (Exception e) {}
+                }
+                if (String.isNotBlank(s.Channel__c)) channel = s.Channel__c;
+            }
+        }
+        String slug = (brand + '_' + channel).replaceAll('[^A-Za-z0-9]+', '-').replaceAll('^-|-$', '');
+        String d = Datetime.now().format('yyyy-MM-dd');
+        return 'text/html#2-way_' + slug + '_' + d + '.html';
     }
 
     public String getHtml() {

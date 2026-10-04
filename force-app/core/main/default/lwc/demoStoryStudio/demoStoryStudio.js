@@ -7,6 +7,7 @@ import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
+import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 
 const FIELDS = [CFG];
 
@@ -48,11 +49,70 @@ const DEFAULTS = {
     ]
 };
 
+// Per-industry content starter packs. Picking an industry fills the content
+// fields deterministically; ✨Generate can then refine via Einstein.
+const INDUSTRY_PACKS = {
+    'Financial Services': {
+        subjectLine: 'A smarter way to save is here',
+        headline: 'Unlock Smart Wealth Building',
+        subHeadline: 'Automatic round-ups that grow your savings',
+        bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYour everyday spending can quietly build your savings. Turn on round-ups and watch it add up — automatically.',
+        featureColumn1: 'Round up every purchase to the nearest dollar.',
+        featureColumn2: 'Track and adjust your goals from anywhere, securely.',
+        bullet1: 'Seamless: round-ups and deposits sync instantly.',
+        bullet2: 'Mobile goal tracking with bank-level security.',
+        bullet3: 'Real-time insights before you spend.',
+        ctaButtonText: 'See how it works',
+        replyPromptHeadline: 'Have questions? Just hit reply!',
+        replyPromptBody: 'Reply directly to this email and our AI specialist will answer instantly.',
+        messages: [
+            { sender: 'user', text: 'How do the round-ups work with my existing accounts?' },
+            { sender: 'bot', text: 'Every debit-card purchase rounds up to the nearest dollar and the difference moves to your savings — automatically, no extra apps.' }
+        ]
+    },
+    'Retail': {
+        subjectLine: 'Your cart misses you — here is 15% off',
+        headline: 'Still thinking it over?',
+        subHeadline: 'Complete your order and save today',
+        bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nThe items you loved are still waiting. Here is a little something to help you decide.',
+        featureColumn1: 'Free shipping on orders over $50.',
+        featureColumn2: 'Easy 30-day returns, no questions asked.',
+        bullet1: 'Members-only early access to new drops.',
+        bullet2: 'Points on every purchase.',
+        bullet3: 'Price-match guarantee.',
+        ctaButtonText: 'Complete my order',
+        replyPromptHeadline: 'Need help choosing?',
+        replyPromptBody: 'Reply to this email and our shopping assistant will help you pick the right size and style.',
+        messages: [
+            { sender: 'user', text: 'Do you have this in a medium, and when would it arrive?' },
+            { sender: 'bot', text: 'Yes! Medium is in stock and ships free — it would arrive in 2-3 business days with the offer applied at checkout.' }
+        ]
+    },
+    'Hospitality & Travel': {
+        subjectLine: 'Your getaway is calling',
+        headline: 'Escape awaits, [[CUSTOMER_FIRST_NAME]]',
+        subHeadline: 'Exclusive member rates on your next stay',
+        bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYou have been working hard. Treat yourself to a getaway with rates reserved just for members.',
+        featureColumn1: 'Up to 25% off member-only room rates.',
+        featureColumn2: 'Flexible booking with free cancellation.',
+        bullet1: 'Earn and redeem points on every stay.',
+        bullet2: 'Complimentary room upgrades when available.',
+        bullet3: 'Late checkout for members.',
+        ctaButtonText: 'Plan my trip',
+        replyPromptHeadline: 'Questions about your trip?',
+        replyPromptBody: 'Reply to this email and our concierge AI will help you plan dates, rooms, and extras.',
+        messages: [
+            { sender: 'user', text: 'Can I use my points toward a beachfront room for a long weekend?' },
+            { sender: 'bot', text: 'Absolutely — your points cover two nights in a beachfront room, and I can hold Friday-Sunday with free cancellation. Want me to reserve it?' }
+        ]
+    }
+};
+
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
-    { key: 'template', label: 'Email Template', icon: 'utility:email' },
     { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
     { key: 'agent', label: 'AI Agent', icon: 'utility:einstein' },
+    { key: 'template', label: 'Email Template', icon: 'utility:email' },
     { key: 'convo', label: 'Messages', icon: 'utility:chat' }
 ];
 
@@ -202,7 +262,7 @@ export default class DemoStoryStudio extends LightningElement {
     // ---- preview = Visualforce page loaded by relative URL (LWS-legal), debounced autosave
     scheduleAutosave() {
         if (this._timer) clearTimeout(this._timer);
-        this._timer = setTimeout(() => { this.doSave(); }, 900);
+        this._timer = setTimeout(() => { this.doSave(); }, 450);
     }
     async doSave() {
         try {
@@ -234,9 +294,51 @@ export default class DemoStoryStudio extends LightningElement {
     get saveStatusText() { return this.saved ? 'All changes saved' : 'Unsaved changes'; }
     get saveStatusPillClass() { return 'save-status ' + (this.saved ? 'save-status--saved' : 'save-status--pending'); }
 
-    // AI generate — wired to EinsteinProvider in the next pass.
-    handleGenerate() {
-        this.toast('Coming next', 'One-click AI generate (brand → full branded email + conversation) is the next wire-up.', 'info');
+    // ---- AI Generate (industry pack + Einstein) ----
+    @track showGenerate = false;
+    @track genIndustry = 'Financial Services';
+    @track genUseCase = '';
+    generating = false;
+
+    get industryOptions() {
+        return [
+            { label: 'Financial Services', value: 'Financial Services' },
+            { label: 'Retail', value: 'Retail' },
+            { label: 'Hospitality & Travel', value: 'Hospitality & Travel' }
+        ];
+    }
+    handleGenerate() { this.showGenerate = true; }
+    closeGenerate() { this.showGenerate = false; }
+    handleGenUseCase(e) { this.genUseCase = e.target.value; }
+
+    // Picking an industry fills the deterministic starter pack immediately.
+    handleGenIndustry(e) {
+        this.genIndustry = e.detail.value;
+        const pack = INDUSTRY_PACKS[this.genIndustry];
+        if (pack) this._commit({ ...pack });
+    }
+
+    async runGenerate() {
+        this.generating = true;
+        try {
+            const raw = await generateEmail({ industry: this.genIndustry, brand: this.config.brandName, useCase: this.genUseCase });
+            const gen = JSON.parse(raw);
+            const patch = {};
+            ['subjectLine', 'headline', 'subHeadline', 'bodyParagraph', 'featureColumn1', 'featureColumn2',
+             'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
+                .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
+            if (Array.isArray(gen.messages) && gen.messages.length) {
+                patch.messages = gen.messages.filter((m) => m && m.text)
+                    .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text }));
+            }
+            this._commit(patch);
+            this.showGenerate = false;
+            this.toast('Generated', 'AI drafted your email + conversation. Edit anything.', 'success');
+        } catch (err) {
+            this.toast('Generate failed', (err && err.body && err.body.message) || err.message || 'Could not parse AI output', 'error');
+        } finally {
+            this.generating = false;
+        }
     }
 
     toast(t, m, v) { this.dispatchEvent(new ShowToastEvent({ title: t, message: m, variant: v })); }

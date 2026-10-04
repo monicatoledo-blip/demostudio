@@ -59,26 +59,26 @@
                             </button>
                         </template>
                     </div>
-                    <lightning-input label="Email Subject Line" data-field="subjectLine" value={config.subjectLine} onchange={handleInput}></lightning-input>
                     <lightning-input label="Brand Name" data-field="brandName" value={config.brandName} onchange={handleInput}></lightning-input>
                     <lightning-input label="Brand Domain" data-field="brandDomain" value={config.brandDomain} onchange={handleInput}></lightning-input>
                     <c-demo-story-image label="Marketing Sender Avatar" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                     <c-demo-story-image label="Logo" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
                     <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
-                    <lightning-input type="color" label="Logo Background Color" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input>
-                    <lightning-input type="color" label="Primary Hex Color" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input>
-                    <lightning-input type="color" label="Headline Text Color" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input>
+                    <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
+                    <div class="color-field"><label class="color-label">Primary Hex Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="primaryColor" value={config.primaryColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input></div></div>
+                    <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
                 </template>
 
                 <template lwc:if={isTemplate}>
                     <h2 class="sec-title">Email Template</h2>
+                    <lightning-input label="Email Subject Line" data-field="subjectLine" value={config.subjectLine} onchange={handleInput}></lightning-input>
                     <c-demo-story-image label="Hero Image" value={config.heroImageUrl} data-field="heroImageUrl" onpick={handleImagePick}></c-demo-story-image>
                     <lightning-input label="Headline" data-field="headline" value={config.headline} onchange={handleInput}></lightning-input>
                     <lightning-input label="Sub-headline" data-field="subHeadline" value={config.subHeadline} onchange={handleInput}></lightning-input>
                     <lightning-textarea label="2-Column Copy: Left" data-field="featureColumn1" value={config.featureColumn1} onchange={handleInput}></lightning-textarea>
                     <lightning-textarea label="2-Column Copy: Right" data-field="featureColumn2" value={config.featureColumn2} onchange={handleInput}></lightning-textarea>
-                    <lightning-input type="color" label="2-Column Text Color" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput}></lightning-input>
-                    <lightning-input type="color" label="2-Column Section Background Color" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput}></lightning-input>
+                    <div class="color-field"><label class="color-label">2-Column Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput}></lightning-input></div></div>
+                    <div class="color-field"><label class="color-label">2-Column Section Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput}></lightning-input></div></div>
                     <lightning-textarea label="Body" data-field="bodyParagraph" value={config.bodyParagraph} onchange={handleInput}></lightning-textarea>
                     <lightning-input type="checkbox" label="Show bullet points" data-field="showBullets" checked={config.showBullets} onchange={handleToggle}></lightning-input>
                     <lightning-input label="Bullet Point 1" data-field="bullet1" value={config.bullet1} onchange={handleInput}></lightning-input>
@@ -87,7 +87,7 @@
                     <lightning-input label="Reply Prompt Headline" data-field="replyPromptHeadline" value={config.replyPromptHeadline} onchange={handleInput}></lightning-input>
                     <lightning-textarea label="Reply Prompt Body" data-field="replyPromptBody" value={config.replyPromptBody} onchange={handleInput}></lightning-textarea>
                     <lightning-input label="CTA Button Text" data-field="ctaButtonText" value={config.ctaButtonText} onchange={handleInput}></lightning-input>
-                    <lightning-input type="color" label="CTA Button Color" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput}></lightning-input>
+                    <div class="color-field"><label class="color-label">CTA Button Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput}></lightning-input></div></div>
                 </template>
 
                 <template lwc:if={isCustomer}>
@@ -142,5 +142,25 @@
                 </div>
             </aside>
         </div>
+
+        <template lwc:if={showGenerate}>
+            <section class="gen-backdrop" onclick={closeGenerate}></section>
+            <section class="gen-modal">
+                <h3 class="gen-title">✨ Generate with AI</h3>
+                <lightning-combobox label="Industry" options={industryOptions} value={genIndustry}
+                    onchange={handleGenIndustry}></lightning-combobox>
+                <lightning-input label="Brand" value={config.brandName} disabled></lightning-input>
+                <lightning-textarea label="Use case / prompt" value={genUseCase} onchange={handleGenUseCase}
+                    placeholder="e.g. Win back lapsed auto-loan shoppers with a rate-drop offer"></lightning-textarea>
+                <p class="gen-hint">Picking an industry fills a starter pack instantly. Generate uses Einstein to tailor the copy and the 2-way conversation to your use case.</p>
+                <div class="gen-actions">
+                    <lightning-button label="Cancel" onclick={closeGenerate} disabled={generating}></lightning-button>
+                    <lightning-button variant="brand" label="Generate" onclick={runGenerate} disabled={generating}></lightning-button>
+                </div>
+                <template lwc:if={generating}>
+                    <lightning-spinner alternative-text="Generating..." size="small"></lightning-spinner>
+                </template>
+            </section>
+        </template>
     </div>
 </template>

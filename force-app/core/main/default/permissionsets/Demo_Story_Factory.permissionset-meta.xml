@@ -11,6 +11,10 @@
         <apexClass>DemoBrandKitService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>DemoStoryGenerator</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
     <objectPermissions>
         <object>Two_Way_Simulator__c</object>
         <allowCreate>true</allowCreate>

@@ -93,3 +93,17 @@
 .kit-swatch { display: flex; align-items: center; justify-content: center; height: 54px; }
 .kit-swatch img { max-width: 72px; max-height: 36px; object-fit: contain; }
 .kit-name { display: block; padding: 0.4rem 0.5rem; font-size: 0.78rem; font-weight: 600; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.color-field { margin-bottom: 0.75rem; }
+.color-label { display: block; font-size: 0.8rem; font-weight: 600; color: #444; margin-bottom: 0.25rem; }
+.color-row { display: flex; align-items: center; gap: 0.5rem; }
+.color-swatch { width: 44px; height: 36px; border: 1px solid #c9ced6; border-radius: 6px; padding: 0; cursor: pointer; background: none; flex: 0 0 44px; }
+.color-row lightning-input { flex: 1 1 auto; }
+
+.gen-backdrop { position: fixed; inset: 0; background: rgba(10,31,68,0.35); z-index: 90; }
+.gen-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%); z-index: 91;
+    width: 460px; max-width: 92vw; background: #fff; border-radius: 12px; padding: 1.25rem;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.25); }
+.gen-title { font-size: 1.1rem; font-weight: 700; color: #0A1F44; margin: 0 0 0.75rem; }
+.gen-modal lightning-combobox, .gen-modal lightning-input, .gen-modal lightning-textarea { display: block; margin-bottom: 0.6rem; }
+.gen-hint { font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0.9rem; line-height: 1.4; }
+.gen-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
