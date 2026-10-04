@@ -27,8 +27,8 @@ const DEFAULTS = {
     heroImageUrl: '',
     headline: 'Unlock Smart Wealth Building',
     subHeadline: 'Stop stressing about your savings goals',
-    featureColumn1: 'Since you already bank with [[BRAND_NAME]], your accounts sync automatically. No manual transfers or complex budgeting spreadsheets required.',
-    featureColumn2: 'Track your net worth and adjust your savings goals from anywhere using the [[BRAND_NAME]] app, complete with real-time security alerts.',
+    featureColumn1: 'Since you already bank with [[BRAND_NAME]], your accounts sync automatically — checking, savings, and the Smart Wealth add-on in one view. No manual transfers, no exporting statements, and no complex budgeting spreadsheets to keep up. Everything updates in real time, so you always know exactly where you stand.',
+    featureColumn2: 'Track your net worth and adjust your savings goals from anywhere with the [[BRAND_NAME]] app. Set a target, switch on automatic round-ups, and watch your progress build without lifting a finger. You will get real-time security alerts on every transaction, and you can pause or change your plan whenever you like.',
     featureColumnTextColor: '#FFFFFF', featureSectionColor: '#03A05B',
     bodyParagraph: 'As a valued [[BRAND_NAME]] customer, you know how important it is to keep your personal finances organized and secure. But what if you could put your wealth-building entirely on autopilot?\n\nWe’re excited to introduce the Smart Wealth add-on, designed specifically to integrate flawlessly with your existing [[BRAND_NAME]] checking and savings accounts.',
     showBullets: true,
@@ -60,8 +60,8 @@ const INDUSTRY_PACKS = {
         headline: 'Where to next?',
         subHeadline: 'Member fares and perks picked for you',
         bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYou travel enough to deserve the easy button. [[BRAND_NAME]] just unlocked member-only fares and stays tailored to where you love to go.\n\nBook in a tap, change plans without the stress, and earn rewards on every trip.',
-        featureColumn1: 'Member-only fares and stays, bundled so you save more.',
-        featureColumn2: 'Free changes and 24/7 trip support from anywhere.',
+        featureColumn1: 'Unlock member-only fares and bundled stays for the destinations you love, refreshed daily and reserved just for [[BRAND_NAME]] members. We watch prices across airlines and hotels so you do not have to, and flag the best windows to book. The more you travel, the more you save.',
+        featureColumn2: 'Plans change, and that is fine — enjoy free changes on most bookings and 24/7 trip support from anywhere in the world. One itinerary keeps your flights, hotels, and cars together, and a concierge is always a reply away. Travel with the confidence that someone has your back.',
         bullet1: 'Price-drop alerts on the routes you watch.',
         bullet2: 'Earn and redeem points on flights, hotels, and cars.',
         bullet3: 'One itinerary for the whole trip.',
@@ -78,8 +78,8 @@ const INDUSTRY_PACKS = {
         headline: 'Unlock Smart Wealth Building',
         subHeadline: 'Automatic round-ups that grow your savings',
         bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYour everyday spending can quietly build your savings. Turn on round-ups and watch it add up — automatically.',
-        featureColumn1: 'Round up every purchase to the nearest dollar.',
-        featureColumn2: 'Track and adjust your goals from anywhere, securely.',
+        featureColumn1: 'Every purchase rounds up to the nearest dollar and the spare change moves straight into savings — automatically, in the background. There is nothing new to download and nothing to remember. It is the easiest way to build a cushion without changing how you spend.',
+        featureColumn2: 'Set a goal, track your progress, and adjust anytime from your phone with bank-level security on every session. Get a heads-up before big purchases and a clear view of projected growth. Your money works harder while you stay fully in control.',
         bullet1: 'Seamless: round-ups and deposits sync instantly.',
         bullet2: 'Mobile goal tracking with bank-level security.',
         bullet3: 'Real-time insights before you spend.',
@@ -96,8 +96,8 @@ const INDUSTRY_PACKS = {
         headline: 'Still thinking it over?',
         subHeadline: 'Complete your order and save today',
         bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nThe items you loved are still waiting. Here is a little something to help you decide.',
-        featureColumn1: 'Free shipping on orders over $50.',
-        featureColumn2: 'Easy 30-day returns, no questions asked.',
+        featureColumn1: 'Enjoy free shipping on orders over $50 and members-only early access to new drops before they sell out. Your cart and favorites follow you across every device, so you can pick up right where you left off. Checkout is one tap once your details are saved.',
+        featureColumn2: 'Changed your mind? Easy 30-day returns, no questions asked, with a prepaid label in a click. Earn points on every purchase and redeem them for whatever you want next. Plus a price-match guarantee, so you never second-guess a buy.',
         bullet1: 'Members-only early access to new drops.',
         bullet2: 'Points on every purchase.',
         bullet3: 'Price-match guarantee.',
@@ -114,8 +114,8 @@ const INDUSTRY_PACKS = {
         headline: 'Escape awaits, [[CUSTOMER_FIRST_NAME]]',
         subHeadline: 'Exclusive member rates on your next stay',
         bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYou have been working hard. Treat yourself to a getaway with rates reserved just for members.',
-        featureColumn1: 'Up to 25% off member-only room rates.',
-        featureColumn2: 'Flexible booking with free cancellation.',
+        featureColumn1: 'Enjoy up to 25% off member-only room rates at properties picked for how you like to travel. Earn and redeem points on every stay, and get complimentary upgrades whenever a room opens up. The longer you are a member, the better it gets.',
+        featureColumn2: 'Book with total flexibility — free cancellation and easy changes if plans shift. Members get late checkout, priority support, and little perks on arrival. Tell us what you need and our concierge handles the rest.',
         bullet1: 'Earn and redeem points on every stay.',
         bullet2: 'Complimentary room upgrades when available.',
         bullet3: 'Late checkout for members.',
@@ -355,6 +355,27 @@ export default class DemoStoryStudio extends LightningElement {
     }
     // Reload the preview iframe so the 2-way simulation restarts from the top.
     handleResetPreview() { this.previewVersion++; }
+
+    // ---- draggable divider between editor and preview ----
+    @track editorWidth = 440;
+    get splitStyle() { return 'grid-template-columns: 200px ' + this.editorWidth + 'px 8px 1fr;'; }
+    _startX = 0;
+    _startW = 440;
+    _onMove = (e) => {
+        const w = this._startW + (e.clientX - this._startX);
+        this.editorWidth = Math.max(300, Math.min(900, w));
+    };
+    _onUp = () => {
+        window.removeEventListener('mousemove', this._onMove);
+        window.removeEventListener('mouseup', this._onUp);
+    };
+    startResize(e) {
+        this._startX = e.clientX;
+        this._startW = this.editorWidth;
+        window.addEventListener('mousemove', this._onMove);
+        window.addEventListener('mouseup', this._onUp);
+        e.preventDefault();
+    }
 
     async handleDownload() {
         this.loading = true;

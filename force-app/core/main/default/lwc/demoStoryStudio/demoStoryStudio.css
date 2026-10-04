@@ -147,3 +147,5 @@
 .gen-modal { max-height: none; }
 .gen-body { overflow: visible; }
 .preview-reset { margin-left: auto; }
+.studio-resizer { background: #e6e9ee; cursor: col-resize; transition: background 0.15s; }
+.studio-resizer:hover, .studio-resizer:active { background: #0176d3; }

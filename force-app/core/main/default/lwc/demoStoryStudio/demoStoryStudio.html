@@ -35,7 +35,7 @@
                 onclick={handleGenerate} class="generate-banner-btn"></lightning-button>
         </div>
 
-        <div class="studio-split">
+        <div class="studio-split" style={splitStyle}>
             <nav class="studio-rail">
                 <template for:each={tabs} for:item="t">
                     <button key={t.key} class={t.className} data-key={t.key} onclick={handleTab}>
@@ -146,6 +146,8 @@
                         class="slds-m-top_x-small"></lightning-button>
                 </template>
             </section>
+
+            <div class="studio-resizer" onmousedown={startResize} title="Drag to resize"></div>
 
             <aside class="studio-preview">
                 <header class="preview-header">
