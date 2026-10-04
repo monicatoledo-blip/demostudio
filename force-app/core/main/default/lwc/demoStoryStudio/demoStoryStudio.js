@@ -323,7 +323,14 @@ export default class DemoStoryStudio extends LightningElement {
 
     // ---- sections / nav
     get visibleSections() {
-        return SECTIONS.filter((s) => !s.channels || s.channels.includes(this.channel));
+        const vis = SECTIONS.filter((s) => !s.channels || s.channels.includes(this.channel));
+        // Messaging channels put Messages ahead of AI Agent (the thread is the
+        // star). Email keeps its original rail order unchanged.
+        if (this.isMessaging) {
+            const order = ['branding', 'customer', 'convo', 'agent'];
+            return vis.slice().sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
+        }
+        return vis;
     }
     get tabs() {
         return this.visibleSections.map((s) => ({ ...s,
