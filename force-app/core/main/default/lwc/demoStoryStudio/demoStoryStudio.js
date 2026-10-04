@@ -607,8 +607,13 @@ export default class DemoStoryStudio extends LightningElement {
         }
         // If the AI picked up a specific recipient from the context, set the
         // Customer Profile so the [[CUSTOMER_FIRST_NAME]] token resolves to them.
-        if (gen.customerFirstName) patch.customerFirstName = gen.customerFirstName;
-        if (gen.customerName) patch.customerName = gen.customerName;
+        // Normalize: first name = first word (the model sometimes returns the
+        // full name in customerFirstName).
+        const full = gen.customerName || gen.customerFirstName;
+        if (full) {
+            patch.customerName = full;
+            patch.customerFirstName = (gen.customerFirstName || full).trim().split(/\s+/)[0];
+        }
         this._commit(patch);
     }
 
