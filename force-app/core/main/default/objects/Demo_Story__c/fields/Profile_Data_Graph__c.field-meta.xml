@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Profile_Data_Graph__c</fullName>
+    <label>Profile Data Graph</label>
+    <description>Real-time profile data graph the Personalization Points bind to. Must be a REAL-TIME graph for WPM to list the PPs (meshmesh: Real_Time_Personalization).</description>
+    <defaultValue>&quot;Real_Time_Personalization&quot;</defaultValue>
+    <length>120</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

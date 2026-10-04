@@ -1,0 +1,35 @@
+<template>
+    <lightning-card title="Deploy to this Org" icon-name="utility:upload">
+        <div class="slds-p-horizontal_medium slds-p-bottom_medium">
+            <div class="slds-m-bottom_small">
+                <span class="slds-m-right_x-small">Status:</span>
+                <lightning-badge label={status} variant={statusVariant}></lightning-badge>
+                <template if:true={lastDeployed}>
+                    <span class="slds-text-body_small slds-m-left_small">
+                        Last deployed <lightning-formatted-date-time value={lastDeployed}></lightning-formatted-date-time>
+                    </span>
+                </template>
+            </div>
+            <div class="slds-is-relative">
+                <lightning-button
+                    variant="brand"
+                    label="Deploy to SDO"
+                    title="Create the personalization objects + host the experience in this org"
+                    onclick={handleDeploy}
+                    disabled={loading}
+                    class="slds-m-right_x-small">
+                </lightning-button>
+                <lightning-button
+                    variant="destructive-text"
+                    label="Tear Down"
+                    title="Remove everything this story created from the org"
+                    onclick={handleTeardown}
+                    disabled={loading}>
+                </lightning-button>
+                <template if:true={loading}>
+                    <lightning-spinner alternative-text="Working..." size="small"></lightning-spinner>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>

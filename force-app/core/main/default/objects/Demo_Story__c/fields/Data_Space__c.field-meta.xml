@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Data_Space__c</fullName>
+    <label>Data Space</label>
+    <defaultValue>&quot;default&quot;</defaultValue>
+    <length>80</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

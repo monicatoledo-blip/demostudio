@@ -1,0 +1,35 @@
+<template>
+    <div class="img-field">
+        <label class="img-label">{label}</label>
+        <div class="img-row">
+            <div class="img-thumb">
+                <template lwc:if={hasValue}>
+                    <img src={value} alt={label} />
+                </template>
+                <template lwc:else>
+                    <span class="img-empty">No image</span>
+                </template>
+            </div>
+            <div class="img-controls">
+                <lightning-input variant="label-hidden" placeholder="Paste an image URL"
+                    value={value} onchange={handleUrl}></lightning-input>
+                <div class="img-btns">
+                    <lightning-button label={toggleLabel} onclick={toggleGrid} variant="neutral"></lightning-button>
+                    <template lwc:if={hasValue}>
+                        <lightning-button label="Clear" onclick={clearImg} variant="base"></lightning-button>
+                    </template>
+                </div>
+            </div>
+        </div>
+        <template lwc:if={showGrid}>
+            <div class="img-grid">
+                <template for:each={images} for:item="img">
+                    <button key={img.id} class="img-cell" data-url={img.url}
+                        title={img.description} onclick={pickFromGrid}>
+                        <img src={img.url} alt={img.description} loading="lazy" />
+                    </button>
+                </template>
+            </div>
+        </template>
+    </div>
+</template>

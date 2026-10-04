@@ -149,6 +149,10 @@
         <modifyAllRecords>false</modifyAllRecords>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <recordTypeVisibilities>
+        <recordType>Contact.Demo_Persona</recordType>
+        <visible>true</visible>
+    </recordTypeVisibilities>
     <fieldPermissions>
         <field>Contact.Demo_Persona__c</field>
         <editable>true</editable>

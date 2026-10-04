@@ -293,6 +293,11 @@ public with sharing class DemoStudioService {
             Demo_Persona__c    = personaId,
             Demo_Assigned_By__c = me
         );
+        // Stamp the Demo Persona record type so the branded Unified Profile
+        // page renders on this Contact in any Lightning app (Sales, Service,
+        // Data Cloud, Marketing Cloud Advanced) — not just the Demo Studio app.
+        Id demoRt = demoPersonaRecordTypeId();
+        if (demoRt != null) c.RecordTypeId = demoRt;
         // Demo contacts are intentionally clones of a persona, so a second
         // contact for the same persona matches the Standard Contact Duplicate
         // Rule and the insert is blocked with DUPLICATES_DETECTED (surfaced as
@@ -301,7 +306,20 @@ public with sharing class DemoStudioService {
         // Note: the DuplicateRuleHeader is only honored via the
         // Database.insert(record, dmlOptions) form — setOptions() does not
         // carry it.
-        Database.insert(c, allowDuplicatesDmlOptions());
+        // Crash-proof the record-type stamp: if the running user can't assign
+        // the Demo Persona record type, still create the Contact (without it)
+        // rather than throwing. It just won't render the cross-app UP for that
+        // user — a graceful downgrade, never a failure.
+        try {
+            Database.insert(c, allowDuplicatesDmlOptions());
+        } catch (Exception e) {
+            if (c.RecordTypeId != null) {
+                c.RecordTypeId = null;
+                Database.insert(c, allowDuplicatesDmlOptions());
+            } else {
+                throw e;
+            }
+        }
         return c.Id;
     }
 
@@ -311,6 +329,22 @@ public with sharing class DemoStudioService {
         Database.DMLOptions dml = new Database.DMLOptions();
         dml.DuplicateRuleHeader.AllowSave = true;
         return dml;
+    }
+
+    // Record type helpers. Guarded so the service still works in orgs where the
+    // Demo Persona record type hasn't been deployed yet (returns null → the
+    // Contact keeps the default record type, no error).
+    @TestVisible
+    private static Id demoPersonaRecordTypeId() {
+        Schema.RecordTypeInfo rt = Schema.SObjectType.Contact
+            .getRecordTypeInfosByDeveloperName().get('Demo_Persona');
+        return (rt != null && rt.isAvailable()) ? rt.getRecordTypeId() : null;
+    }
+
+    private static Id masterContactRecordTypeId() {
+        Schema.RecordTypeInfo rt = Schema.SObjectType.Contact
+            .getRecordTypeInfosByDeveloperName().get('Master');
+        return (rt != null) ? rt.getRecordTypeId() : null;
     }
 
     @AuraEnabled
@@ -338,6 +372,7 @@ public with sharing class DemoStudioService {
         Map<String, Integer> counterByInitials = suffixCountersForPersona(personaId);
 
         Id me = UserInfo.getUserId();
+        Id demoRt = demoPersonaRecordTypeId();
         List<Contact> updates = new List<Contact>();
         for (Contact c : existing) {
             Contact u = new Contact(
@@ -345,6 +380,9 @@ public with sharing class DemoStudioService {
                 Demo_Persona__c = personaId,
                 Demo_Assigned_By__c = me
             );
+            // Same as create: stamp the Demo Persona record type so reskinned
+            // contacts render the Unified Profile across all apps.
+            if (demoRt != null) u.RecordTypeId = demoRt;
             if (hasPersonaName) {
                 if (String.isBlank(c.Demo_Original_Snapshot__c)) {
                     u.Demo_Original_Snapshot__c = JSON.serialize(new Map<String, String>{
@@ -369,7 +407,20 @@ public with sharing class DemoStudioService {
         }
         // Renaming a Contact to match a persona can also trip the duplicate
         // rule; save through it via the dmlOptions form (see createContactForPersona).
-        if (!updates.isEmpty()) Database.update(updates, allowDuplicatesDmlOptions());
+        // Crash-proof the record-type stamp the same way as create: if the RT
+        // can't be assigned, strip it and still complete the assignment.
+        if (!updates.isEmpty()) {
+            try {
+                Database.update(updates, allowDuplicatesDmlOptions());
+            } catch (Exception e) {
+                Boolean strippedRt = false;
+                for (Contact u : updates) {
+                    if (u.RecordTypeId != null) { u.RecordTypeId = null; strippedRt = true; }
+                }
+                if (strippedRt) Database.update(updates, allowDuplicatesDmlOptions());
+                else throw e;
+            }
+        }
     }
 
     private static String buildInitials(String first, String last) {
@@ -407,6 +458,7 @@ public with sharing class DemoStudioService {
             SELECT Id, Demo_Original_Snapshot__c
             FROM Contact WHERE Id IN :contactIds
         ];
+        Id masterRt = masterContactRecordTypeId();
         List<Contact> updates = new List<Contact>();
         for (Contact c : existing) {
             Contact u = new Contact(
@@ -414,6 +466,9 @@ public with sharing class DemoStudioService {
                 Demo_Persona__c = null,
                 Demo_Assigned_By__c = null
             );
+            // Return the Contact to the standard page by reverting the record
+            // type to Master when it's no longer a demo contact.
+            if (masterRt != null) u.RecordTypeId = masterRt;
             // Restore the original name/email/phone if we stashed a snapshot on assign.
             if (String.isNotBlank(c.Demo_Original_Snapshot__c)) {
                 try {
@@ -427,7 +482,18 @@ public with sharing class DemoStudioService {
             }
             updates.add(u);
         }
-        update updates;
+        // Crash-proof the record-type revert (mirrors create/assign): if the
+        // Master record type can't be set, still complete the unassign.
+        try {
+            update updates;
+        } catch (Exception e) {
+            Boolean strippedRt = false;
+            for (Contact u : updates) {
+                if (u.RecordTypeId != null) { u.RecordTypeId = null; strippedRt = true; }
+            }
+            if (strippedRt) update updates;
+            else throw e;
+        }
     }
 
     public class ArchetypeSummary {

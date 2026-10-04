@@ -1,0 +1,129 @@
+<template>
+    <div class="studio-frame">
+        <header class="studio-toolbar">
+            <div class="studio-toolbar-left">
+                <span class="studio-logo">
+                    <lightning-icon icon-name="utility:email" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="studio-title-wrap">
+                    <h1 class="studio-title">Story Studio</h1>
+                    <p class="studio-subtitle">{subtitle}</p>
+                </div>
+            </div>
+            <div class="studio-toolbar-right">
+                <span class={saveStatusPillClass}>
+                    <span class="save-status-text">{saveStatusText}</span>
+                </span>
+                <lightning-button variant="brand" label="Save" onclick={handleSave} disabled={loading}
+                    class="slds-m-left_small"></lightning-button>
+            </div>
+        </header>
+
+        <div class="generate-banner">
+            <div class="generate-banner-body">
+                <span class="generate-banner-icon">
+                    <lightning-icon icon-name="utility:magicwand" size="small" variant="inverse"></lightning-icon>
+                </span>
+                <div class="generate-banner-text">
+                    <h3 class="generate-banner-title">Start with a story, not a form</h3>
+                    <p class="generate-banner-sub">Describe the brand and offer — we'll pre-fill the branded email and the 2-way agent conversation. Then edit anything, with the preview updating live.</p>
+                </div>
+            </div>
+            <lightning-button variant="brand" label="✨ Generate" icon-name="utility:magicwand"
+                onclick={handleGenerate} class="generate-banner-btn"></lightning-button>
+        </div>
+
+        <div class="studio-split">
+            <nav class="studio-rail">
+                <template for:each={tabs} for:item="t">
+                    <button key={t.key} class={t.className} data-key={t.key} onclick={handleTab}>
+                        <lightning-icon icon-name={t.icon} size="x-small" class="rail-icon"></lightning-icon>
+                        <span class="rail-label">{t.label}</span>
+                    </button>
+                </template>
+            </nav>
+
+            <section class="studio-editor">
+                <template lwc:if={isBranding}>
+                    <h2 class="sec-title">Branding</h2>
+                    <lightning-input label="Email Subject Line" data-field="subjectLine" value={config.subjectLine} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Brand Name" data-field="brandName" value={config.brandName} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Brand Domain" data-field="brandDomain" value={config.brandDomain} onchange={handleInput}></lightning-input>
+                    <c-demo-story-image label="Marketing Sender Avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
+                    <lightning-input type="color" label="Primary Hex Color" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input>
+                    <lightning-input type="color" label="Headline Text Color" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input>
+                </template>
+
+                <template lwc:if={isTemplate}>
+                    <h2 class="sec-title">Email Template</h2>
+                    <c-demo-story-image label="Hero Image" value={config.heroImageUrl} data-field="heroImageUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <lightning-input label="Headline" data-field="headline" value={config.headline} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Sub-headline" data-field="subHeadline" value={config.subHeadline} onchange={handleInput}></lightning-input>
+                    <lightning-textarea label="2-Column Copy: Left" data-field="featureColumn1" value={config.featureColumn1} onchange={handleInput}></lightning-textarea>
+                    <lightning-textarea label="2-Column Copy: Right" data-field="featureColumn2" value={config.featureColumn2} onchange={handleInput}></lightning-textarea>
+                    <lightning-input type="color" label="2-Column Text Color" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput}></lightning-input>
+                    <lightning-input type="color" label="2-Column Section Background Color" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput}></lightning-input>
+                    <lightning-textarea label="Body" data-field="bodyParagraph" value={config.bodyParagraph} onchange={handleInput}></lightning-textarea>
+                    <lightning-input type="checkbox" label="Show bullet points" data-field="showBullets" checked={config.showBullets} onchange={handleToggle}></lightning-input>
+                    <lightning-input label="Bullet Point 1" data-field="bullet1" value={config.bullet1} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Bullet Point 2" data-field="bullet2" value={config.bullet2} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Bullet Point 3" data-field="bullet3" value={config.bullet3} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Reply Prompt Headline" data-field="replyPromptHeadline" value={config.replyPromptHeadline} onchange={handleInput}></lightning-input>
+                    <lightning-textarea label="Reply Prompt Body" data-field="replyPromptBody" value={config.replyPromptBody} onchange={handleInput}></lightning-textarea>
+                    <lightning-input label="CTA Button Text" data-field="ctaButtonText" value={config.ctaButtonText} onchange={handleInput}></lightning-input>
+                    <lightning-input type="color" label="CTA Button Color" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput}></lightning-input>
+                </template>
+
+                <template lwc:if={isCustomer}>
+                    <h2 class="sec-title">Customer Profile</h2>
+                    <lightning-input label="Customer Name" data-field="customerName" value={config.customerName} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Customer Email" data-field="customerEmail" value={config.customerEmail} onchange={handleInput}></lightning-input>
+                    <c-demo-story-image label="Customer Avatar" value={config.customerAvatarUrl} data-field="customerAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <lightning-input label="Customer Title" data-field="customerTitle" value={config.customerTitle} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Customer Company" data-field="customerCompany" value={config.customerCompany} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Customer Mobile" data-field="customerMobile" value={config.customerMobile} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Address" data-field="address" value={config.address} onchange={handleInput}></lightning-input>
+                </template>
+
+                <template lwc:if={isAgent}>
+                    <h2 class="sec-title">AI Agent</h2>
+                    <lightning-input label="Virtual Agent Name" data-field="agentName" value={config.agentName} onchange={handleInput}></lightning-input>
+                    <c-demo-story-image label="Agent Avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                </template>
+
+                <template lwc:if={isConvo}>
+                    <h2 class="sec-title">Customer &amp; Agent Messages</h2>
+                    <p class="sec-subtitle">Thread — the back-and-forth after the email</p>
+                    <template for:each={decoratedMessages} for:item="m">
+                        <div key={m.i} class="msg-row">
+                            <div class="msg-row-head">
+                                <lightning-combobox class="msg-sender" variant="label-hidden"
+                                    data-i={m.i} value={m.sender} options={senderOptions}
+                                    onchange={handleSender}></lightning-combobox>
+                                <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                    alternative-text="Delete message" title="Delete message"
+                                    data-i={m.i} onclick={removeMessage}></lightning-button-icon>
+                            </div>
+                            <lightning-textarea label={m.rowLabel} variant="label-hidden"
+                                data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
+                        </div>
+                    </template>
+                    <lightning-button label="+ Add Message" onclick={addMessage}
+                        class="slds-m-top_x-small"></lightning-button>
+                </template>
+            </section>
+
+            <aside class="studio-preview">
+                <header class="preview-header">
+                    <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
+                    <span>Live Preview · 2-Way Email</span>
+                </header>
+                <div class="preview-canvas">
+                    <iframe class="preview-iframe" title="Email preview" src={previewUrl}></iframe>
+                </div>
+            </aside>
+        </div>
+    </div>
+</template>

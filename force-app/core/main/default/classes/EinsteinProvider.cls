@@ -13,6 +13,12 @@ public with sharing class EinsteinProvider implements IPersonaProvider {
 
     private static final String MODEL_NAME = 'sfdc_ai__DefaultOpenAIGPT4Omni';
 
+    // Test seam. The native aiplatform.ModelsAPI call is not mockable via
+    // HttpCalloutMock/WebServiceMock, so tests set this to the raw model text
+    // they want callModel(...) to return. Only consulted under Test.isRunningTest().
+    @TestVisible
+    private static String mockGeneratedText;
+
     public DemoStudioPersonaGenerator.Result generate(String brief, String brandHint) {
         String prompt = PersonaPromptBuilder.build(brief, brandHint);
         String jsonBody = callAndExtractJson(prompt);
@@ -43,6 +49,9 @@ public with sharing class EinsteinProvider implements IPersonaProvider {
     }
 
     private static String callModelStatic(String prompt) {
+        if (Test.isRunningTest()) {
+            return mockGeneratedText;
+        }
         aiplatform.ModelsAPI api = new aiplatform.ModelsAPI();
         aiplatform.ModelsAPI.createGenerations_Request req = new aiplatform.ModelsAPI.createGenerations_Request();
         req.modelName = MODEL_NAME;

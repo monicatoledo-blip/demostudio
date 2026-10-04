@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RecordType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Demo_Persona</fullName>
+    <active>true</active>
+    <description>Demo Studio contacts. Lets the branded Unified Profile page render on the Contact in any Lightning app while real contacts keep their standard page.</description>
+    <label>Demo Persona</label>
+</RecordType>

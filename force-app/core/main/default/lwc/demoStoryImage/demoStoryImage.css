@@ -1,0 +1,12 @@
+.img-field { margin-bottom: 0.9rem; }
+.img-label { display: block; font-size: 0.8rem; font-weight: 600; color: #444; margin-bottom: 0.25rem; }
+.img-row { display: flex; gap: 0.6rem; align-items: flex-start; }
+.img-thumb { width: 72px; height: 72px; border: 1px solid #e6e9ee; border-radius: 8px; overflow: hidden; flex: 0 0 72px; display: flex; align-items: center; justify-content: center; background: #f4f6f9; }
+.img-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.img-empty { font-size: 0.7rem; color: #9aa5b1; text-align: center; }
+.img-controls { flex: 1 1 auto; min-width: 0; }
+.img-btns { display: flex; gap: 0.4rem; margin-top: 0.35rem; }
+.img-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.4rem; margin-top: 0.6rem; max-height: 260px; overflow-y: auto; padding: 0.4rem; border: 1px solid #e6e9ee; border-radius: 8px; background: #fbfcfd; }
+.img-cell { padding: 0; border: 1px solid #e6e9ee; border-radius: 6px; overflow: hidden; cursor: pointer; background: #fff; aspect-ratio: 1 / 1; }
+.img-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.img-cell:hover { border-color: #0176d3; }

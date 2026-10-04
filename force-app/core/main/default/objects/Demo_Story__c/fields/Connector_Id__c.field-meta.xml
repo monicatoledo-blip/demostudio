@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Connector_Id__c</fullName>
+    <label>Connector Id</label>
+    <description>Website connector UUID used for the Data Cloud Web SDK beacon on the generated experience.</description>
+    <length>60</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>

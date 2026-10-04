@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Surface__c</fullName>
+    <label>Surface</label>
+    <description>Content zone / surface identifier this stage targets (e.g. homepage_hero, market_insight_1).</description>
+    <length>80</length>
+    <required>false</required>
+    <type>Text</type>
+</CustomField>
