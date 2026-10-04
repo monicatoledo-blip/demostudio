@@ -24,20 +24,6 @@ export const NBA_IMAGE_LIBRARY = [
     ]
   },
   {
-    "id": "img-002",
-    "url": "https://res.cloudinary.com/dfx98jgdc/image/upload/v1774201482/Travel-Credit-Card_qz9owg.jpg",
-    "description": "Beach Views - Travel Credit Card",
-    "categories": [
-      "Cash Optimization",
-      "Cross-Sell",
-      "Direct Action"
-    ],
-    "industries": [
-      "insurance",
-      "retailBanking"
-    ]
-  },
-  {
     "id": "img-003",
     "url": "https://res.cloudinary.com/dfx98jgdc/image/upload/v1774201705/retirement-income-planning-gi2190459889-hero_1.jpg_m30krr.webp",
     "description": "Wealth / retirement Grandpa reading to his grandkids",
