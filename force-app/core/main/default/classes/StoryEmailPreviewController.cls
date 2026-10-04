@@ -64,7 +64,8 @@ public with sharing class StoryEmailPreviewController {
         catch (Exception e) { return '<p style="font-family:Arial">Template load failed: ' + e.getMessage() + '</p>'; }
 
         if (ch == 'sms') return renderSms(tpl, c);
-        // WhatsApp + RCS branches are added in their own build phases.
+        else if (ch == 'whatsapp') return renderWhatsapp(tpl, c);
+        // RCS branch is added in its own build phase.
         return renderEmail(tpl, c);
     }
 
@@ -276,5 +277,64 @@ public with sharing class StoryEmailPreviewController {
 
     private static String smsBubbleEl(String role, String skin, String content) {
         return '<div class="message ' + role + ' bubble ' + skin + '">' + content + '</div>';
+    }
+
+    // ----------------------------------------------------------------------
+    // WhatsApp — ported from buildWhatsAppThreadHtml (script.js:7231). Same
+    // config + playback engine as SMS; WhatsApp bubble skin + meta/checks.
+    // ----------------------------------------------------------------------
+    private static final String WHATSAPP_THREAD_TIME = '11:42 AM';
+
+    private static String renderWhatsapp(String tpl, Map<String, Object> c) {
+        Map<String, String> tok = new Map<String, String>{
+            'WHATSAPP_THREAD_HTML' => buildWhatsappThread(c),
+            'WHATSAPP_THEME' => smsTheme(c),
+            'MARKETING_AVATAR_URL' => messagingHeaderAvatar(c),
+            'MESSAGING_AGENT_HEADER' => messagingHeader(c)
+        };
+        String out = tpl;
+        for (String k : tok.keySet()) {
+            out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
+        }
+        out = resolveSharedTokens(out, c);
+        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        return out;
+    }
+
+    private static String buildWhatsappThread(Map<String, Object> c) {
+        String ts = escapeSms(WHATSAPP_THREAD_TIME);
+        String parts = '';
+        for (Object o : msgList(c)) {
+            if (!(o instanceof Map<String, Object>)) continue;
+            Map<String, Object> m = (Map<String, Object>) o;
+            String sender = String.valueOf(m.get('sender')) == 'user' ? 'user' : 'bot';
+            String text = m.get('text') == null ? '' : String.valueOf(m.get('text'));
+            String img = m.get('imageUrl') == null ? '' : String.valueOf(m.get('imageUrl'));
+            if (String.isBlank(text) && String.isBlank(img)) continue;
+            String bubbleInner = waBubbleInner(text, img);
+            if (sender == 'user') {
+                parts += '<div class="row row-outgoing" data-sender="user">'
+                    + '<div class="message wa-outgoing hidden-msg"><div class="wa-bubble wa-bubble-out">'
+                    + '<div class="wa-text">' + bubbleInner + '</div>'
+                    + '<div class="wa-meta-row"><span class="wa-time">' + ts + '</span>'
+                    + '<span class="wa-checks" aria-hidden="true">✓✓</span></div></div></div></div>';
+            } else {
+                parts += '<div class="row row-incoming" data-sender="bot">'
+                    + '<div class="message wa-incoming hidden-msg"><div class="wa-bubble wa-bubble-in">'
+                    + '<div class="wa-text">' + bubbleInner + '</div>'
+                    + '<div class="wa-meta-row"><span class="wa-time">' + ts + '</span></div></div></div></div>';
+            }
+        }
+        return parts;
+    }
+
+    // Bubble inner: optional image + copy (mirrors buildMessageBubbleInner).
+    private static String waBubbleInner(String text, String img) {
+        String bits = '';
+        if (String.isNotBlank(text)) bits += '<div class="msg-copy">' + smsBubble(text) + '</div>';
+        if (String.isNotBlank(img)) {
+            bits += '<img class="msg-attached-image" src="' + escapeSms(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" />';
+        }
+        return bits;
     }
 }
