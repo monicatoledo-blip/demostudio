@@ -271,24 +271,13 @@ export default class DemoStoryStudio extends LightningElement {
             const primary = k.Primary_Color__c || this.config.primaryColor;
             const accent = k.Accent_Color__c || primary;
             const domain = k.Name ? (k.Name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com') : this.config.brandDomain;
-            const prevBrand = this.config.brandName;
-            const newBrand = k.Name || this.config.brandName;
-            const patch = {
-                brandKitId: kitId, brandName: newBrand, brandDomain: domain,
+            this._commit({
+                brandKitId: kitId, brandName: k.Name || this.config.brandName, brandDomain: domain,
                 primaryColor: primary, ctaButtonColor: primary, logoBgColor: primary,
                 featureSectionColor: accent,
                 logoUrl: k.Logo_URL__c || this.config.logoUrl,
                 marketingAvatarUrl: k.Secondary_Logo_URL__c || k.Logo_URL__c || this.config.marketingAvatarUrl
-            };
-            // Messaging threads bake the brand name in — swap the old brand for
-            // the new one across the thread so it stays in sync.
-            if (this.isMessaging && newBrand && prevBrand && newBrand !== prevBrand) {
-                const re = new RegExp(prevBrand.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                patch.messages = (this.config.messages || []).map((m) => ({
-                    ...m, text: (m.text || '').replace(/\[\[BRAND_NAME\]\]/g, newBrand).replace(re, newBrand)
-                }));
-            }
-            this._commit(patch);
+            });
         } catch (err) {
             this.toast('Brand Kit', (err && err.body && err.body.message) || err.message, 'error');
         }
@@ -312,10 +301,11 @@ export default class DemoStoryStudio extends LightningElement {
         if (!personaId) return;
         try {
             const p = await getPersona({ personaId });
-            const full = ((p.First_Name__c || '') + ' ' + (p.Last_Name__c || '')).trim();
-            const prevFirst = this.firstName;
-            const newFirst = p.First_Name__c || this.config.customerFirstName;
-            const patch = {
+            // Personas may populate only the Name field (not First/Last) — fall
+            // back to Name so the thread's first-name token still resolves.
+            const full = ((p.First_Name__c || '') + ' ' + (p.Last_Name__c || '')).trim() || (p.Name || '');
+            const newFirst = p.First_Name__c || (p.Name ? p.Name.trim().split(' ')[0] : this.config.customerFirstName);
+            this._commit({
                 personaId: personaId,
                 customerName: full || this.config.customerName,
                 customerFirstName: newFirst,
@@ -324,16 +314,7 @@ export default class DemoStoryStudio extends LightningElement {
                 customerCompany: p.Company__c || this.config.customerCompany,
                 customerMobile: p.Primary_Phone__c || this.config.customerMobile,
                 customerAvatarUrl: p.Avatar_URL__c || this.config.customerAvatarUrl
-            };
-            // Messaging threads bake the first name in (no live token), so when
-            // the persona changes, swap the previously-baked name for the new one.
-            if (this.isMessaging && newFirst && prevFirst && newFirst !== prevFirst) {
-                const re = new RegExp(prevFirst.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-                patch.messages = (this.config.messages || []).map((m) => ({
-                    ...m, text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, newFirst).replace(re, newFirst)
-                }));
-            }
-            this._commit(patch);
+            });
         } catch (err) {
             this.toast('Persona', (err && err.body && err.body.message) || err.message, 'error');
         }
@@ -365,11 +346,7 @@ export default class DemoStoryStudio extends LightningElement {
         // Fresh messaging record: seed the marketing-first 2-way thread for the
         // record's industry (the email industry packs are recipient-first).
         if (!raw && channel !== 'Email') {
-            this.config = { ...this.config, messages: this.bakeTokens(messagingSeedFor(ind)) };
-        } else if (channel !== 'Email' && this.config.messages) {
-            // Existing messaging record: resolve any saved [[TOKENS]] in the
-            // thread so the editor shows real persona/brand values, not tokens.
-            this.config = { ...this.config, messages: this.bakeTokens(this.config.messages) };
+            this.config = { ...this.config, messages: messagingSeedFor(ind) };
         }
         // If the active section isn't valid for this channel (e.g. Email Template
         // on an SMS record), fall back to the first valid section.
@@ -394,13 +371,13 @@ export default class DemoStoryStudio extends LightningElement {
     // Bake live tokens into messaging thread text so the editor shows real
     // values (persona first name + brand) instead of [[TOKENS]]. Re-baked when
     // the persona or brand kit changes (see applyPersonaById / applyKitById).
-    bakeTokens(messages) {
+    // Resolve the live tokens in a single message's text for EDITOR DISPLAY.
+    // Storage keeps the tokens, so persona/brand swaps reflect automatically and
+    // the server render resolves them for the preview. (Edited text stores as-is.)
+    resolveTokens(text) {
         const fn = this.firstName;
         const br = this.config.brandName || 'the brand';
-        return (messages || []).map((m) => ({
-            ...m,
-            text: (m.text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn).replace(/\[\[BRAND_NAME\]\]/g, br)
-        }));
+        return (text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn).replace(/\[\[BRAND_NAME\]\]/g, br);
     }
 
     // ---- channel ----
@@ -484,7 +461,7 @@ export default class DemoStoryStudio extends LightningElement {
     }
     get decoratedMessages() {
         return (this.config.messages || []).map((m, i) => ({
-            i, sender: m.sender || 'user', text: m.text,
+            i, sender: m.sender || 'user', text: this.resolveTokens(m.text),
             imageUrl: m.imageUrl || '',
             rowLabel: 'Message ' + (i + 1)
         }));
@@ -593,7 +570,7 @@ export default class DemoStoryStudio extends LightningElement {
         this.genIndustry = e.detail.value;
         if (this.isMessaging) {
             // Messaging channels only have a thread — swap in that industry's.
-            this._commit({ messages: this.bakeTokens(messagingSeedFor(this.genIndustry)) });
+            this._commit({ messages: messagingSeedFor(this.genIndustry) });
             return;
         }
         const pack = INDUSTRY_PACKS[this.genIndustry];
@@ -625,8 +602,8 @@ export default class DemoStoryStudio extends LightningElement {
          'bullet1', 'bullet2', 'bullet3', 'ctaButtonText', 'replyPromptHeadline', 'replyPromptBody']
             .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
         if (Array.isArray(gen.messages) && gen.messages.length) {
-            patch.messages = this.bakeTokens(gen.messages.filter((m) => m && m.text)
-                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' })));
+            patch.messages = gen.messages.filter((m) => m && m.text)
+                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' }));
         }
         this._commit(patch);
     }

@@ -296,6 +296,21 @@
       }
       .send-btn.show { display: flex; }
       .send-btn svg { width: 28px; height: 28px; fill: #34c759; }
+
+      /* Agent typing indicator — a bot-side bubble with three bouncing dots,
+         shown for ~1s after the recipient sends before the agent's reply. */
+      .typing-bubble { display: flex; gap: 4px; align-items: center; min-width: 44px; }
+      .typing-bubble .tdot {
+        width: 7px; height: 7px; border-radius: 50%;
+        background: currentColor; opacity: 0.5;
+        animation: tbounce 1.2s infinite ease-in-out;
+      }
+      .typing-bubble .tdot:nth-child(2) { animation-delay: 0.18s; }
+      .typing-bubble .tdot:nth-child(3) { animation-delay: 0.36s; }
+      @keyframes tbounce {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+        30% { transform: translateY(-4px); opacity: 0.9; }
+      }
     </style>
   </head>
   <body>
@@ -342,7 +357,7 @@
       </footer>
 
       <div style="text-align: center; padding: 20px; font-size: 12px; color: #666666;">
-        <p style="margin: 0 0 5px 0;">© Cumulus Financial. All rights reserved.</p>
+        <p style="margin: 0 0 5px 0;">© [[BRAND_NAME]]. All rights reserved.</p>
         <p style="margin: 0; font-size: 11px;">Built for Salesforce Solution Engineers</p>
       </div>
     </div>
@@ -445,13 +460,36 @@
           setPill(draft, true);
           sendBtn.classList.add("show");
         }
+        function showTyping() {
+          hideTyping();
+          var row = document.createElement("div");
+          row.className = "row row-bot";
+          row.id = "typingRow";
+          row.innerHTML =
+            '<div class="message-group"><div class="message bot bubble bubble-bot typing-bubble">' +
+            '<span class="tdot"></span><span class="tdot"></span><span class="tdot"></span></div></div>';
+          thread.appendChild(row);
+          scrollBottom();
+        }
+        function hideTyping() {
+          var t = document.getElementById("typingRow");
+          if (t && t.parentNode) t.parentNode.removeChild(t);
+        }
+
         function sendRecipient() {
           if (mode !== "ready") return;
           reveal(rows[idx]);
           idx += 1;
           resetPill();
           mode = "idle";
-          playBrandRun();
+          // Give the agent a beat to "reply": ~1s typing indicator, then the
+          // brand/agent message(s) appear.
+          if (idx < rows.length && senderOf(rows[idx]) === "bot") {
+            showTyping();
+            setTimeout(function () { hideTyping(); playBrandRun(); }, 1100);
+          } else {
+            playBrandRun();
+          }
         }
 
         // Clicking into the composer starts the recipient typing (when it's
