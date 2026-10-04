@@ -18,12 +18,12 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ReadWrite</externalSharingModel>
-    <label>Demo Persona</label>
+    <label>Unified Profile</label>
     <nameField>
         <label>Persona Name</label>
         <type>Text</type>
     </nameField>
-    <pluralLabel>Demo Personas</pluralLabel>
+    <pluralLabel>Unified Profile Builder</pluralLabel>
     <searchLayouts>
         <customTabListAdditionalFields>Brand__c</customTabListAdditionalFields>
         <customTabListAdditionalFields>Title__c</customTabListAdditionalFields>

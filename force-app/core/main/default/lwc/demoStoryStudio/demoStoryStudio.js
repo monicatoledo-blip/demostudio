@@ -70,7 +70,7 @@ const INDUSTRY_PACKS = {
             { sender: 'bot', text: 'Every debit-card purchase rounds up to the nearest dollar and the difference moves to your savings — automatically, no extra apps.' }
         ]
     },
-    'Retail': {
+    'Retail & Consumer Goods': {
         subjectLine: 'Your cart misses you — here is 15% off',
         headline: 'Still thinking it over?',
         subHeadline: 'Complete your order and save today',
@@ -88,7 +88,7 @@ const INDUSTRY_PACKS = {
             { sender: 'bot', text: 'Yes! Medium is in stock and ships free — it would arrive in 2-3 business days with the offer applied at checkout.' }
         ]
     },
-    'Hospitality & Travel': {
+    'Consumer Business Services': {
         subjectLine: 'Your getaway is calling',
         headline: 'Escape awaits, [[CUSTOMER_FIRST_NAME]]',
         subHeadline: 'Exclusive member rates on your next stay',
@@ -122,6 +122,8 @@ export default class DemoStoryStudio extends LightningElement {
     @track activeSection = 'branding';
     @track previewVersion = 1;
     @track brandKits = [];
+    @track showBrandPicker = false;
+    @track brandSearch = '';
     @track personaOptions = [];
     loading = false;
     saved = true;
@@ -141,6 +143,21 @@ export default class DemoStoryStudio extends LightningElement {
         }));
     }
 
+    get selectedKit() {
+        const k = (this.brandKits || []).find((x) => x.value === this.config.brandKitId);
+        if (!k) return null;
+        return { label: k.label, logo: k.logo, hasLogo: !!k.logo,
+            swatch: 'background:' + (k.gradient || k.primary || '#0A1F44') + ';' };
+    }
+    get filteredBrandTiles() {
+        const q = (this.brandSearch || '').toLowerCase();
+        const tiles = this.brandKitTiles;
+        return q ? tiles.filter((t) => (t.label || '').toLowerCase().includes(q)) : tiles;
+    }
+    get brandChangeLabel() { return this.selectedKit ? 'Change brand' : 'Choose a brand kit'; }
+    toggleBrandPicker() { this.showBrandPicker = !this.showBrandPicker; }
+    handleBrandSearch(e) { this.brandSearch = e.target.value; }
+
     async handlePickKit(e) {
         const kitId = e.currentTarget.dataset.kitid;
         try {
@@ -153,10 +170,20 @@ export default class DemoStoryStudio extends LightningElement {
                 featureSectionColor: accent, logoUrl: k.Logo_URL__c || this.config.logoUrl,
                 marketingAvatarUrl: k.Logo_URL__c || this.config.marketingAvatarUrl
             });
+            this.showBrandPicker = false;
+            this.brandSearch = '';
         } catch (err) {
             this.toast('Brand Kit', (err && err.body && err.body.message) || err.message, 'error');
         }
     }
+
+    @track personaSearch = '';
+    get filteredPersonaOptions() {
+        const q = (this.personaSearch || '').toLowerCase();
+        const all = this.personaOptions || [];
+        return q ? all.filter((o) => (o.label || '').toLowerCase().includes(q)) : all;
+    }
+    handlePersonaSearch(e) { this.personaSearch = e.target.value; }
 
     // Persona inheritance — fills the customer identity from a Demo Persona.
     async handlePersona(e) {
@@ -302,10 +329,10 @@ export default class DemoStoryStudio extends LightningElement {
 
     get industryOptions() {
         return [
-            { label: 'Financial Services', value: 'Financial Services' },
-            { label: 'Retail', value: 'Retail' },
-            { label: 'Hospitality & Travel', value: 'Hospitality & Travel' }
-        ];
+            'Financial Services', 'Health & Life Sciences', 'Retail & Consumer Goods',
+            'Manufacturing', 'Communications, Media & Technology', 'Public Sector',
+            'Consumer Business Services', 'Energy & Utilities'
+        ].map((i) => ({ label: i, value: i }));
     }
     handleGenerate() { this.showGenerate = true; }
     closeGenerate() { this.showGenerate = false; }

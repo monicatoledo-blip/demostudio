@@ -107,3 +107,7 @@
 .gen-modal lightning-combobox, .gen-modal lightning-input, .gen-modal lightning-textarea { display: block; margin-bottom: 0.6rem; }
 .gen-hint { font-size: 0.75rem; color: #6b7280; margin: 0.25rem 0 0.9rem; line-height: 1.4; }
 .gen-actions { display: flex; justify-content: flex-end; gap: 0.5rem; }
+.brand-current { display: flex; align-items: center; gap: 0.6rem; margin-bottom: 0.5rem; }
+.brand-current-name { font-weight: 600; color: #0A1F44; font-size: 0.9rem; }
+.kit-swatch--sm { width: 48px; height: 32px; border: 1px solid #e6e9ee; border-radius: 6px; flex: 0 0 48px; }
+.kit-swatch--sm img { max-width: 40px; max-height: 24px; object-fit: contain; }
