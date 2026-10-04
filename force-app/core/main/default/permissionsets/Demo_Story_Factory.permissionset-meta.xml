@@ -69,4 +69,8 @@
         <tab>Two_Way_Simulator__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
+    <tabSettings>
+        <tab>Demo_Story_New</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>

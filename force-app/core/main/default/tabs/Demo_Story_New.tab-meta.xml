@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <flexiPage>Demo_Story_New</flexiPage>
+    <label>New Experience</label>
+    <motif>Custom53: Bands</motif>
+</CustomTab>
