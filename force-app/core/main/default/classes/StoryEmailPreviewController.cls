@@ -134,6 +134,10 @@ public with sharing class StoryEmailPreviewController {
         for (String k : tok.keySet()) {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
+        // Resolve brand tokens nested inside inserted body/feature copy (the
+        // default copy uses [[BRAND_NAME]] so it re-brands when the kit changes).
+        out = out.replace('[[BRAND_NAME]]', tok.get('BRAND_NAME') == null ? '' : tok.get('BRAND_NAME'));
+        out = out.replace('[[BRAND_DOMAIN]]', tok.get('BRAND_DOMAIN') == null ? '' : tok.get('BRAND_DOMAIN'));
         // Remove broken <img> tags whose src resolved to empty (no logo/hero set).
         out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
         // Scripts are KEPT so the 2-way Reply interactivity works in the preview.

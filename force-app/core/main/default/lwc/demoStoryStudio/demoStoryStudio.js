@@ -26,10 +26,10 @@ const DEFAULTS = {
     heroImageUrl: '',
     headline: 'Unlock Smart Wealth Building',
     subHeadline: 'Stop stressing about your savings goals',
-    featureColumn1: 'Since you already bank with Cumulus Financial, your accounts sync automatically. No manual transfers or complex budgeting spreadsheets required.',
-    featureColumn2: 'Track your net worth and adjust your savings goals from anywhere using the Cumulus Financial app, complete with real-time security alerts.',
+    featureColumn1: 'Since you already bank with [[BRAND_NAME]], your accounts sync automatically. No manual transfers or complex budgeting spreadsheets required.',
+    featureColumn2: 'Track your net worth and adjust your savings goals from anywhere using the [[BRAND_NAME]] app, complete with real-time security alerts.',
     featureColumnTextColor: '#FFFFFF', featureSectionColor: '#03A05B',
-    bodyParagraph: 'As a valued Cumulus Financial Bank customer, you know how important it is to keep your personal finances organized and secure. But what if you could put your wealth-building entirely on autopilot?\n\nWe’re excited to introduce the Smart Wealth add-on, designed specifically to integrate flawlessly with your existing Cumulus Financial checking and savings accounts.',
+    bodyParagraph: 'As a valued [[BRAND_NAME]] customer, you know how important it is to keep your personal finances organized and secure. But what if you could put your wealth-building entirely on autopilot?\n\nWe’re excited to introduce the Smart Wealth add-on, designed specifically to integrate flawlessly with your existing [[BRAND_NAME]] checking and savings accounts.',
     showBullets: true,
     bullet1: 'Seamless Integration: Your spare change round-ups and automated deposits sync instantly.',
     bullet2: 'Mobile Goal Tracking: Adjust your financial targets and manage your funds from anywhere with bank-level security.',
@@ -47,7 +47,7 @@ const DEFAULTS = {
     // Conversation
     messages: [
         { sender: 'user', text: 'This sounds great! How exactly do the spare change round-ups work with my existing accounts?' },
-        { sender: 'bot', text: 'Hi there! Great question! Every time you make a purchase with your Cumulus Financial debit card, we round up to the nearest dollar and automatically transfer the difference to your Smart Wealth savings account.' }
+        { sender: 'bot', text: 'Hi there! Great question! Every time you make a purchase with your [[BRAND_NAME]] debit card, we round up to the nearest dollar and automatically transfer the difference to your Smart Wealth savings account.' }
     ]
 };
 
@@ -171,8 +171,9 @@ export default class DemoStoryStudio extends LightningElement {
             const k = await getBrandKit({ kitId });
             const primary = k.Primary_Color__c || this.config.primaryColor;
             const accent = k.Accent_Color__c || primary;
+            const domain = k.Name ? (k.Name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com') : this.config.brandDomain;
             this._commit({
-                brandKitId: kitId, brandName: k.Name || this.config.brandName,
+                brandKitId: kitId, brandName: k.Name || this.config.brandName, brandDomain: domain,
                 primaryColor: primary, ctaButtonColor: primary, logoBgColor: primary,
                 featureSectionColor: accent,
                 logoUrl: k.Logo_URL__c || this.config.logoUrl,
