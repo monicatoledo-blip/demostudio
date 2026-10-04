@@ -267,7 +267,7 @@
       /* Recipient compose typing: once the recipient starts "typing", the pill
          holds their drafted reply in the normal text color with a blinking
          caret; a green send arrow appears when the draft is ready. */
-      .input-pill.is-typing { color: #fff; }
+      .input-pill.is-typing { color: #fff; cursor: text; }
       html[data-theme="light"] .input-pill.is-typing { color: #000; }
       .sms-caret {
         display: inline-block;
@@ -355,7 +355,9 @@
         // Ordered rows; each carries data-sender ("user" = recipient, "bot" = brand/agent).
         var rows = Array.prototype.slice.call(phone.querySelectorAll(".row"));
         var idx = 0;            // next row to play
-        var mode = "idle";      // idle | typing | ready (recipient draft ready to send)
+        // idle | awaiting (recipient's turn, click composer to begin typing)
+        // | typing | ready (recipient draft typed, ready to send)
+        var mode = "idle";
         var draft = "";
         var PLACEHOLDER = "Text Message • SMS";
 
@@ -397,11 +399,22 @@
             idx += 1;
           }
           if (idx < rows.length) {
-            startRecipientTyping();
+            awaitRecipient();
           } else {
             resetPill();
             mode = "idle";
           }
+        }
+
+        // Recipient's turn: show an empty composer with a blinking cursor and
+        // wait for the SE to click into it before the reply types out (mirrors
+        // the email, which focuses the compose box and waits for a click).
+        function awaitRecipient() {
+          mode = "awaiting";
+          pill.classList.add("is-typing");
+          sendBtn.classList.remove("show");
+          setPill("", true);
+          scrollBottom();
         }
 
         function startRecipientTyping() {
@@ -438,11 +451,19 @@
           playBrandRun();
         }
 
+        // Clicking into the composer starts the recipient typing (when it's
+        // their turn), or sends once the draft is ready.
+        pill.addEventListener("click", function (e) {
+          e.stopPropagation();
+          if (mode === "awaiting") startRecipientTyping();
+          else if (mode === "ready") sendRecipient();
+        });
         sendBtn.addEventListener("click", function (e) {
           e.stopPropagation();
           sendRecipient();
         });
-        // Tapping the phone sends the ready recipient draft (forgiving for demos).
+        // Tapping the phone sends a ready draft (forgiving for demos) but never
+        // auto-starts typing — that must be a deliberate click in the composer.
         phone.addEventListener("click", function () {
           if (mode === "ready") sendRecipient();
         });
