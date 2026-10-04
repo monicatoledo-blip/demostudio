@@ -10,3 +10,9 @@
 .new-body lightning-combobox { display: block; margin-bottom: 0.75rem; }
 .new-footer { display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem;
     padding: 0.85rem 1.25rem; border-top: 1px solid #e6e9ee; background: #f8fafc; position: relative; }
+.ta { position: relative; }
+.ta-list { position: absolute; z-index: 20; left: 0; right: 0; margin-top: 2px; background: #fff;
+    border: 1px solid #e6e9ee; border-radius: 8px; max-height: 260px; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12); list-style: none; padding: 0.25rem 0; }
+.ta-item { padding: 0.5rem 0.85rem; cursor: pointer; font-size: 0.9rem; color: #0A1F44; }
+.ta-item:hover { background: #f3f6fb; }

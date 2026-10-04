@@ -7,36 +7,27 @@ import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 
 /**
  * Guided create for a 2-Way Simulator — no Experience Name field (the trigger
- * derives it). Pick Brand Kit, Channel, Industry, Persona and go straight into
- * Story Studio.
+ * derives it). Brand Kit + Persona are single-field typeaheads.
  */
 export default class DemoStoryNew extends NavigationMixin(LightningElement) {
     @track brandKits = [];
     @track personaOptions = [];
+    @track brandQuery = '';
+    @track personaQuery = '';
+    @track brandOpen = false;
+    @track personaOpen = false;
     brandKitId;
     personaId;
     channel = 'Email';
     industry = 'Financial Services';
     creating = false;
 
-    @track brandSearch = '';
-    @track personaSearch = '';
-
     @wire(listBrandKits) wiredKits({ data }) {
         if (data) this.brandKits = data.map((k) => ({ label: k.label, value: k.value }));
     }
-    @wire(listPersonas) wiredPersonas({ data }) { if (data) this.personaOptions = data; }
-
-    get filteredBrandKits() {
-        const q = (this.brandSearch || '').toLowerCase();
-        return q ? this.brandKits.filter((o) => (o.label || '').toLowerCase().includes(q)) : this.brandKits;
+    @wire(listPersonas) wiredPersonas({ data }) {
+        if (data) this.personaOptions = data.map((p) => ({ label: p.label, value: p.value }));
     }
-    get filteredPersonas() {
-        const q = (this.personaSearch || '').toLowerCase();
-        return q ? this.personaOptions.filter((o) => (o.label || '').toLowerCase().includes(q)) : this.personaOptions;
-    }
-    handleBrandSearch(e) { this.brandSearch = e.target.value; }
-    handlePersonaSearch(e) { this.personaSearch = e.target.value; }
 
     get channelOptions() {
         return ['Email', 'SMS', 'RCS', 'WhatsApp'].map((c) => ({ label: c, value: c }));
@@ -47,8 +38,31 @@ export default class DemoStoryNew extends NavigationMixin(LightningElement) {
             'Consumer Business Services', 'Travel & Hospitality', 'Energy & Utilities'].map((i) => ({ label: i, value: i }));
     }
 
-    handleBrand(e) { this.brandKitId = e.detail.value; }
-    handlePersona(e) { this.personaId = e.detail.value; }
+    get brandMatches() { return this._match(this.brandKits, this.brandQuery); }
+    get personaMatches() { return this._match(this.personaOptions, this.personaQuery); }
+    _match(list, q) {
+        const s = (q || '').toLowerCase();
+        return (s ? list.filter((o) => (o.label || '').toLowerCase().includes(s)) : list).slice(0, 50);
+    }
+
+    handleBrandInput(e) { this.brandQuery = e.target.value; this.brandKitId = null; this.brandOpen = true; }
+    handleBrandFocus() { this.brandOpen = true; }
+    handleBrandBlur() { window.setTimeout(() => { this.brandOpen = false; }, 200); }
+    pickBrand(e) {
+        this.brandKitId = e.currentTarget.dataset.value;
+        this.brandQuery = e.currentTarget.dataset.label;
+        this.brandOpen = false;
+    }
+
+    handlePersonaInput(e) { this.personaQuery = e.target.value; this.personaId = null; this.personaOpen = true; }
+    handlePersonaFocus() { this.personaOpen = true; }
+    handlePersonaBlur() { window.setTimeout(() => { this.personaOpen = false; }, 200); }
+    pickPersona(e) {
+        this.personaId = e.currentTarget.dataset.value;
+        this.personaQuery = e.currentTarget.dataset.label;
+        this.personaOpen = false;
+    }
+
     handleChannel(e) { this.channel = e.detail.value; }
     handleIndustry(e) { this.industry = e.detail.value; }
 

@@ -9,16 +9,30 @@
                 </div>
             </header>
             <div class="new-body">
-                <lightning-input type="search" label="Brand Kit" placeholder="Search brands…"
-                    value={brandSearch} onchange={handleBrandSearch}></lightning-input>
-                <lightning-combobox variant="label-hidden" placeholder="Choose a brand…" options={filteredBrandKits}
-                    value={brandKitId} onchange={handleBrand}></lightning-combobox>
+                <div class="ta">
+                    <lightning-input type="search" label="Brand Kit" placeholder="Type to search brands…"
+                        value={brandQuery} oninput={handleBrandInput} onfocus={handleBrandFocus} onblur={handleBrandBlur}></lightning-input>
+                    <template lwc:if={brandOpen}>
+                        <ul class="ta-list">
+                            <template for:each={brandMatches} for:item="o">
+                                <li key={o.value} class="ta-item" data-value={o.value} data-label={o.label} onmousedown={pickBrand}>{o.label}</li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
                 <lightning-combobox label="Channel" options={channelOptions} value={channel} onchange={handleChannel}></lightning-combobox>
                 <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
-                <lightning-input type="search" label="Persona" placeholder="Search personas…"
-                    value={personaSearch} onchange={handlePersonaSearch}></lightning-input>
-                <lightning-combobox variant="label-hidden" placeholder="Choose a persona…" options={filteredPersonas}
-                    value={personaId} onchange={handlePersona}></lightning-combobox>
+                <div class="ta">
+                    <lightning-input type="search" label="Persona" placeholder="Type to search personas…"
+                        value={personaQuery} oninput={handlePersonaInput} onfocus={handlePersonaFocus} onblur={handlePersonaBlur}></lightning-input>
+                    <template lwc:if={personaOpen}>
+                        <ul class="ta-list">
+                            <template for:each={personaMatches} for:item="o">
+                                <li key={o.value} class="ta-item" data-value={o.value} data-label={o.label} onmousedown={pickPersona}>{o.label}</li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
             </div>
             <footer class="new-footer">
                 <template lwc:if={creating}><lightning-spinner size="small" alternative-text="Creating…"></lightning-spinner></template>
