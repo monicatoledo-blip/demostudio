@@ -600,7 +600,7 @@ public with sharing class DemoStudioService {
         if (themeId == null) return null;
         List<Demo_Theme__c> ts = [
             SELECT Id, Name, Primary_Color__c, Accent_Color__c, Background_Gradient__c,
-                   Logo_Static_Resource__c, Logo_URL__c, Font_Family__c, Header_Style__c
+                   Logo_Static_Resource__c, Logo_URL__c, Secondary_Logo_URL__c, Font_Family__c, Header_Style__c
             FROM Demo_Theme__c
             WHERE Id = :themeId
             LIMIT 1

@@ -116,6 +116,7 @@ export default class DemoThemeStudio extends LightningElement {
     }
 
     get logoUrlField() { return this.theme.Logo_URL__c || ''; }
+    get secondaryLogoField() { return this.theme.Secondary_Logo_URL__c || ''; }
 
     get logoSrc() {
         if (this.logoUrlField) return this.logoUrlField;
@@ -254,7 +255,7 @@ export default class DemoThemeStudio extends LightningElement {
         // Auto-rewrite external logo URLs to Cloudinary Fetch so they render
         // through res.cloudinary.com (already CSP-trusted). Skip URLs that
         // are already Cloudinary, already Salesforce Files, or non-http.
-        if (field === 'Logo_URL__c') {
+        if (field === 'Logo_URL__c' || field === 'Secondary_Logo_URL__c') {
             if (value && /^https?:\/\//i.test(value)) {
                 const isCloudinary = /^https:\/\/res\.cloudinary\.com\//i.test(value);
                 const isShepherd   = value.startsWith('/sfc/servlet.shepherd');
@@ -262,7 +263,7 @@ export default class DemoThemeStudio extends LightningElement {
                     value = cloudinaryFetchUrl(value);
                 }
             }
-            logoUrlChanged = value !== (this.working && this.working.Logo_URL__c);
+            if (field === 'Logo_URL__c') logoUrlChanged = value !== (this.working && this.working.Logo_URL__c);
         }
         this.working = { ...this.working, [field]: value };
         this.isDirty = true;

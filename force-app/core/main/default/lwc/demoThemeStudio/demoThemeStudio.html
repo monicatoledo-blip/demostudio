@@ -140,8 +140,12 @@
                             </template>
                         </div>
                         <div class="ts-logo-inputs">
-                            <lightning-input type="url" label="Logo URL" value={logoUrlField} data-field="Logo_URL__c" onchange={handleFieldChange}
-                                placeholder="https://cdn.example.com/logo.svg"></lightning-input>
+                            <lightning-input type="url" label="Primary Logo URL" value={logoUrlField} data-field="Logo_URL__c" onchange={handleFieldChange}
+                                placeholder="https://cdn.example.com/logo.svg"
+                                field-level-help="The full logo — used large in the email hero/header."></lightning-input>
+                            <lightning-input type="url" label="Secondary Logo URL" value={secondaryLogoField} data-field="Secondary_Logo_URL__c" onchange={handleFieldChange}
+                                placeholder="https://cdn.example.com/logo-mark.svg" class="slds-m-top_x-small"
+                                field-level-help="The small mark/icon — used for the sender avatar &amp; footer."></lightning-input>
                             <div class="ts-uploader-wrap slds-m-top_x-small">
                                 <lightning-file-upload
                                     label="Or upload image"

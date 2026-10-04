@@ -179,6 +179,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <field>Demo_Theme__c.Secondary_Logo_URL__c</field>
+        <editable>true</editable>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <field>Demo_Persona__c.Brand__c</field>
         <editable>true</editable>
         <readable>true</readable>
