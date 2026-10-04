@@ -38,8 +38,8 @@
         min-width: 0;
         max-width: 100%;
         width: auto;
-        height: 90vh;
-        max-height: 812px;
+        height: 96vh;
+        max-height: 960px;
         aspect-ratio: 9 / 19.5;
         margin: 0 auto;
         border-radius: 40px;
