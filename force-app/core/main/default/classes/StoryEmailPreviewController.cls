@@ -240,7 +240,6 @@ public with sharing class StoryEmailPreviewController {
 
     private static String buildSmsThread(Map<String, Object> c) {
         String parts = '';
-        Boolean firstShown = false;
         for (Object o : msgList(c)) {
             if (!(o instanceof Map<String, Object>)) continue;
             Map<String, Object> m = (Map<String, Object>) o;
@@ -259,11 +258,11 @@ public with sharing class StoryEmailPreviewController {
             } else {
                 bubbles = smsBubbleEl(sender, skin, '<div class="msg-copy">' + smsBubble(text) + '</div>');
             }
-            // Marketing message (the first bubble) shows immediately so the
-            // thread reads like the email; the rest reveal on tap.
-            String hide = firstShown ? ' hidden-msg' : '';
-            firstShown = true;
-            parts += '<div class="row ' + rowAlign + '"><div class="message-group' + hide + '">' + bubbles + '</div></div>';
+            // Every bubble starts hidden; the template script plays them in
+            // order — agent/marketing bubbles appear instantly, the recipient's
+            // replies type out in the composer before posting (mirrors email).
+            parts += '<div class="row ' + rowAlign + '" data-sender="' + sender
+                   + '"><div class="message-group hidden-msg">' + bubbles + '</div></div>';
         }
         return parts;
     }

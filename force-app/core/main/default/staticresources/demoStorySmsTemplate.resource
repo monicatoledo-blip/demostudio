@@ -263,6 +263,36 @@
         background: #ececec;
         color: #8e8e93;
       }
+
+      /* Recipient compose typing: once the recipient starts "typing", the pill
+         holds their drafted reply in the normal text color with a blinking
+         caret; a green send arrow appears when the draft is ready. */
+      .input-pill.is-typing { color: #fff; }
+      html[data-theme="light"] .input-pill.is-typing { color: #000; }
+      .sms-caret {
+        display: inline-block;
+        width: 2px;
+        height: 1.05em;
+        background: currentColor;
+        margin-left: 1px;
+        vertical-align: -2px;
+        animation: smsblink 1s steps(1) infinite;
+      }
+      @keyframes smsblink { 50% { opacity: 0; } }
+      .send-btn {
+        flex-shrink: 0;
+        width: 30px;
+        height: 30px;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        padding: 0;
+        border: none;
+        background: transparent;
+      }
+      .send-btn.show { display: flex; }
+      .send-btn svg { width: 28px; height: 28px; fill: #34c759; }
     </style>
   </head>
   <body>
@@ -300,14 +330,12 @@
             <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
           </svg>
         </div>
-        <div class="input-pill">Text Message • SMS</div>
-        <div class="composer-icon" aria-hidden="true">
+        <div id="composerPill" class="input-pill">Text Message • SMS</div>
+        <button id="sendBtn" class="send-btn" type="button" aria-label="Send">
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"
-            />
+            <path d="M12 2a10 10 0 100 20 10 10 0 000-20zm0 15a1 1 0 01-1-1V9.41l-2.3 2.3a1 1 0 11-1.4-1.42l4-4a1 1 0 011.4 0l4 4a1 1 0 11-1.4 1.42L13 9.4V16a1 1 0 01-1 1z"/>
           </svg>
-        </div>
+        </button>
       </footer>
 
       <div style="text-align: center; padding: 20px; font-size: 12px; color: #666666;">
@@ -320,25 +348,108 @@
       (function () {
         var thread = document.getElementById("smsThreadScroll");
         var phone = document.getElementById("phoneShell");
+        var pill = document.getElementById("composerPill");
+        var sendBtn = document.getElementById("sendBtn");
         if (!phone || !thread) return;
 
-        var messages = phone.querySelectorAll(".message-group");
-        // Messages pre-shown (no .hidden-msg) stay visible; tapping reveals the rest.
-        var nextIndex = phone.querySelectorAll(".message-group:not(.hidden-msg)").length;
+        // Ordered rows; each carries data-sender ("user" = recipient, "bot" = brand/agent).
+        var rows = Array.prototype.slice.call(phone.querySelectorAll(".row"));
+        var idx = 0;            // next row to play
+        var mode = "idle";      // idle | typing | ready (recipient draft ready to send)
+        var draft = "";
+        var PLACEHOLDER = "Text Message • SMS";
 
-        function scrollThreadToBottom() {
+        function scrollBottom() {
           thread.scrollTop = thread.scrollHeight;
+          requestAnimationFrame(function () { thread.scrollTop = thread.scrollHeight; });
+        }
+        function reveal(row) {
+          var g = row.querySelector(".message-group");
+          if (g) g.classList.remove("hidden-msg");
+          scrollBottom();
+        }
+        function senderOf(row) { return row.getAttribute("data-sender") === "user" ? "user" : "bot"; }
+        function textOf(row) {
+          var copy = row.querySelector(".msg-copy");
+          return copy ? (copy.textContent || "").trim() : "";
         }
 
-        function revealNext() {
-          if (nextIndex >= messages.length) return;
-          messages[nextIndex].classList.remove("hidden-msg");
-          nextIndex += 1;
-          scrollThreadToBottom();
-          requestAnimationFrame(scrollThreadToBottom);
+        function setPill(text, withCaret) {
+          pill.textContent = "";
+          pill.appendChild(document.createTextNode(text && text.length ? text : (withCaret ? "" : PLACEHOLDER)));
+          if (withCaret) {
+            var caret = document.createElement("span");
+            caret.className = "sms-caret";
+            pill.appendChild(caret);
+          }
+        }
+        function resetPill() {
+          pill.classList.remove("is-typing");
+          setPill(PLACEHOLDER, false);
+          sendBtn.classList.remove("show");
         }
 
-        phone.addEventListener("click", revealNext);
+        // Reveal consecutive brand/agent messages instantly, then stop at the
+        // next recipient message and start its compose typing.
+        function playBrandRun() {
+          while (idx < rows.length && senderOf(rows[idx]) === "bot") {
+            reveal(rows[idx]);
+            idx += 1;
+          }
+          if (idx < rows.length) {
+            startRecipientTyping();
+          } else {
+            resetPill();
+            mode = "idle";
+          }
+        }
+
+        function startRecipientTyping() {
+          var full = textOf(rows[idx]);
+          // Image-only recipient message: nothing to type — just arm send.
+          if (!full) { draft = ""; armSend(); return; }
+          mode = "typing";
+          pill.classList.add("is-typing");
+          draft = "";
+          var i = 0;
+          (function typeNext() {
+            if (i >= full.length) { armSend(); return; }
+            draft += full.charAt(i);
+            i += 1;
+            setPill(draft, true);
+            var prev = full.charAt(i - 1);
+            var delay = 40 + Math.random() * 45;
+            if (prev === " " && Math.random() < 0.12) delay += 110 + Math.random() * 140;
+            else if (".,!?".indexOf(prev) >= 0 && Math.random() < 0.25) delay += 150 + Math.random() * 200;
+            setTimeout(typeNext, delay);
+          })();
+        }
+        function armSend() {
+          mode = "ready";
+          setPill(draft, true);
+          sendBtn.classList.add("show");
+        }
+        function sendRecipient() {
+          if (mode !== "ready") return;
+          reveal(rows[idx]);
+          idx += 1;
+          resetPill();
+          mode = "idle";
+          playBrandRun();
+        }
+
+        sendBtn.addEventListener("click", function (e) {
+          e.stopPropagation();
+          sendRecipient();
+        });
+        // Tapping the phone sends the ready recipient draft (forgiving for demos).
+        phone.addEventListener("click", function () {
+          if (mode === "ready") sendRecipient();
+        });
+
+        // Kick off: show the opening marketing message(s) and prime the reply.
+        resetPill();
+        playBrandRun();
       })();
     </script>
   </body>
