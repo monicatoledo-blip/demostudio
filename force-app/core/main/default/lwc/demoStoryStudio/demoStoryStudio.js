@@ -3,13 +3,14 @@ import { getRecord, getFieldValue, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import CFG from '@salesforce/schema/Two_Way_Simulator__c.Config_JSON__c';
 import ID_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Id';
+import BRAND_KIT from '@salesforce/schema/Two_Way_Simulator__c.Brand_Kit__c';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 
-const FIELDS = [CFG];
+const FIELDS = [CFG, BRAND_KIT];
 
 // Default email config (Cumulus-flavored) — overlaid by the saved Config_JSON__c.
 // Mirrors the Experience Generator email config for parity.
@@ -159,7 +160,12 @@ export default class DemoStoryStudio extends LightningElement {
     handleBrandSearch(e) { this.brandSearch = e.target.value; }
 
     async handlePickKit(e) {
-        const kitId = e.currentTarget.dataset.kitid;
+        await this.applyKitById(e.currentTarget.dataset.kitid);
+        this.showBrandPicker = false;
+        this.brandSearch = '';
+    }
+    async applyKitById(kitId) {
+        if (!kitId) return;
         try {
             const k = await getBrandKit({ kitId });
             const primary = k.Primary_Color__c || this.config.primaryColor;
@@ -171,8 +177,6 @@ export default class DemoStoryStudio extends LightningElement {
                 logoUrl: k.Logo_URL__c || this.config.logoUrl,
                 marketingAvatarUrl: k.Secondary_Logo_URL__c || k.Logo_URL__c || this.config.marketingAvatarUrl
             });
-            this.showBrandPicker = false;
-            this.brandSearch = '';
         } catch (err) {
             this.toast('Brand Kit', (err && err.body && err.body.message) || err.message, 'error');
         }
@@ -221,6 +225,9 @@ export default class DemoStoryStudio extends LightningElement {
         if (!data) return;
         const raw = getFieldValue(data, CFG);
         if (raw) { try { this.config = { ...DEFAULTS, ...JSON.parse(raw) }; } catch (e) {} }
+        // Default the brand from the Brand Kit chosen at record creation.
+        const kitId = getFieldValue(data, BRAND_KIT);
+        if (kitId && !this.config.brandKitId) { this.applyKitById(kitId); }
         this.previewVersion++;
     }
 

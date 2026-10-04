@@ -45,6 +45,7 @@
     <fieldPermissions><field>Two_Way_Simulator__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Brand_Kit__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Industry__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Persona__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Theme__c.Primary_Color__c</field><editable>false</editable><readable>true</readable></fieldPermissions>

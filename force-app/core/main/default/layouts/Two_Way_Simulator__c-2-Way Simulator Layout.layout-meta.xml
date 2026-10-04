@@ -12,7 +12,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
-                <field>Brand__c</field>
+                <field>Brand_Kit__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Edit</behavior>
