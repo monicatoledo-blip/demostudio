@@ -151,6 +151,9 @@
                 <header class="preview-header">
                     <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
                     <span>Live Preview · 2-Way Email</span>
+                    <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                        alternative-text="Restart simulation" title="Restart the 2-way simulation"
+                        onclick={handleResetPreview} class="preview-reset"></lightning-button-icon>
                 </header>
                 <div class="preview-canvas">
                     <iframe class="preview-iframe" title="Email preview" src={previewUrl}></iframe>

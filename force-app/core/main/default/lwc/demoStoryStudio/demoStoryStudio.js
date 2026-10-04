@@ -353,6 +353,9 @@ export default class DemoStoryStudio extends LightningElement {
         if (this.saved) this.toast('Saved', 'Your experience is saved to the record.', 'success');
         this.loading = false;
     }
+    // Reload the preview iframe so the 2-way simulation restarts from the top.
+    handleResetPreview() { this.previewVersion++; }
+
     async handleDownload() {
         this.loading = true;
         await this.doSave();

@@ -146,3 +146,4 @@
 /* Let combobox dropdowns escape the modal instead of being clipped */
 .gen-modal { max-height: none; }
 .gen-body { overflow: visible; }
+.preview-reset { margin-left: auto; }
