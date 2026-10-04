@@ -134,6 +134,8 @@ public with sharing class StoryEmailPreviewController {
         for (String k : tok.keySet()) {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
+        // Remove broken <img> tags whose src resolved to empty (no logo/hero set).
+        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
         // Scripts are KEPT so the 2-way Reply interactivity works in the preview.
         // The preview is a cross-domain Visualforce iframe, so the sim's JS runs in
         // its own frame. (If a future template's JS misbehaves, re-add a strip here.)

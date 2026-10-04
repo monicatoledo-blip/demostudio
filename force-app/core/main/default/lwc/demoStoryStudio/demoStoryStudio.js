@@ -4,13 +4,14 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import CFG from '@salesforce/schema/Two_Way_Simulator__c.Config_JSON__c';
 import ID_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Id';
 import BRAND_KIT from '@salesforce/schema/Two_Way_Simulator__c.Brand_Kit__c';
+import PERSONA_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Persona__c';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 
-const FIELDS = [CFG, BRAND_KIT];
+const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD];
 
 // Default email config (Cumulus-flavored) — overlaid by the saved Config_JSON__c.
 // Mirrors the Experience Generator email config for parity.
@@ -19,7 +20,7 @@ const DEFAULTS = {
     subjectLine: 'A smarter way to save is here',
     brandName: 'Cumulus Financial', brandDomain: 'cumulusfinserv.com',
     marketingAvatarUrl: '',
-    logoUrl: 'https://cumulusfinserv-ad61ddfc9e8c.herokuapp.com/images/cumulus-logo.png',
+    logoUrl: '',
     logoWidth: '140', primaryColor: '#2894D6', headlineTextColor: '#FFFFFF',
     // Email template
     heroImageUrl: '',
@@ -191,9 +192,13 @@ export default class DemoStoryStudio extends LightningElement {
     handlePersonaSearch(e) { this.personaSearch = e.target.value; }
 
     // Persona inheritance — fills the customer identity from a Demo Persona.
-    async handlePersona(e) {
+    handlePersona(e) {
         const personaId = e.detail.value;
         if (!personaId) { this._commit({ personaId: '' }); return; }
+        this.applyPersonaById(personaId);
+    }
+    async applyPersonaById(personaId) {
+        if (!personaId) return;
         try {
             const p = await getPersona({ personaId });
             const full = ((p.First_Name__c || '') + ' ' + (p.Last_Name__c || '')).trim();
@@ -228,6 +233,8 @@ export default class DemoStoryStudio extends LightningElement {
         // Default the brand from the Brand Kit chosen at record creation.
         const kitId = getFieldValue(data, BRAND_KIT);
         if (kitId && !this.config.brandKitId) { this.applyKitById(kitId); }
+        const pId = getFieldValue(data, PERSONA_FIELD);
+        if (pId && !this.config.personaId) { this.applyPersonaById(pId); }
         this.previewVersion++;
     }
 
