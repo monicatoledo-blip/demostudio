@@ -13,8 +13,14 @@
             <div class="img-controls">
                 <lightning-input variant="label-hidden" placeholder="Paste an image URL"
                     value={value} onchange={handleUrl}></lightning-input>
+                <label class="img-upload-btn">
+                    <span>{uploadLabel}</span>
+                    <input type="file" accept="image/*" onchange={handleFile} class="img-file-input" />
+                </label>
                 <div class="img-btns">
-                    <lightning-button label={toggleLabel} onclick={toggleGrid} variant="neutral"></lightning-button>
+                    <template lwc:if={hasLibrary}>
+                        <lightning-button label={toggleLabel} onclick={toggleGrid} variant="neutral"></lightning-button>
+                    </template>
                     <template lwc:if={hasValue}>
                         <lightning-button label="Clear" onclick={clearImg} variant="base"></lightning-button>
                     </template>

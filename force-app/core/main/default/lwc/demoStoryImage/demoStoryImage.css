@@ -10,3 +10,6 @@
 .img-cell { padding: 0; border: 1px solid #e6e9ee; border-radius: 6px; overflow: hidden; cursor: pointer; background: #fff; aspect-ratio: 1 / 1; }
 .img-cell img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .img-cell:hover { border-color: #0176d3; }
+.img-upload-btn { display: inline-block; margin-top: 0.35rem; font-size: 0.8rem; color: #0176d3; cursor: pointer; }
+.img-upload-btn span { text-decoration: underline; }
+.img-file-input { display: none; }

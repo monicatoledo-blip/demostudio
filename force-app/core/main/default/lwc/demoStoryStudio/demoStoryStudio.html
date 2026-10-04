@@ -14,8 +14,10 @@
                 <span class={saveStatusPillClass}>
                     <span class="save-status-text">{saveStatusText}</span>
                 </span>
+                <lightning-button variant="neutral" label="Download HTML" icon-name="utility:download"
+                    onclick={handleDownload} disabled={loading} class="slds-m-left_small"></lightning-button>
                 <lightning-button variant="brand" label="Save" onclick={handleSave} disabled={loading}
-                    class="slds-m-left_small"></lightning-button>
+                    class="slds-m-left_x-small"></lightning-button>
             </div>
         </header>
 
@@ -46,12 +48,24 @@
             <section class="studio-editor">
                 <template lwc:if={isBranding}>
                     <h2 class="sec-title">Branding</h2>
+                    <p class="sec-subtitle">Brand Kit — applies colors, logo &amp; sender avatar (override anything below)</p>
+                    <div class="kit-grid">
+                        <template for:each={brandKitTiles} for:item="k">
+                            <button key={k.id} class={k.cls} data-kitid={k.id} onclick={handlePickKit} title={k.label}>
+                                <span class="kit-swatch" style={k.swatch}>
+                                    <template lwc:if={k.hasLogo}><img src={k.logo} alt={k.label} /></template>
+                                </span>
+                                <span class="kit-name">{k.label}</span>
+                            </button>
+                        </template>
+                    </div>
                     <lightning-input label="Email Subject Line" data-field="subjectLine" value={config.subjectLine} onchange={handleInput}></lightning-input>
                     <lightning-input label="Brand Name" data-field="brandName" value={config.brandName} onchange={handleInput}></lightning-input>
                     <lightning-input label="Brand Domain" data-field="brandDomain" value={config.brandDomain} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Marketing Sender Avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
-                    <c-demo-story-image label="Logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Marketing Sender Avatar" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Logo" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
                     <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
+                    <lightning-input type="color" label="Logo Background Color" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input>
                     <lightning-input type="color" label="Primary Hex Color" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input>
                     <lightning-input type="color" label="Headline Text Color" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input>
                 </template>
@@ -78,9 +92,12 @@
 
                 <template lwc:if={isCustomer}>
                     <h2 class="sec-title">Customer Profile</h2>
+                    <lightning-combobox label="Inherit from Persona" placeholder="Pick a persona to fill customer details…"
+                        options={personaOptions} value={config.personaId} onchange={handlePersona}></lightning-combobox>
+                    <p class="sec-subtitle">Fills name, email, title, company &amp; avatar from the Demo Persona. Override below.</p>
                     <lightning-input label="Customer Name" data-field="customerName" value={config.customerName} onchange={handleInput}></lightning-input>
                     <lightning-input label="Customer Email" data-field="customerEmail" value={config.customerEmail} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Customer Avatar" value={config.customerAvatarUrl} data-field="customerAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Customer Avatar" kind="avatar" value={config.customerAvatarUrl} data-field="customerAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                     <lightning-input label="Customer Title" data-field="customerTitle" value={config.customerTitle} onchange={handleInput}></lightning-input>
                     <lightning-input label="Customer Company" data-field="customerCompany" value={config.customerCompany} onchange={handleInput}></lightning-input>
                     <lightning-input label="Customer Mobile" data-field="customerMobile" value={config.customerMobile} onchange={handleInput}></lightning-input>
@@ -90,7 +107,7 @@
                 <template lwc:if={isAgent}>
                     <h2 class="sec-title">AI Agent</h2>
                     <lightning-input label="Virtual Agent Name" data-field="agentName" value={config.agentName} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Agent Avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Agent Avatar" kind="avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                 </template>
 
                 <template lwc:if={isConvo}>

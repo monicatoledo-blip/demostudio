@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Config_JSON__c</fullName>
+    <label>Config JSON</label>
+    <description>The full simulator config (brand, content, conversation) driving HTML generation. Produced/edited in Story Studio.</description>
+    <length>131072</length>
+    <required>false</required>
+    <type>LongTextArea</type>
+    <visibleLines>10</visibleLines>
+</CustomField>

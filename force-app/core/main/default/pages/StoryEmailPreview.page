@@ -1,4 +1,5 @@
 <apex:page controller="StoryEmailPreviewController" showHeader="false" sidebar="false"
-    standardStylesheets="false" applyHtmlTag="false" applyBodyTag="false" cache="false">
+    standardStylesheets="false" applyHtmlTag="false" applyBodyTag="false" cache="false"
+    contentType="{!pageContentType}">
 <apex:outputText value="{!html}" escape="false"/>
 </apex:page>

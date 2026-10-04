@@ -34,14 +34,14 @@
     </actionOverrides>
     <actionOverrides>
         <actionName>View</actionName>
-        <content>Demo_Story_Record_Page</content>
+        <content>Two_Way_Simulator_Record_Page</content>
         <formFactor>Large</formFactor>
-        <pageOrSobjectType>Demo_Story__c</pageOrSobjectType>
+        <pageOrSobjectType>Two_Way_Simulator__c</pageOrSobjectType>
         <type>Flexipage</type>
     </actionOverrides>
     <tabs>Demo_Persona__c</tabs>
     <tabs>Demo_Theme__c</tabs>
-    <tabs>Demo_Story__c</tabs>
+    <tabs>Two_Way_Simulator__c</tabs>
     <tabs>standard-Contact</tabs>
     <uiType>Lightning</uiType>
 </CustomApplication>

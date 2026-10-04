@@ -1,59 +1,66 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
-    <label>Demo Story Factory</label>
-    <description>Additive permission set for the Demo Story Factory (Demo_Story__c / Demo_Stage__c + deploy service). Separate from Demo Studio Admin so the existing unified-profile generator is untouched.</description>
+    <label>2-Way Simulators</label>
+    <description>Additive permission set for the 2-Way Simulators tool (Two_Way_Simulator__c + Story Studio + preview + brand kits). Separate from Demo Studio Admin and from StoryStudio.</description>
     <hasActivationRequired>false</hasActivationRequired>
-    <objectPermissions>
-        <object>Demo_Story__c</object>
-        <allowCreate>true</allowCreate>
-        <allowDelete>true</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>true</modifyAllRecords>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
-    <objectPermissions>
-        <object>Demo_Stage__c</object>
-        <allowCreate>true</allowCreate>
-        <allowDelete>true</allowDelete>
-        <allowEdit>true</allowEdit>
-        <allowRead>true</allowRead>
-        <modifyAllRecords>true</modifyAllRecords>
-        <viewAllRecords>true</viewAllRecords>
-    </objectPermissions>
-    <fieldPermissions><field>Demo_Story__c.Industry__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Brand_Domain__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Primary_Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Accent_Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Logo_URL__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Persona__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Status__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Connector_Id__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Data_Space__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Profile_Data_Graph__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Deployed_Artifacts__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Story__c.Last_Deployed__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Stage__c.Stage_Type__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Stage__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Stage__c.Sort_Order__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Stage__c.Surface__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <fieldPermissions><field>Demo_Stage__c.Content_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
-    <tabSettings>
-        <tab>Demo_Story__c</tab>
-        <visibility>Visible</visibility>
-    </tabSettings>
-    <classAccesses>
-        <apexClass>DemoStudioDeployService</apexClass>
-        <enabled>true</enabled>
-    </classAccesses>
     <classAccesses>
         <apexClass>StoryEmailPreviewController</apexClass>
         <enabled>true</enabled>
     </classAccesses>
+    <classAccesses>
+        <apexClass>DemoBrandKitService</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <objectPermissions>
+        <object>Two_Way_Simulator__c</object>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>Demo_Theme__c</object>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+    <objectPermissions>
+        <object>Demo_Persona__c</object>
+        <allowCreate>false</allowCreate>
+        <allowDelete>false</allowDelete>
+        <allowEdit>false</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>false</modifyAllRecords>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Industry__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Two_Way_Simulator__c.Persona__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Theme__c.Primary_Color__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Theme__c.Accent_Color__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Theme__c.Logo_URL__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Theme__c.Background_Gradient__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.First_Name__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Last_Name__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Title__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Company__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Primary_Email__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Primary_Phone__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Primary_Address__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Persona__c.Avatar_URL__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <pageAccesses>
         <apexPage>StoryEmailPreview</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
+    <tabSettings>
+        <tab>Two_Way_Simulator__c</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
 </PermissionSet>

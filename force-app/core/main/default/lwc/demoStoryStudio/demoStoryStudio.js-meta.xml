@@ -8,7 +8,7 @@
     <targetConfigs>
         <targetConfig targets="lightning__RecordPage">
             <objects>
-                <object>Demo_Story__c</object>
+                <object>Two_Way_Simulator__c</object>
             </objects>
         </targetConfig>
     </targetConfigs>

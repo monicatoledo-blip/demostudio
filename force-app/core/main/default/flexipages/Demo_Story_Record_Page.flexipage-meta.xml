@@ -3,18 +3,6 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>c:demoStoryStudio</componentName>
-                <identifier>demoStoryStudio_1</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentName>c:demoStoryDeploy</componentName>
-                <identifier>demoStoryDeploy_1</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
                 <componentName>force:detailPanel</componentName>
                 <identifier>force_detailPanel_1</identifier>
             </componentInstance>

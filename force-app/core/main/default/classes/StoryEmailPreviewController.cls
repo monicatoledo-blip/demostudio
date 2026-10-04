@@ -7,12 +7,19 @@
  */
 public with sharing class StoryEmailPreviewController {
 
+    // When ?download=1, set a filename so the browser downloads the HTML instead
+    // of rendering it inline (used by the Story Studio "Download HTML" button).
+    public String getPageContentType() {
+        String dl = ApexPages.currentPage().getParameters().get('download');
+        return dl == '1' ? 'text/html#story-email.html' : 'text/html';
+    }
+
     public String getHtml() {
         String storyId = ApexPages.currentPage().getParameters().get('id');
         if (String.isBlank(storyId)) return '<p style="font-family:Arial">No story id.</p>';
 
         Map<String, Object> c = new Map<String, Object>();
-        for (Demo_Story__c s : [SELECT Config_JSON__c FROM Demo_Story__c WHERE Id = :storyId LIMIT 1]) {
+        for (Two_Way_Simulator__c s : [SELECT Config_JSON__c FROM Two_Way_Simulator__c WHERE Id = :storyId LIMIT 1]) {
             if (String.isNotBlank(s.Config_JSON__c)) {
                 try { c = (Map<String, Object>) JSON.deserializeUntyped(s.Config_JSON__c); } catch (Exception e) {}
             }
@@ -108,9 +115,9 @@ public with sharing class StoryEmailPreviewController {
         for (String k : tok.keySet()) {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
-        // Strip scripts: the preview is a static render (interactivity belongs to the
-        // deployed page). Also avoids the sim's own JS running in the iframe.
-        out = out.replaceAll('<script[\\s\\S]*?</script>', '');
+        // Scripts are KEPT so the 2-way Reply interactivity works in the preview.
+        // The preview is a cross-domain Visualforce iframe, so the sim's JS runs in
+        // its own frame. (If a future template's JS misbehaves, re-add a strip here.)
         return out;
     }
 }
