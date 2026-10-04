@@ -605,6 +605,10 @@ export default class DemoStoryStudio extends LightningElement {
             patch.messages = gen.messages.filter((m) => m && m.text)
                 .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' }));
         }
+        // If the AI picked up a specific recipient from the context, set the
+        // Customer Profile so the [[CUSTOMER_FIRST_NAME]] token resolves to them.
+        if (gen.customerFirstName) patch.customerFirstName = gen.customerFirstName;
+        if (gen.customerName) patch.customerName = gen.customerName;
         this._commit(patch);
     }
 

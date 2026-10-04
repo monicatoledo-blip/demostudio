@@ -34,13 +34,14 @@ public with sharing class DemoStoryGenerator {
             ctx,
             '',
             'Return ONLY a single JSON object (no prose, no code fences) with EXACTLY this shape:',
-            '{ "messages": [ {"sender":"bot","text":string}, {"sender":"user","text":string}, ... ] }',
+            '{ "customerFirstName": string, "customerName": string, "messages": [ {"sender":"bot","text":string}, {"sender":"user","text":string}, ... ] }',
+            'If the campaign context names a specific recipient, set "customerName" to their full name and "customerFirstName" to their first name; otherwise set both to "". Do NOT invent a name that is not in the context.',
             'Rules for "messages":',
             '- 4 to 6 turns, ALTERNATING, and the FIRST message MUST be "bot" (the brand sending a short marketing/outreach text).',
             '- "bot" = the brand / its AI agent. "user" = the recipient (' + br + ' customer).',
             '- After the opening brand text, the recipient ("user") replies with a realistic question grounded in the campaign context, then the brand AI agent ("bot") answers helpfully and specifically for ' + ind + ', and so on.',
             '- SMS style: short, conversational, 1-2 sentences per message, no markdown. You may use at most one tasteful emoji in the opening brand text only.',
-            '- You may include [[CUSTOMER_FIRST_NAME]] and [[BRAND_NAME]] tokens; they are substituted at render time.',
+            '- Use the [[CUSTOMER_FIRST_NAME]] and [[BRAND_NAME]] tokens for the recipient first name and brand (they are substituted at render time) rather than writing the literal names into the text.',
             'Make it specific to the campaign context and angle - not generic. Do not include any key other than "messages". Output must be valid JSON.'
         }, '\n');
     }
