@@ -3,7 +3,7 @@
         <header class="studio-toolbar">
             <div class="studio-toolbar-left">
                 <span class="studio-logo">
-                    <lightning-icon icon-name="utility:email" size="small" variant="inverse"></lightning-icon>
+                    <lightning-icon icon-name={channelIcon} size="small" variant="inverse"></lightning-icon>
                 </span>
                 <div class="studio-title-wrap">
                     <h1 class="studio-title">Story Studio</h1>
@@ -28,7 +28,7 @@
                 </span>
                 <div class="generate-banner-text">
                     <h3 class="generate-banner-title">Start with a story, not a form</h3>
-                    <p class="generate-banner-sub">Describe the brand and offer — we'll pre-fill the branded email and the 2-way agent conversation. Then edit anything, with the preview updating live.</p>
+                    <p class="generate-banner-sub">Describe the brand and offer — we'll pre-fill the branded experience and the 2-way agent conversation. Then edit anything, with the preview updating live.</p>
                 </div>
             </div>
             <lightning-button variant="brand" label="✨ Generate" icon-name="utility:magicwand"
@@ -80,6 +80,11 @@
                     <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
                     <div class="color-field"><label class="color-label">Primary Hex Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="primaryColor" value={config.primaryColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input></div></div>
                     <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
+                    <template lwc:if={isMessaging}>
+                        <lightning-combobox label="Phone Theme" data-field="theme" value={config.theme}
+                            options={themeOptions} onchange={handleDetailField}
+                            field-level-help="Light or dark mode for the simulated phone screen."></lightning-combobox>
+                    </template>
                 </template>
 
                 <template lwc:if={isTemplate}>
@@ -123,11 +128,16 @@
                     <h2 class="sec-title">AI Agent</h2>
                     <lightning-input label="Virtual Agent Name" data-field="agentName" value={config.agentName} onchange={handleInput}></lightning-input>
                     <c-demo-story-image label="Agent Avatar" kind="avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <template lwc:if={isMessaging}>
+                        <lightning-input label="Chat Header Title" data-field="messagingAgentHeader" value={config.messagingAgentHeader} onchange={handleInput}
+                            placeholder="Penny (Cumulus Financial AI Agent)"
+                            field-level-help="Shown at the top of the chat. Leave blank to auto-build from the agent + brand name. The header avatar uses the Marketing Sender Avatar in Branding."></lightning-input>
+                    </template>
                 </template>
 
                 <template lwc:if={isConvo}>
                     <h2 class="sec-title">Customer &amp; Agent Messages</h2>
-                    <p class="sec-subtitle">Thread — the back-and-forth after the email</p>
+                    <p class="sec-subtitle">Thread — the back-and-forth 2-way conversation</p>
                     <template for:each={decoratedMessages} for:item="m">
                         <div key={m.i} class="msg-row">
                             <div class="msg-row-head">
@@ -140,6 +150,10 @@
                             </div>
                             <lightning-textarea label={m.rowLabel} variant="label-hidden"
                                 data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
+                            <template lwc:if={isMessaging}>
+                                <c-demo-story-image label="Attach image (optional)" value={m.imageUrl}
+                                    data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
+                            </template>
                         </div>
                     </template>
                     <lightning-button label="+ Add Message" onclick={addMessage}
@@ -152,13 +166,13 @@
             <aside class="studio-preview">
                 <header class="preview-header">
                     <lightning-icon icon-name="utility:preview" size="x-small"></lightning-icon>
-                    <span>Live Preview · 2-Way Email</span>
+                    <span>{previewLabel}</span>
                     <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
                         alternative-text="Restart simulation" title="Restart the 2-way simulation"
                         onclick={handleResetPreview} class="preview-reset"></lightning-button-icon>
                 </header>
                 <div class="preview-canvas">
-                    <iframe class="preview-iframe" title="Email preview" src={previewUrl}></iframe>
+                    <iframe class="preview-iframe" title="2-Way preview" src={previewUrl}></iframe>
                 </div>
             </aside>
         </div>

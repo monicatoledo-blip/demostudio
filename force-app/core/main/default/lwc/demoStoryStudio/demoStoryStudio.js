@@ -6,17 +6,22 @@ import ID_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Id';
 import BRAND_KIT from '@salesforce/schema/Two_Way_Simulator__c.Brand_Kit__c';
 import PERSONA_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Persona__c';
 import INDUSTRY_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Industry__c';
+import CHANNEL_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Channel__c';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 
-const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD];
+const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD, CHANNEL_FIELD];
 
 // Default email config (Cumulus-flavored) — overlaid by the saved Config_JSON__c.
 // Mirrors the Experience Generator email config for parity.
 const DEFAULTS = {
+    // Channel + messaging-channel appearance (shared by SMS/WhatsApp/RCS)
+    channel: 'Email',
+    theme: 'light',
+    messagingAgentHeader: '',
     // Branding
     subjectLine: 'A smarter way to save is here',
     brandName: 'Cumulus Financial', brandDomain: 'cumulusfinserv.com',
@@ -129,13 +134,34 @@ const INDUSTRY_PACKS = {
     }
 };
 
+// `channels` (optional) restricts a section to specific channels; sections with
+// no `channels` key show for every channel. The Email Template section is
+// email-only; messaging channels (SMS/WhatsApp/RCS) drop it and keep the rest.
+// Marketing-first starter thread for messaging channels (SMS/WhatsApp/RCS):
+// the brand's outreach shows first, then the recipient replies, then the agent
+// answers — reading like the email's 2-way reply. Brand token re-renders live.
+const MESSAGING_SEED_MESSAGES = [
+    { sender: 'bot', text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your round-ups just added $50 to savings this month 🎉 Want to put it on autopilot?', imageUrl: '' },
+    { sender: 'user', text: 'Oh nice! How does that work exactly?', imageUrl: '' },
+    { sender: 'bot', text: 'Every card purchase rounds up to the next dollar and the change moves straight to savings — automatically. Reply BOOST and I’ll double it.', imageUrl: '' }
+];
+
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
     { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
     { key: 'agent', label: 'AI Agent', icon: 'utility:einstein' },
-    { key: 'template', label: 'Email Template', icon: 'utility:email' },
+    { key: 'template', label: 'Email Template', icon: 'utility:email', channels: ['Email'] },
     { key: 'convo', label: 'Messages', icon: 'utility:chat' }
 ];
+
+// Per-channel chrome: toolbar icon + the "2-Way <x>" label used in the header
+// subtitle and the preview pane.
+const CHANNEL_META = {
+    Email: { icon: 'utility:email', label: 'Email' },
+    SMS: { icon: 'utility:sms', label: 'SMS' },
+    WhatsApp: { icon: 'utility:chat', label: 'WhatsApp' },
+    RCS: { icon: 'utility:comments', label: 'RCS' }
+};
 
 export default class DemoStoryStudio extends LightningElement {
     @api recordId;
@@ -250,11 +276,25 @@ export default class DemoStoryStudio extends LightningElement {
         if (!data) return;
         const raw = getFieldValue(data, CFG);
         const ind = getFieldValue(data, INDUSTRY_FIELD);
+        const channel = getFieldValue(data, CHANNEL_FIELD) || 'Email';
         if (raw) {
             try { this.config = { ...DEFAULTS, ...JSON.parse(raw) }; } catch (e) {}
         } else if (ind && INDUSTRY_PACKS[ind]) {
             // Fresh record: seed the copy from the record's industry pack.
             this.config = { ...this.config, ...INDUSTRY_PACKS[ind] };
+        }
+        // The record's Channel drives which sections + template render. Keep the
+        // config's channel in sync so the VF preview picks the right template.
+        if (this.config.channel !== channel) { this.config = { ...this.config, channel }; }
+        // Fresh messaging record: seed the marketing-first 2-way thread (the
+        // industry packs' threads are email-oriented / recipient-first).
+        if (!raw && channel !== 'Email') {
+            this.config = { ...this.config, messages: MESSAGING_SEED_MESSAGES.map((m) => ({ ...m })) };
+        }
+        // If the active section isn't valid for this channel (e.g. Email Template
+        // on an SMS record), fall back to the first valid section.
+        if (!this.visibleSections.some((s) => s.key === this.activeSection)) {
+            this.activeSection = this.visibleSections[0].key;
         }
         if (ind) { this.genIndustry = ind; this._recordIndustry = ind; } // default the AI modal's Industry
         // Default the brand from the Brand Kit chosen at record creation.
@@ -265,9 +305,28 @@ export default class DemoStoryStudio extends LightningElement {
         this.previewVersion++;
     }
 
+    // ---- channel ----
+    get channel() { return this.config.channel || 'Email'; }
+    get isEmail() { return this.channel === 'Email'; }
+    get isSms() { return this.channel === 'SMS'; }
+    get isWhatsapp() { return this.channel === 'WhatsApp'; }
+    get isRcs() { return this.channel === 'RCS'; }
+    // Messaging channels share the Branding/Agent/Messages layout + theme control.
+    get isMessaging() { return this.isSms || this.isWhatsapp || this.isRcs; }
+    get channelMeta() { return CHANNEL_META[this.channel] || CHANNEL_META.Email; }
+    get channelLabel() { return this.channelMeta.label; }
+    get channelIcon() { return this.channelMeta.icon; }
+    get previewLabel() { return 'Live Preview · 2-Way ' + this.channelLabel; }
+    get themeOptions() {
+        return [{ label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' }];
+    }
+
     // ---- sections / nav
+    get visibleSections() {
+        return SECTIONS.filter((s) => !s.channels || s.channels.includes(this.channel));
+    }
     get tabs() {
-        return SECTIONS.map((s) => ({ ...s,
+        return this.visibleSections.map((s) => ({ ...s,
             className: 'studio-tab' + (s.key === this.activeSection ? ' studio-tab--active' : '') }));
     }
     get isBranding() { return this.activeSection === 'branding'; }
@@ -275,7 +334,7 @@ export default class DemoStoryStudio extends LightningElement {
     get isCustomer() { return this.activeSection === 'customer'; }
     get isAgent() { return this.activeSection === 'agent'; }
     get isConvo() { return this.activeSection === 'convo'; }
-    get subtitle() { return (this.config.brandName || 'New') + ' · 2-Way Email'; }
+    get subtitle() { return (this.config.brandName || 'New') + ' · 2-Way ' + this.channelLabel; }
     handleTab(e) { this.activeSection = e.currentTarget.dataset.key; }
 
     // ---- editing
@@ -287,6 +346,10 @@ export default class DemoStoryStudio extends LightningElement {
     }
     handleToggle(e) {
         this._commit({ [e.currentTarget.dataset.field]: e.target.checked });
+    }
+    // For lightning-combobox (and other components firing detail.value), e.g. theme.
+    handleDetailField(e) {
+        this._commit({ [e.currentTarget.dataset.field]: e.detail.value });
     }
     handleImagePick(e) {
         this._commit({ [e.currentTarget.dataset.field]: e.detail.url });
@@ -310,7 +373,7 @@ export default class DemoStoryStudio extends LightningElement {
     addMessage() {
         const prev = (this.config.messages || []);
         const nextSender = prev.length && prev[prev.length - 1].sender === 'user' ? 'bot' : 'user';
-        this._commit({ messages: [...prev, { sender: nextSender, text: '' }] });
+        this._commit({ messages: [...prev, { sender: nextSender, text: '', imageUrl: '' }] });
     }
     removeMessage(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
@@ -324,8 +387,15 @@ export default class DemoStoryStudio extends LightningElement {
     get decoratedMessages() {
         return (this.config.messages || []).map((m, i) => ({
             i, sender: m.sender || 'user', text: m.text,
+            imageUrl: m.imageUrl || '',
             rowLabel: 'Message ' + (i + 1)
         }));
+    }
+    // Attach/replace an image on a message (same library picker as the hero).
+    handleMsgImage(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        const msgs = this.config.messages.map((m, idx) => idx === i ? { ...m, imageUrl: e.detail.url } : m);
+        this._commit({ messages: msgs });
     }
 
     // ---- preview = Visualforce page loaded by relative URL (LWS-legal), debounced autosave

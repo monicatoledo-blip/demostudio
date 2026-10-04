@@ -38,16 +38,33 @@ public with sharing class StoryEmailPreviewController {
         if (String.isBlank(storyId)) return '<p style="font-family:Arial">No story id.</p>';
 
         Map<String, Object> c = new Map<String, Object>();
-        for (Two_Way_Simulator__c s : [SELECT Config_JSON__c FROM Two_Way_Simulator__c WHERE Id = :storyId LIMIT 1]) {
+        String channel = 'Email';
+        for (Two_Way_Simulator__c s : [SELECT Channel__c, Config_JSON__c FROM Two_Way_Simulator__c WHERE Id = :storyId LIMIT 1]) {
+            if (String.isNotBlank(s.Channel__c)) channel = s.Channel__c;
             if (String.isNotBlank(s.Config_JSON__c)) {
                 try { c = (Map<String, Object>) JSON.deserializeUntyped(s.Config_JSON__c); } catch (Exception e) {}
             }
         }
+        // The saved config carries its own channel; prefer it if present (keeps
+        // preview + record in sync even if the field hasn't refreshed yet).
+        if (c.get('channel') != null && String.isNotBlank(String.valueOf(c.get('channel')))) {
+            channel = String.valueOf(c.get('channel'));
+        }
+
+        // Pick the ported template + renderer by channel. Email is the default
+        // and its behavior is unchanged; SMS/WhatsApp/RCS are additive branches.
+        String ch = channel == null ? 'email' : channel.toLowerCase();
+        String resource = 'demoStoryEmailTemplate';
+        if (ch == 'sms') resource = 'demoStorySmsTemplate';
+        else if (ch == 'whatsapp') resource = 'demoStoryWhatsappTemplate';
+        else if (ch == 'rcs') resource = 'demoStoryRcsTemplate';
 
         String tpl;
-        try { tpl = new PageReference('/resource/demoStoryEmailTemplate').getContent().toString(); }
+        try { tpl = new PageReference('/resource/' + resource).getContent().toString(); }
         catch (Exception e) { return '<p style="font-family:Arial">Template load failed: ' + e.getMessage() + '</p>'; }
 
+        if (ch == 'sms') return renderSms(tpl, c);
+        // WhatsApp + RCS branches are added in their own build phases.
         return renderEmail(tpl, c);
     }
 
@@ -144,5 +161,114 @@ public with sharing class StoryEmailPreviewController {
         // The preview is a cross-domain Visualforce iframe, so the sim's JS runs in
         // its own frame. (If a future template's JS misbehaves, re-add a strip here.)
         return out;
+    }
+
+    // ----------------------------------------------------------------------
+    // Messaging-channel helpers (shared by SMS / WhatsApp / RCS)
+    // ----------------------------------------------------------------------
+
+    // HTML-escape a string for safe injection into a messaging bubble.
+    // Mirrors the Experience Generator's escapeHtmlForSms (script.js:6932).
+    private static String escapeSms(String text) {
+        if (text == null) return '';
+        return text.replace('&', '&amp;').replace('<', '&lt;')
+                   .replace('>', '&gt;').replace('"', '&quot;');
+    }
+
+    // Escape bubble text and turn newlines into <br> (script.js:6941 smsBubbleHtml).
+    private static String smsBubble(String text) {
+        return escapeSms(text).replace('\r\n', '\n').replace('\n', '<br>');
+    }
+
+    // Extract the shared {sender,text,imageUrl} message list from the config.
+    private static List<Object> msgList(Map<String, Object> c) {
+        Object m = c.get('messages');
+        return (m instanceof List<Object>) ? (List<Object>) m : new List<Object>();
+    }
+
+    // Header title shown in the SMS/WhatsApp/RCS chat header. Uses an explicit
+    // messagingAgentHeader if set, else composes "<Agent> (<Brand> AI Agent)".
+    private static String messagingHeader(Map<String, Object> c) {
+        String explicit = str(c, 'messagingAgentHeader', '');
+        if (String.isNotBlank(explicit)) return explicit;
+        String agent = str(c, 'agentName', 'Penny');
+        String brand = str(c, 'brandName', 'Cumulus Financial');
+        return agent + ' (' + brand + ' AI Agent)';
+    }
+
+    // Resolve brand/customer tokens that may appear inside message copy, the
+    // same way renderEmail resolves [[BRAND_NAME]] over the whole output.
+    private static String resolveSharedTokens(String out, Map<String, Object> c) {
+        String name = str(c, 'customerName', 'Rachel Green');
+        String first = str(c, 'customerFirstName', name.split(' ')[0]);
+        return out
+            .replace('[[BRAND_NAME]]', str(c, 'brandName', 'Cumulus Financial'))
+            .replace('[[BRAND_DOMAIN]]', str(c, 'brandDomain', 'cumulusfinserv.com'))
+            .replace('[[CUSTOMER_FIRST_NAME]]', first)
+            .replace('[[CUSTOMER_NAME]]', name)
+            .replace('[[AGENT_NAME]]', str(c, 'agentName', 'Penny'));
+    }
+
+    // ----------------------------------------------------------------------
+    // SMS — Apple iMessage-style thread (ported from buildAppleSmsThreadHtml,
+    // script.js:7199). Each row is one .message-group.hidden-msg; the ported
+    // template's own tap-to-reveal script plays them one at a time.
+    // ----------------------------------------------------------------------
+    private static String renderSms(String tpl, Map<String, Object> c) {
+        Map<String, String> tok = new Map<String, String>{
+            'SMS_THREAD_HTML' => buildSmsThread(c),
+            'SMS_THEME' => smsTheme(c),
+            'MARKETING_AVATAR_URL' => str(c, 'marketingAvatarUrl', ''),
+            'MESSAGING_AGENT_HEADER' => messagingHeader(c)
+        };
+        String out = tpl;
+        for (String k : tok.keySet()) {
+            out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
+        }
+        out = resolveSharedTokens(out, c);
+        // Remove the header avatar <img> if no avatar is set (grey circle shows).
+        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        // Scripts KEPT so tap-to-reveal plays the 2-way thread.
+        return out;
+    }
+
+    private static String smsTheme(Map<String, Object> c) {
+        // Shared across messaging channels (Studio exposes one Light/Dark control).
+        String t = str(c, 'theme', 'light');
+        return String.isBlank(t) ? 'light' : t;
+    }
+
+    private static String buildSmsThread(Map<String, Object> c) {
+        String parts = '';
+        Boolean firstShown = false;
+        for (Object o : msgList(c)) {
+            if (!(o instanceof Map<String, Object>)) continue;
+            Map<String, Object> m = (Map<String, Object>) o;
+            String sender = String.valueOf(m.get('sender')) == 'user' ? 'user' : 'bot';
+            String text = m.get('text') == null ? '' : String.valueOf(m.get('text'));
+            String img = m.get('imageUrl') == null ? '' : String.valueOf(m.get('imageUrl'));
+            if (String.isBlank(text) && String.isBlank(img)) continue;
+            String rowAlign = sender == 'user' ? 'row-user' : 'row-bot';
+            String skin = sender == 'user' ? 'bubble-user' : 'bubble-bot';
+            String bubbles = '';
+            if (String.isNotBlank(img) && String.isNotBlank(text)) {
+                bubbles = smsBubbleEl(sender, skin, '<img class="msg-attached-image" src="' + escapeSms(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" />')
+                      + smsBubbleEl(sender, skin, '<div class="msg-copy">' + smsBubble(text) + '</div>');
+            } else if (String.isNotBlank(img)) {
+                bubbles = smsBubbleEl(sender, skin, '<img class="msg-attached-image" src="' + escapeSms(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" />');
+            } else {
+                bubbles = smsBubbleEl(sender, skin, '<div class="msg-copy">' + smsBubble(text) + '</div>');
+            }
+            // Marketing message (the first bubble) shows immediately so the
+            // thread reads like the email; the rest reveal on tap.
+            String hide = firstShown ? ' hidden-msg' : '';
+            firstShown = true;
+            parts += '<div class="row ' + rowAlign + '"><div class="message-group' + hide + '">' + bubbles + '</div></div>';
+        }
+        return parts;
+    }
+
+    private static String smsBubbleEl(String role, String skin, String content) {
+        return '<div class="message ' + role + ' bubble ' + skin + '">' + content + '</div>';
     }
 }
