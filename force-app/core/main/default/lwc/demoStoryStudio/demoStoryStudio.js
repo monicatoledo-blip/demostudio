@@ -400,14 +400,20 @@ export default class DemoStoryStudio extends LightningElement {
     toggleCopyPrompt() { this.showCopyPrompt = !this.showCopyPrompt; }
 
     get copyablePrompt() {
-        const brand = this.config.brandName || 'the brand';
-        const sub = this.config.customerName || 'the customer';
+        const brand = this.config.brandName || 'the customer';
+        const sub = this.config.customerName || 'the primary contact';
         const ind = this.genIndustry;
-        return 'Summarize the campaign I want to demo into a "campaign context" for a Salesforce email demo. '
-            + 'Include the offer, the target audience, and the angle (win-back, cross-sell, onboarding, retention, etc.). '
-            + 'Ignore anything that sounds like a to-do or blocker. Keep it under 150 words, written as one continuous '
-            + 'paragraph, not bullets. The brand is ' + brand + ' and the customer receiving the email is ' + sub
-            + ' in the ' + ind + ' industry.';
+        return [
+            'Review everything you have on ' + brand + ' — all my meeting notes, call transcripts, and discovery for '
+            + 'this account — and research ' + brand + ' on the web if you can (recent news, priorities, products, pains).',
+            'Based on what we have ACTUALLY discussed with them so far, propose a marketing email campaign for ' + brand
+            + ' (' + ind + ') that the stakeholders I have been meeting with would resonate with — tied to their real '
+            + 'priorities from our conversations, not a generic pitch. The email should invite a 2-way interaction '
+            + '(the recipient can reply and an AI agent answers follow-up questions).',
+            'Write it as a single "campaign context" paragraph I can paste into a demo tool: the offer, the recipient ('
+            + sub + '), the angle, and why it lands given our calls. Under ~180 words, one paragraph, no bullets, no '
+            + 'preamble — just the paragraph.'
+        ].join('\n\n');
     }
 
     handleCopyPrompt() {
