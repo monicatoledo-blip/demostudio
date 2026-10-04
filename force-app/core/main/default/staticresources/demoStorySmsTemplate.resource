@@ -248,6 +248,9 @@
       }
       html[data-theme="light"] .header-title { color: #000; }
       html[data-theme="light"] .header-sub { color: #6d6d72; }
+      /* Avatar circle sits on the light header in light mode — give it a light
+         fill so a logo with transparency doesn't show the dark default behind it. */
+      html[data-theme="light"] .header-avatar { background: #e5e5ea; }
       html[data-theme="light"] #smsThreadScroll {
         background: #fff;
       }
