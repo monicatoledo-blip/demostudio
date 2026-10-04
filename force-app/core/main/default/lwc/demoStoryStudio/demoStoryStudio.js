@@ -256,7 +256,7 @@ export default class DemoStoryStudio extends LightningElement {
             // Fresh record: seed the copy from the record's industry pack.
             this.config = { ...this.config, ...INDUSTRY_PACKS[ind] };
         }
-        if (ind) this.genIndustry = ind; // default the AI modal's Industry to this record's
+        if (ind) { this.genIndustry = ind; this._recordIndustry = ind; } // default the AI modal's Industry
         // Default the brand from the Brand Kit chosen at record creation.
         const kitId = getFieldValue(data, BRAND_KIT);
         if (kitId && !this.config.brandKitId) { this.applyKitById(kitId); }
@@ -382,7 +382,10 @@ export default class DemoStoryStudio extends LightningElement {
             'Consumer Business Services', 'Travel & Hospitality', 'Energy & Utilities'
         ].map((i) => ({ label: i, value: i }));
     }
-    handleGenerate() { this.showGenerate = true; }
+    handleGenerate() {
+        if (this._recordIndustry) this.genIndustry = this._recordIndustry;
+        this.showGenerate = true;
+    }
     closeGenerate() { this.showGenerate = false; }
     handleGenContext(e) { this.genContext = e.target.value; }
     handleGenAngle(e) { this.genAngle = e.detail.value; }
