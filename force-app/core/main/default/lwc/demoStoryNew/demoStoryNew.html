@@ -9,11 +9,15 @@
                 </div>
             </header>
             <div class="new-body">
-                <lightning-combobox label="Brand Kit" placeholder="Choose a brand…" options={brandKits}
+                <lightning-input type="search" label="Brand Kit" placeholder="Search brands…"
+                    value={brandSearch} onchange={handleBrandSearch}></lightning-input>
+                <lightning-combobox variant="label-hidden" placeholder="Choose a brand…" options={filteredBrandKits}
                     value={brandKitId} onchange={handleBrand}></lightning-combobox>
                 <lightning-combobox label="Channel" options={channelOptions} value={channel} onchange={handleChannel}></lightning-combobox>
                 <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
-                <lightning-combobox label="Persona" placeholder="Choose a persona…" options={personaOptions}
+                <lightning-input type="search" label="Persona" placeholder="Search personas…"
+                    value={personaSearch} onchange={handlePersonaSearch}></lightning-input>
+                <lightning-combobox variant="label-hidden" placeholder="Choose a persona…" options={filteredPersonas}
                     value={personaId} onchange={handlePersona}></lightning-combobox>
             </div>
             <footer class="new-footer">

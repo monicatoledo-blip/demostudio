@@ -19,10 +19,24 @@ export default class DemoStoryNew extends NavigationMixin(LightningElement) {
     industry = 'Financial Services';
     creating = false;
 
+    @track brandSearch = '';
+    @track personaSearch = '';
+
     @wire(listBrandKits) wiredKits({ data }) {
         if (data) this.brandKits = data.map((k) => ({ label: k.label, value: k.value }));
     }
     @wire(listPersonas) wiredPersonas({ data }) { if (data) this.personaOptions = data; }
+
+    get filteredBrandKits() {
+        const q = (this.brandSearch || '').toLowerCase();
+        return q ? this.brandKits.filter((o) => (o.label || '').toLowerCase().includes(q)) : this.brandKits;
+    }
+    get filteredPersonas() {
+        const q = (this.personaSearch || '').toLowerCase();
+        return q ? this.personaOptions.filter((o) => (o.label || '').toLowerCase().includes(q)) : this.personaOptions;
+    }
+    handleBrandSearch(e) { this.brandSearch = e.target.value; }
+    handlePersonaSearch(e) { this.personaSearch = e.target.value; }
 
     get channelOptions() {
         return ['Email', 'SMS', 'RCS', 'WhatsApp'].map((c) => ({ label: c, value: c }));
