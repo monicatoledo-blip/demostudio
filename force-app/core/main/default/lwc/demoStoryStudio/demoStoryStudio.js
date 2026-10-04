@@ -359,6 +359,12 @@ export default class DemoStoryStudio extends LightningElement {
     // ---- draggable divider between editor and preview ----
     @track editorWidth = 440;
     get splitStyle() { return 'grid-template-columns: 200px ' + this.editorWidth + 'px 8px 1fr;'; }
+    // Re-theme the Story Studio chrome to the selected brand (like Persona Studio).
+    get frameStyle() {
+        const p = this.config.primaryColor || '#0A1F44';
+        const a = this.config.featureSectionColor || this.config.ctaButtonColor || '#1C3B7B';
+        return '--demo-bg-gradient: linear-gradient(135deg, ' + p + ' 0%, ' + a + ' 100%);';
+    }
     _startX = 0;
     _startW = 440;
     _onMove = (e) => {
