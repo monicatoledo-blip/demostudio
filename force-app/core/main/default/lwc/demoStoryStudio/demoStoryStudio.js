@@ -149,7 +149,9 @@ const MESSAGING_SEED_MESSAGES = [
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
     { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
-    { key: 'agent', label: 'AI Agent', icon: 'utility:einstein' },
+    // On messaging channels the agent identity merges into the Messages
+    // section, so the standalone AI Agent tab is email-only.
+    { key: 'agent', label: 'AI Agent', icon: 'utility:einstein', channels: ['Email'] },
     { key: 'template', label: 'Email Template', icon: 'utility:email', channels: ['Email'] },
     { key: 'convo', label: 'Messages', icon: 'utility:chat' }
 ];
