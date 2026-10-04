@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Secondary_Logo_URL__c</fullName>
+    <label>Secondary Logo URL</label>
+    <description>Smaller/mark logo used for avatars and footers (vs the primary logo used in the hero/header).</description>
+    <required>false</required>
+    <type>Url</type>
+</CustomField>

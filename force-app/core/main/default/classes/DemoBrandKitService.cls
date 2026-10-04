@@ -9,7 +9,7 @@ public with sharing class DemoBrandKitService {
     public static List<Map<String, Object>> listBrandKits() {
         List<Map<String, Object>> out = new List<Map<String, Object>>();
         for (Demo_Theme__c t : [
-            SELECT Id, Name, Primary_Color__c, Accent_Color__c, Logo_URL__c, Background_Gradient__c
+            SELECT Id, Name, Primary_Color__c, Accent_Color__c, Logo_URL__c, Secondary_Logo_URL__c, Background_Gradient__c
             FROM Demo_Theme__c ORDER BY Name LIMIT 500
         ]) {
             out.add(new Map<String, Object>{
@@ -24,7 +24,7 @@ public with sharing class DemoBrandKitService {
     @AuraEnabled
     public static Demo_Theme__c getBrandKit(Id kitId) {
         return [
-            SELECT Id, Name, Primary_Color__c, Accent_Color__c, Logo_URL__c, Background_Gradient__c
+            SELECT Id, Name, Primary_Color__c, Accent_Color__c, Logo_URL__c, Secondary_Logo_URL__c, Background_Gradient__c
             FROM Demo_Theme__c WHERE Id = :kitId LIMIT 1
         ];
     }

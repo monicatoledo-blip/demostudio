@@ -167,8 +167,9 @@ export default class DemoStoryStudio extends LightningElement {
             this._commit({
                 brandKitId: kitId, brandName: k.Name || this.config.brandName,
                 primaryColor: primary, ctaButtonColor: primary, logoBgColor: primary,
-                featureSectionColor: accent, logoUrl: k.Logo_URL__c || this.config.logoUrl,
-                marketingAvatarUrl: k.Logo_URL__c || this.config.marketingAvatarUrl
+                featureSectionColor: accent,
+                logoUrl: k.Logo_URL__c || this.config.logoUrl,
+                marketingAvatarUrl: k.Secondary_Logo_URL__c || k.Logo_URL__c || this.config.marketingAvatarUrl
             });
             this.showBrandPicker = false;
             this.brandSearch = '';
