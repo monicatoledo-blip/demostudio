@@ -143,3 +143,6 @@
 .gen-prepare { background: none; border: none; color: #0176d3; font-weight: 600; cursor: pointer; font-size: 0.82rem; font-family: inherit; }
 .gen-copy-callout { background: #eef4fb; border: 1px solid #c6dcf5; border-radius: 8px; padding: 0.75rem 0.85rem; margin: 0.6rem 0; }
 .gen-copy-callout-label { font-size: 0.8rem; font-weight: 600; color: #0A1F44; margin: 0 0 0.5rem; }
+/* Let combobox dropdowns escape the modal instead of being clipped */
+.gen-modal { max-height: none; }
+.gen-body { overflow: visible; }

@@ -5,13 +5,14 @@ import CFG from '@salesforce/schema/Two_Way_Simulator__c.Config_JSON__c';
 import ID_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Id';
 import BRAND_KIT from '@salesforce/schema/Two_Way_Simulator__c.Brand_Kit__c';
 import PERSONA_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Persona__c';
+import INDUSTRY_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Industry__c';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 
-const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD];
+const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD];
 
 // Default email config (Cumulus-flavored) — overlaid by the saved Config_JSON__c.
 // Mirrors the Experience Generator email config for parity.
@@ -54,6 +55,24 @@ const DEFAULTS = {
 // Per-industry content starter packs. Picking an industry fills the content
 // fields deterministically; ✨Generate can then refine via Einstein.
 const INDUSTRY_PACKS = {
+    'Travel & Hospitality': {
+        subjectLine: 'Your next getaway, already planned',
+        headline: 'Where to next?',
+        subHeadline: 'Member fares and perks picked for you',
+        bodyParagraph: 'Hi [[CUSTOMER_FIRST_NAME]],\n\nYou travel enough to deserve the easy button. [[BRAND_NAME]] just unlocked member-only fares and stays tailored to where you love to go.\n\nBook in a tap, change plans without the stress, and earn rewards on every trip.',
+        featureColumn1: 'Member-only fares and stays, bundled so you save more.',
+        featureColumn2: 'Free changes and 24/7 trip support from anywhere.',
+        bullet1: 'Price-drop alerts on the routes you watch.',
+        bullet2: 'Earn and redeem points on flights, hotels, and cars.',
+        bullet3: 'One itinerary for the whole trip.',
+        ctaButtonText: 'Plan my trip',
+        replyPromptHeadline: 'Questions about your trip?',
+        replyPromptBody: 'Reply to this email and [[BRAND_NAME]]\'s travel concierge AI will help with dates, destinations, and perks.',
+        messages: [
+            { sender: 'user', text: 'Can I use my points toward a beach trip over a long weekend?' },
+            { sender: 'bot', text: 'Absolutely — your points cover round-trip airfare plus two nights at several beach destinations. Want me to hold a Fri–Sun itinerary with free changes?' }
+        ]
+    },
     'Financial Services': {
         subjectLine: 'A smarter way to save is here',
         headline: 'Unlock Smart Wealth Building',
@@ -230,7 +249,14 @@ export default class DemoStoryStudio extends LightningElement {
     wiredStory({ data }) {
         if (!data) return;
         const raw = getFieldValue(data, CFG);
-        if (raw) { try { this.config = { ...DEFAULTS, ...JSON.parse(raw) }; } catch (e) {} }
+        const ind = getFieldValue(data, INDUSTRY_FIELD);
+        if (raw) {
+            try { this.config = { ...DEFAULTS, ...JSON.parse(raw) }; } catch (e) {}
+        } else if (ind && INDUSTRY_PACKS[ind]) {
+            // Fresh record: seed the copy from the record's industry pack.
+            this.config = { ...this.config, ...INDUSTRY_PACKS[ind] };
+        }
+        if (ind) this.genIndustry = ind; // default the AI modal's Industry to this record's
         // Default the brand from the Brand Kit chosen at record creation.
         const kitId = getFieldValue(data, BRAND_KIT);
         if (kitId && !this.config.brandKitId) { this.applyKitById(kitId); }
