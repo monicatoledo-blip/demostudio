@@ -353,7 +353,7 @@ export default class DemoStoryStudio extends LightningElement {
         return [
             'Financial Services', 'Health & Life Sciences', 'Retail & Consumer Goods',
             'Manufacturing', 'Communications, Media & Technology', 'Public Sector',
-            'Consumer Business Services', 'Energy & Utilities'
+            'Consumer Business Services', 'Travel & Hospitality', 'Energy & Utilities'
         ].map((i) => ({ label: i, value: i }));
     }
     handleGenerate() { this.showGenerate = true; }

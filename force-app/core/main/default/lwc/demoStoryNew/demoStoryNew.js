@@ -30,7 +30,7 @@ export default class DemoStoryNew extends NavigationMixin(LightningElement) {
     get industryOptions() {
         return ['Financial Services', 'Health & Life Sciences', 'Retail & Consumer Goods',
             'Manufacturing', 'Communications, Media & Technology', 'Public Sector',
-            'Consumer Business Services', 'Energy & Utilities'].map((i) => ({ label: i, value: i }));
+            'Consumer Business Services', 'Travel & Hospitality', 'Energy & Utilities'].map((i) => ({ label: i, value: i }));
     }
 
     handleBrand(e) { this.brandKitId = e.detail.value; }

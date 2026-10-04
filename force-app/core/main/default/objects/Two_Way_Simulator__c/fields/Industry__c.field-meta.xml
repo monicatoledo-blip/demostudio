@@ -15,6 +15,7 @@
             <value><fullName>Communications, Media &amp; Technology</fullName><default>false</default><label>Communications, Media &amp; Technology</label></value>
             <value><fullName>Public Sector</fullName><default>false</default><label>Public Sector</label></value>
             <value><fullName>Consumer Business Services</fullName><default>false</default><label>Consumer Business Services</label></value>
+            <value><fullName>Travel &amp; Hospitality</fullName><default>false</default><label>Travel &amp; Hospitality</label></value>
             <value><fullName>Energy &amp; Utilities</fullName><default>false</default><label>Energy &amp; Utilities</label></value>
         </valueSetDefinition>
     </valueSet>
