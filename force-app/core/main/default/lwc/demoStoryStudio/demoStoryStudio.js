@@ -148,47 +148,47 @@ const MESSAGING_PACKS = {
     'Financial Services': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your round-ups just added $50 to savings this month 🎉 Want to put it on autopilot?'),
         usr('Oh nice! How does that work exactly?'),
-        bot('Every card purchase rounds up to the next dollar and the change moves straight to savings — automatically. Reply BOOST and I’ll double it.')
+        bot('Every card purchase rounds up to the next dollar and the change moves straight to savings — automatically. Reply BOOST and I’ll double it — or I can connect you with your relationship manager to set a savings goal.')
     ],
     'Health & Life Sciences': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your annual wellness visit is due and members get a $0 copay this month 🩺 Want the next opening?'),
         usr('Sure — what times are open this week?'),
-        bot('I’ve got Wed 9:40am or Thu 2:15pm with Dr. Patel. Reply with one and I’ll lock it in and text you a reminder.')
+        bot('I’ve got Wed 9:40am or Thu 2:15pm with Dr. Patel. Reply with one and I’ll lock it in and text a reminder — or I can have a care coordinator call you.')
     ],
     'Retail & Consumer Goods': [
         bot('[[CUSTOMER_FIRST_NAME]], the jacket in your cart is almost gone — here’s 15% off to finish checkout today 🛍️'),
         usr('Do you have it in a medium?'),
-        bot('Yes! Medium’s in stock and ships free. Reply BUY and I’ll apply the 15% and send tracking.')
+        bot('Yes! Medium’s in stock and ships free. Reply BUY and I’ll apply the 15% and send tracking — or I can loop in a shopping specialist.')
     ],
     'Manufacturing': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] here. Your pump’s maintenance window opens next week — reserve a tech slot to avoid downtime?'),
         usr('What does the service include?'),
-        bot('Full inspection, seal + filter replacement, and a 12-month performance warranty. Reply BOOK and I’ll schedule on-site Tue or Thu.')
+        bot('Full inspection, seal + filter replacement, and a 12-month performance warranty. Reply BOOK and I’ll schedule on-site Tue or Thu — or I can connect you with your account manager.')
     ],
     'Communications, Media & Technology': [
         bot('[[CUSTOMER_FIRST_NAME]], you’re eligible to upgrade to [[BRAND_NAME]] Gigabit — same bill, 3x faster 📶 Want it?'),
         usr('Will I need a new router?'),
-        bot('Nope — your current router works, or grab our Wi-Fi 7 unit free for 12 months. Reply YES and I’ll ship a self-install kit.')
+        bot('Nope — your current router works, or grab our Wi-Fi 7 unit free for 12 months. Reply YES and I’ll ship a self-install kit — or a specialist can finish the setup with you.')
     ],
     'Public Sector': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], this is [[BRAND_NAME]]. Your permit renewal is due in 10 days — renew by text in about 2 minutes?'),
         usr('What do I need to renew?'),
-        bot('Just your permit ID and a card on file. Reply RENEW and I’ll walk you through it — no office visit needed.')
+        bot('Just your permit ID and a card on file. Reply RENEW and I’ll walk you through it — or I can connect you with a representative.')
     ],
     'Consumer Business Services': [
         bot('[[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] members get 25% off your next stay this month 🏨 Want me to find dates?'),
         usr('Can I use points toward a beach weekend?'),
-        bot('Absolutely — your points cover 2 nights beachfront. Reply HOLD and I’ll lock Fri–Sun with free cancellation.')
+        bot('Absolutely — your points cover 2 nights beachfront. Reply HOLD and I’ll lock Fri–Sun with free cancellation — or I can hand you to a concierge to finalize.')
     ],
     'Travel & Hospitality': [
         bot('Where to next, [[CUSTOMER_FIRST_NAME]]? [[BRAND_NAME]] just unlocked member fares to your favorite spots ✈️'),
         usr('Any deals for a long weekend somewhere warm?'),
-        bot('Yes — round-trip plus 2 nights starts at $420 to three beach cities, with free changes. Reply GO and I’ll hold it.')
+        bot('Yes — round-trip plus 2 nights starts at $420 to three beach cities, with free changes. Reply GO and I’ll hold it — or I can connect you with a travel concierge to finalize.')
     ],
     'Energy & Utilities': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] here. Shift usage off-peak and you could cut about 15% off your bill ⚡ Want the free plan?'),
         usr('How does the off-peak plan work?'),
-        bot('Power’s cheaper nights and weekends; we auto-nudge big appliances to those windows. Reply START and I’ll enroll you — no equipment needed.')
+        bot('Power’s cheaper nights and weekends; we auto-nudge big appliances to those windows. Reply START and I’ll enroll you — or I can connect you with a representative.')
     ]
 };
 // Fallback thread when the record's industry has no pack.

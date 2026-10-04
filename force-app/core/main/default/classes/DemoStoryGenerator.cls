@@ -18,6 +18,35 @@ public with sharing class DemoStoryGenerator {
         return EinsteinProvider.callAndExtractJson(buildSmsPrompt(industry, brand, context, angle));
     }
 
+    // Industry-appropriate human escalation role + regulated-space guardrails,
+    // shared by the email and SMS prompts so threads close responsibly.
+    @TestVisible
+    private static String complianceRules(String industry) {
+        String ind = String.isBlank(industry) ? '' : industry.toLowerCase();
+        String role;
+        String prohibit;
+        if (ind.contains('financial')) {
+            role = 'a licensed financial advisor / relationship manager';
+            prohibit = 'Do NOT give specific financial, investment, loan, or tax advice or quote exact rates/returns as if guaranteed; keep it general and defer specifics to the licensed human.';
+        } else if (ind.contains('health') || ind.contains('life sciences')) {
+            role = 'a licensed care coordinator or the recipient’s provider';
+            prohibit = 'Do NOT give medical diagnosis, treatment, dosage, or clinical advice; defer any health specifics to the licensed human.';
+        } else if (ind.contains('insurance')) {
+            role = 'a licensed insurance agent';
+            prohibit = 'Do NOT give specific coverage, claims, or eligibility determinations; defer specifics to the licensed agent.';
+        } else if (ind.contains('public')) {
+            role = 'a caseworker or representative';
+            prohibit = 'Do NOT give legal or eligibility determinations; defer specifics to the representative.';
+        } else {
+            role = 'a specialist (representative, concierge, or account manager)';
+            prohibit = 'Keep claims accurate and avoid promising anything the brand cannot guarantee.';
+        }
+        return String.join(new List<String>{
+            'COMPLIANCE (hard rules): ' + prohibit,
+            'The conversation MUST END with a brand/agent ("bot") message that (a) helpfully addresses the recipient’s final question and (b) offers to connect them with ' + role + ' to take it from here. NEVER end on a recipient ("user") message or leave a question unanswered.'
+        }, '\n');
+    }
+
     @TestVisible
     private static String buildSmsPrompt(String industry, String brand, String context, String angle) {
         String ind = String.isBlank(industry) ? 'Financial Services' : industry;
@@ -37,8 +66,9 @@ public with sharing class DemoStoryGenerator {
             'Return ONLY a single JSON object (no prose, no code fences) with EXACTLY this shape:',
             '{ "customerFirstName": string, "customerName": string, "messages": [ {"sender":"bot","text":string}, {"sender":"user","text":string}, ... ] }',
             'Example: context "...Recipient is Daniel Flores, a frequent traveler..." => "customerFirstName":"Daniel", "customerName":"Daniel Flores".',
+            complianceRules(ind),
             'Rules for "messages":',
-            '- 4 to 6 turns, ALTERNATING, and the FIRST message MUST be "bot" (the brand sending a short marketing/outreach text).',
+            '- 5 or 7 turns, ALTERNATING, with the FIRST message "bot" (brand outreach) and the LAST message "bot" (so it ends on the agent, never on a recipient question).',
             '- "bot" = the brand / its AI agent. "user" = the recipient (' + br + ' customer).',
             '- After the opening brand text, the recipient ("user") replies with a realistic question grounded in the campaign context, then the brand AI agent ("bot") answers helpfully and specifically for ' + ind + ', and so on.',
             '- SMS style: short, conversational, 1-2 sentences per message, no markdown. You may use at most one tasteful emoji in the opening brand text only.',
@@ -77,7 +107,8 @@ public with sharing class DemoStoryGenerator {
             '  "replyPromptHeadline": string, "replyPromptBody": string (invite the reader to reply to this email to chat with an AI agent),',
             '  "messages": [ {"sender":"user","text":string}, {"sender":"bot","text":string}, ... ]',
             '}',
-            'The "messages" array is the back-and-forth AFTER the email: 4 to 6 turns, alternating starting with "user" (the customer asking a question grounded in the campaign context) then "bot" (the brand AI agent answering helpfully and specifically for ' + ind + '). Keep each message realistic and concise.',
+            'The "messages" array is the back-and-forth AFTER the email: 4 or 6 turns, alternating, STARTING with "user" (the customer asking a question grounded in the campaign context) and ENDING with "bot" (the brand AI agent). Keep each message realistic and concise.',
+            complianceRules(ind),
             'Make the copy specific to the campaign context and angle above - not generic. Do not include any key other than those listed. Output must be valid JSON.'
         }, '\n');
     }
