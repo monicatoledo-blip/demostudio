@@ -12,6 +12,7 @@ import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
+import generateSms from '@salesforce/apex/DemoStoryGenerator.generateSms';
 
 const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD, CHANNEL_FIELD];
 
@@ -137,14 +138,65 @@ const INDUSTRY_PACKS = {
 // `channels` (optional) restricts a section to specific channels; sections with
 // no `channels` key show for every channel. The Email Template section is
 // email-only; messaging channels (SMS/WhatsApp/RCS) drop it and keep the rest.
-// Marketing-first starter thread for messaging channels (SMS/WhatsApp/RCS):
-// the brand's outreach shows first, then the recipient replies, then the agent
-// answers — reading like the email's 2-way reply. Brand token re-renders live.
-const MESSAGING_SEED_MESSAGES = [
-    { sender: 'bot', text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your round-ups just added $50 to savings this month 🎉 Want to put it on autopilot?', imageUrl: '' },
-    { sender: 'user', text: 'Oh nice! How does that work exactly?', imageUrl: '' },
-    { sender: 'bot', text: 'Every card purchase rounds up to the next dollar and the change moves straight to savings — automatically. Reply BOOST and I’ll double it.', imageUrl: '' }
-];
+// Marketing-first starter threads for messaging channels (SMS/WhatsApp/RCS),
+// one per Salesforce industry: the brand's outreach shows first, then the
+// recipient replies, then the agent answers — reading like the email's 2-way
+// reply. Brand/first-name tokens re-render live.
+const bot = (text) => ({ sender: 'bot', text, imageUrl: '' });
+const usr = (text) => ({ sender: 'user', text, imageUrl: '' });
+const MESSAGING_PACKS = {
+    'Financial Services': [
+        bot('Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your round-ups just added $50 to savings this month 🎉 Want to put it on autopilot?'),
+        usr('Oh nice! How does that work exactly?'),
+        bot('Every card purchase rounds up to the next dollar and the change moves straight to savings — automatically. Reply BOOST and I’ll double it.')
+    ],
+    'Health & Life Sciences': [
+        bot('Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]]. Your annual wellness visit is due and members get a $0 copay this month 🩺 Want the next opening?'),
+        usr('Sure — what times are open this week?'),
+        bot('I’ve got Wed 9:40am or Thu 2:15pm with Dr. Patel. Reply with one and I’ll lock it in and text you a reminder.')
+    ],
+    'Retail & Consumer Goods': [
+        bot('[[CUSTOMER_FIRST_NAME]], the jacket in your cart is almost gone — here’s 15% off to finish checkout today 🛍️'),
+        usr('Do you have it in a medium?'),
+        bot('Yes! Medium’s in stock and ships free. Reply BUY and I’ll apply the 15% and send tracking.')
+    ],
+    'Manufacturing': [
+        bot('Hi [[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] here. Your pump’s maintenance window opens next week — reserve a tech slot to avoid downtime?'),
+        usr('What does the service include?'),
+        bot('Full inspection, seal + filter replacement, and a 12-month performance warranty. Reply BOOK and I’ll schedule on-site Tue or Thu.')
+    ],
+    'Communications, Media & Technology': [
+        bot('[[CUSTOMER_FIRST_NAME]], you’re eligible to upgrade to [[BRAND_NAME]] Gigabit — same bill, 3x faster 📶 Want it?'),
+        usr('Will I need a new router?'),
+        bot('Nope — your current router works, or grab our Wi-Fi 7 unit free for 12 months. Reply YES and I’ll ship a self-install kit.')
+    ],
+    'Public Sector': [
+        bot('Hi [[CUSTOMER_FIRST_NAME]], this is [[BRAND_NAME]]. Your permit renewal is due in 10 days — renew by text in about 2 minutes?'),
+        usr('What do I need to renew?'),
+        bot('Just your permit ID and a card on file. Reply RENEW and I’ll walk you through it — no office visit needed.')
+    ],
+    'Consumer Business Services': [
+        bot('[[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] members get 25% off your next stay this month 🏨 Want me to find dates?'),
+        usr('Can I use points toward a beach weekend?'),
+        bot('Absolutely — your points cover 2 nights beachfront. Reply HOLD and I’ll lock Fri–Sun with free cancellation.')
+    ],
+    'Travel & Hospitality': [
+        bot('Where to next, [[CUSTOMER_FIRST_NAME]]? [[BRAND_NAME]] just unlocked member fares to your favorite spots ✈️'),
+        usr('Any deals for a long weekend somewhere warm?'),
+        bot('Yes — round-trip plus 2 nights starts at $420 to three beach cities, with free changes. Reply GO and I’ll hold it.')
+    ],
+    'Energy & Utilities': [
+        bot('Hi [[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] here. Shift usage off-peak and you could cut about 15% off your bill ⚡ Want the free plan?'),
+        usr('How does the off-peak plan work?'),
+        bot('Power’s cheaper nights and weekends; we auto-nudge big appliances to those windows. Reply START and I’ll enroll you — no equipment needed.')
+    ]
+};
+// Fallback thread when the record's industry has no pack.
+const MESSAGING_SEED_MESSAGES = MESSAGING_PACKS['Financial Services'];
+function messagingSeedFor(industry) {
+    const pack = MESSAGING_PACKS[industry] || MESSAGING_SEED_MESSAGES;
+    return pack.map((m) => ({ ...m }));
+}
 
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
@@ -288,10 +340,10 @@ export default class DemoStoryStudio extends LightningElement {
         // The record's Channel drives which sections + template render. Keep the
         // config's channel in sync so the VF preview picks the right template.
         if (this.config.channel !== channel) { this.config = { ...this.config, channel }; }
-        // Fresh messaging record: seed the marketing-first 2-way thread (the
-        // industry packs' threads are email-oriented / recipient-first).
+        // Fresh messaging record: seed the marketing-first 2-way thread for the
+        // record's industry (the email industry packs are recipient-first).
         if (!raw && channel !== 'Email') {
-            this.config = { ...this.config, messages: MESSAGING_SEED_MESSAGES.map((m) => ({ ...m })) };
+            this.config = { ...this.config, messages: messagingSeedFor(ind) };
         }
         // If the active section isn't valid for this channel (e.g. Email Template
         // on an SMS record), fall back to the first valid section.
@@ -495,6 +547,11 @@ export default class DemoStoryStudio extends LightningElement {
     // Picking an industry fills the deterministic starter pack immediately.
     handleGenIndustry(e) {
         this.genIndustry = e.detail.value;
+        if (this.isMessaging) {
+            // Messaging channels only have a thread — swap in that industry's.
+            this._commit({ messages: messagingSeedFor(this.genIndustry) });
+            return;
+        }
         const pack = INDUSTRY_PACKS[this.genIndustry];
         if (pack) this._commit({ ...pack });
     }
@@ -502,10 +559,14 @@ export default class DemoStoryStudio extends LightningElement {
     async runGenerate() {
         this.generating = true;
         try {
-            const raw = await generateEmail({ industry: this.genIndustry, brand: this.config.brandName, context: this.genContext, angle: this.genAngle });
+            const args = { industry: this.genIndustry, brand: this.config.brandName, context: this.genContext, angle: this.genAngle };
+            // Messaging channels generate just the 2-way thread; email generates
+            // the full email + thread.
+            const raw = this.isMessaging ? await generateSms(args) : await generateEmail(args);
             this.applyGenJson(JSON.parse(raw));
             this.showGenerate = false;
-            this.toast('Generated', 'AI drafted your email + conversation. Edit anything.', 'success');
+            const what = this.isMessaging ? 'AI drafted your 2-way conversation. Edit anything.' : 'AI drafted your email + conversation. Edit anything.';
+            this.toast('Generated', what, 'success');
         } catch (err) {
             this.toast('Generate failed', (err && err.body && err.body.message) || err.message || 'Could not parse AI output', 'error');
         } finally {
@@ -521,7 +582,7 @@ export default class DemoStoryStudio extends LightningElement {
             .forEach((k) => { if (gen[k]) patch[k] = gen[k]; });
         if (Array.isArray(gen.messages) && gen.messages.length) {
             patch.messages = gen.messages.filter((m) => m && m.text)
-                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text }));
+                .map((m) => ({ sender: m.sender === 'bot' ? 'bot' : 'user', text: m.text, imageUrl: m.imageUrl || '' }));
         }
         this._commit(patch);
     }

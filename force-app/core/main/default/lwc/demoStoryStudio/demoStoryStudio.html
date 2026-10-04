@@ -135,9 +135,10 @@
                     <template lwc:if={isMessaging}>
                         <p class="sec-subtitle">AI agent identity — shown in the chat header; the agent's replies are its side of the thread below.</p>
                         <lightning-input label="Virtual Agent Name" data-field="agentName" value={config.agentName} onchange={handleInput}></lightning-input>
+                        <c-demo-story-image label="Agent Avatar" kind="avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                         <lightning-input label="Chat Header Title" data-field="messagingAgentHeader" value={config.messagingAgentHeader} onchange={handleInput}
                             placeholder="Penny (Cumulus Financial AI Agent)"
-                            field-level-help="Shown at the top of the chat. Leave blank to auto-build from the agent + brand name. The header avatar uses the Marketing Sender Avatar in Branding."></lightning-input>
+                            field-level-help="Shown at the top of the chat. Leave blank to auto-build from the agent + brand name. The chat header photo uses this Agent Avatar (falls back to the Marketing Sender Avatar)."></lightning-input>
                     </template>
                     <p class="sec-subtitle">Thread — the back-and-forth 2-way conversation</p>
                     <template for:each={decoratedMessages} for:item="m">

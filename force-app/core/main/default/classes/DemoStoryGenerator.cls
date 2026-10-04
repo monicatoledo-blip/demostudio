@@ -11,6 +11,40 @@ public with sharing class DemoStoryGenerator {
         return EinsteinProvider.callAndExtractJson(buildPrompt(industry, brand, context, angle));
     }
 
+    // SMS / WhatsApp / RCS: generate just the 2-way thread (these sims have no
+    // subject/headline/body — the thread is the whole experience).
+    @AuraEnabled
+    public static String generateSms(String industry, String brand, String context, String angle) {
+        return EinsteinProvider.callAndExtractJson(buildSmsPrompt(industry, brand, context, angle));
+    }
+
+    @TestVisible
+    private static String buildSmsPrompt(String industry, String brand, String context, String angle) {
+        String ind = String.isBlank(industry) ? 'Financial Services' : industry;
+        String br = String.isBlank(brand) ? 'the brand' : brand;
+        String ang = String.isBlank(angle) ? 'a relevant marketing offer' : angle;
+        String ctx = String.isBlank(context)
+            ? ('A ' + ang + ' campaign from ' + br + ' for its ' + ind + ' customers.')
+            : context;
+
+        return String.join(new List<String>{
+            'You are a senior lifecycle-marketing strategist writing a Salesforce demo SMS conversation for the ' + ind + ' industry.',
+            'Brand: ' + br + '. Campaign angle: ' + ang + '.',
+            'Campaign context (the deal / audience / narrative to demo):',
+            ctx,
+            '',
+            'Return ONLY a single JSON object (no prose, no code fences) with EXACTLY this shape:',
+            '{ "messages": [ {"sender":"bot","text":string}, {"sender":"user","text":string}, ... ] }',
+            'Rules for "messages":',
+            '- 4 to 6 turns, ALTERNATING, and the FIRST message MUST be "bot" (the brand sending a short marketing/outreach text).',
+            '- "bot" = the brand / its AI agent. "user" = the recipient (' + br + ' customer).',
+            '- After the opening brand text, the recipient ("user") replies with a realistic question grounded in the campaign context, then the brand AI agent ("bot") answers helpfully and specifically for ' + ind + ', and so on.',
+            '- SMS style: short, conversational, 1-2 sentences per message, no markdown. You may use at most one tasteful emoji in the opening brand text only.',
+            '- You may include [[CUSTOMER_FIRST_NAME]] and [[BRAND_NAME]] tokens; they are substituted at render time.',
+            'Make it specific to the campaign context and angle - not generic. Do not include any key other than "messages". Output must be valid JSON.'
+        }, '\n');
+    }
+
     @TestVisible
     private static String buildPrompt(String industry, String brand, String context, String angle) {
         String ind = String.isBlank(industry) ? 'Financial Services' : industry;

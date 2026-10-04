@@ -218,7 +218,9 @@ public with sharing class StoryEmailPreviewController {
         Map<String, String> tok = new Map<String, String>{
             'SMS_THREAD_HTML' => buildSmsThread(c),
             'SMS_THEME' => smsTheme(c),
-            'MARKETING_AVATAR_URL' => str(c, 'marketingAvatarUrl', ''),
+            // The chat header is the agent you're texting — prefer the agent
+            // avatar, fall back to the marketing sender avatar.
+            'MARKETING_AVATAR_URL' => messagingHeaderAvatar(c),
             'MESSAGING_AGENT_HEADER' => messagingHeader(c)
         };
         String out = tpl;
@@ -230,6 +232,11 @@ public with sharing class StoryEmailPreviewController {
         out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
         // Scripts KEPT so tap-to-reveal plays the 2-way thread.
         return out;
+    }
+
+    private static String messagingHeaderAvatar(Map<String, Object> c) {
+        String agentAv = str(c, 'agentAvatarUrl', '');
+        return String.isNotBlank(agentAv) ? agentAv : str(c, 'marketingAvatarUrl', '');
     }
 
     private static String smsTheme(Map<String, Object> c) {
