@@ -275,11 +275,15 @@ public with sharing class StoryEmailPreviewController {
     // fallback). Used when no subscriber/customer avatar image is set so the
     // avatar shows initials instead of an empty img (onerror doesn't fire on an
     // empty src) — mirrors the marketing avatar's initials fallback.
+    // Fully URL-encode quotes/spaces (%27/%20): this value is injected both into
+    // HTML img src="" AND into a single-quoted JS string literal in the reply
+    // script, so a raw single quote would terminate that string and break the
+    // whole script (killing the CTA/Reply buttons).
     private static String initialsAvatar(String ini) {
         String t = (ini == null ? '' : ini);
-        return 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E'
-            + '%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23667eea\'/%3E'
-            + '%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'white\' font-size=\'35\' font-family=\'Arial\'%3E'
+        return 'data:image/svg+xml,%3Csvg%20xmlns=%27http://www.w3.org/2000/svg%27%20viewBox=%270%200%20100%20100%27%3E'
+            + '%3Ccircle%20cx=%2750%27%20cy=%2750%27%20r=%2750%27%20fill=%27%23667eea%27/%3E'
+            + '%3Ctext%20x=%2750%27%20y=%2750%27%20text-anchor=%27middle%27%20dy=%27.3em%27%20fill=%27white%27%20font-size=%2735%27%20font-family=%27Arial%27%3E'
             + t + '%3C/text%3E%3C/svg%3E';
     }
 
