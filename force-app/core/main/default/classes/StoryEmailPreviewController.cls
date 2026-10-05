@@ -99,12 +99,15 @@ public with sharing class StoryEmailPreviewController {
     // are inlined as base64 data URIs; other relative URLs are absolute-prefixed.
     // ----------------------------------------------------------------------
 
-    // Max ContentVersion size we inline as base64. The data URI can appear
-    // several times in one page (header banner + card), and getHtml() runs in
-    // the 6 MB synchronous VF heap, so keep this modest — brand logos/avatars
-    // (the only /sfc/ images we inline) are small; larger assets fall back to an
-    // absolute core-domain URL.
-    private static final Integer MAX_INLINE_BYTES = 800000;
+    // Max ContentVersion size we inline as base64. Kept small on purpose: the
+    // Visualforce preview page renders the HTML through <apex:outputText
+    // escape="false">, which throws "Regex too complicated" once the output
+    // grows to ~1-2 MB. A single injected image token (e.g. the customer avatar)
+    // expands to several copies across the template, so inlining one ~470 KB
+    // photo (→ ~630 KB base64 × N slots) alone blows that budget. Brand logos
+    // are small (~20 KB) and must inline so they render cross-domain in the
+    // iframe; anything larger falls back to an absolute core-domain URL instead.
+    private static final Integer MAX_INLINE_BYTES = 80000;
 
     // Dedupe cache so the same logo across header + card is only queried once.
     private static Map<String, String> resolvedUrlCache = new Map<String, String>();
@@ -209,6 +212,48 @@ public with sharing class StoryEmailPreviewController {
         catch (Exception e) { return u; }
     }
 
+    // Remove <img> tags whose src resolved to empty (no logo/hero set), WITHOUT
+    // a regex. The old `(?i)<img[^>]{0,600}src="\s*"[^>]{0,600}>` throws Apex
+    // "Regex too complicated" once an image is base64-inlined (a single ~637KB
+    // data URI pushes the page past ~664KB and the bounded quantifiers blow the
+    // engine's complexity budget). This indexOf/substring scan is O(n) and has
+    // no budget, so inlined images (which render cross-domain) can stay. Only
+    // tags whose first src="" / src=''/ whitespace-only value is empty are cut.
+    @TestVisible
+    private static String stripEmptyImgTags(String html) {
+        if (String.isBlank(html) || !html.contains('<img')) return html;
+        List<String> keep = new List<String>();
+        Integer copiedUpTo = 0;
+        Integer searchFrom = 0;
+        while (true) {
+            Integer tagStart = html.indexOf('<img', searchFrom);
+            if (tagStart == -1) break;
+            Integer tagEnd = html.indexOf('>', tagStart);
+            if (tagEnd == -1) break;
+            if (imgHasEmptySrc(html.substring(tagStart, tagEnd + 1))) {
+                keep.add(html.substring(copiedUpTo, tagStart));
+                copiedUpTo = tagEnd + 1;
+            }
+            searchFrom = tagEnd + 1;
+        }
+        if (copiedUpTo == 0) return html; // nothing stripped
+        keep.add(html.substring(copiedUpTo));
+        return String.join(keep, '');
+    }
+
+    // True when the tag's first src attribute is empty / whitespace-only.
+    private static Boolean imgHasEmptySrc(String tag) {
+        Integer i = tag.indexOf('src=');
+        if (i == -1) return false;
+        Integer q = i + 4;
+        if (q >= tag.length()) return false;
+        String quote = tag.substring(q, q + 1);
+        if (quote != '"' && quote != '\'') return false;
+        Integer close = tag.indexOf(quote, q + 1);
+        if (close == -1) return false;
+        return String.isBlank(tag.substring(q + 1, close));
+    }
+
     private static String initials(String s) {
         if (String.isBlank(s)) return '';
         String out = '';
@@ -292,7 +337,7 @@ public with sharing class StoryEmailPreviewController {
         out = out.replace('[[BRAND_NAME]]', tok.get('BRAND_NAME') == null ? '' : tok.get('BRAND_NAME'));
         out = out.replace('[[BRAND_DOMAIN]]', tok.get('BRAND_DOMAIN') == null ? '' : tok.get('BRAND_DOMAIN'));
         // Remove broken <img> tags whose src resolved to empty (no logo/hero set).
-        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
+        out = stripEmptyImgTags(out);
         // Scripts are KEPT so the 2-way Reply interactivity works in the preview.
         // The preview is a cross-domain Visualforce iframe, so the sim's JS runs in
         // its own frame. (If a future template's JS misbehaves, re-add a strip here.)
@@ -365,7 +410,7 @@ public with sharing class StoryEmailPreviewController {
         }
         out = resolveSharedTokens(out, c);
         // Remove the header avatar <img> if no avatar is set (grey circle shows).
-        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
+        out = stripEmptyImgTags(out);
         // Scripts KEPT so tap-to-reveal plays the 2-way thread.
         return out;
     }
@@ -432,7 +477,7 @@ public with sharing class StoryEmailPreviewController {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
         out = resolveSharedTokens(out, c);
-        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
+        out = stripEmptyImgTags(out);
         return out;
     }
 
@@ -504,7 +549,7 @@ public with sharing class StoryEmailPreviewController {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
         out = resolveSharedTokens(out, c);
-        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
+        out = stripEmptyImgTags(out);
         return out;
     }
 
