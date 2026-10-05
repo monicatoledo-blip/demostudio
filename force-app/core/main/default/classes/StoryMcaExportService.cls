@@ -139,8 +139,13 @@ public with sharing class StoryMcaExportService {
                 r.emailContentId = ec.Id;
             }
         }
-        if (r.emailContentId != null) {
-            r.builderUrl = URL.getOrgDomainUrl().toExternalForm() + '/lightning/r/EmailContent/' + r.emailContentId + '/view';
+        // Deep-link to the ManagedContent record in the MCA Content experience
+        // (navigationLocation=content_page) — this opens the MCA email builder.
+        // Linking to the EmailContent record instead routed to the legacy
+        // Account Engagement (MCAE) email experience chooser.
+        if (r.managedContentId != null) {
+            r.builderUrl = URL.getOrgDomainUrl().toExternalForm()
+                + '/lightning/r/ManagedContent/' + r.managedContentId + '/view?navigationLocation=content_page';
         }
         return r;
     }
