@@ -18,6 +18,10 @@
                     onclick={handleDownload} disabled={loading} class="slds-m-left_small"></lightning-button>
                 <lightning-button variant="brand" label="Save" onclick={handleSave} disabled={loading}
                     class="slds-m-left_x-small"></lightning-button>
+                <template lwc:if={isEmail}>
+                    <lightning-button variant="brand" label="Push to Marketing Cloud" icon-name="utility:send"
+                        onclick={openMcaPush} disabled={loading} class="slds-m-left_x-small"></lightning-button>
+                </template>
             </div>
         </header>
 
@@ -342,6 +346,43 @@
                     </template>
                     <lightning-button label="Cancel" onclick={closeGenerate} disabled={generating}></lightning-button>
                     <lightning-button variant="brand" label="✨ Generate" onclick={runGenerate} disabled={generating}
+                        class="slds-m-left_x-small"></lightning-button>
+                </footer>
+            </section>
+        </template>
+
+        <template lwc:if={showMcaPush}>
+            <section class="gen-backdrop" onclick={closeMcaPush}></section>
+            <section class="gen-modal">
+                <header class="gen-header">
+                    <span class="gen-header-icon">
+                        <lightning-icon icon-name="utility:send" variant="inverse" size="small"></lightning-icon>
+                    </span>
+                    <div class="gen-header-text">
+                        <h3 class="gen-header-title">Deploy to Marketing Cloud</h3>
+                        <p class="gen-header-sub">Create this email as a real Marketing Cloud Advanced email asset.</p>
+                    </div>
+                    <lightning-button-icon icon-name="utility:close" variant="bare-inverse" alternative-text="Close"
+                        class="gen-close" onclick={closeMcaPush}></lightning-button-icon>
+                </header>
+                <div class="gen-body">
+                    <lightning-combobox label="Workspace" options={mcaWorkspaceOptions} value={mcaWorkspaceId}
+                        onchange={handleMcaWorkspace} placeholder="Choose a workspace…"></lightning-combobox>
+                    <p class="gen-hint">Lands in the chosen content workspace. The hero comes through as a Dynamic-Content-ready image component.</p>
+                    <template lwc:if={mcaResultUrl}>
+                        <div class="gen-copy-callout">
+                            <p class="gen-copy-callout-label">Deployed! Open it in Marketing Cloud:</p>
+                            <lightning-button label="Open email" icon-name="utility:new_window"
+                                onclick={openMcaResult} class="slds-m-top_x-small"></lightning-button>
+                        </div>
+                    </template>
+                </div>
+                <footer class="gen-footer">
+                    <template lwc:if={mcaPushing}>
+                        <lightning-spinner alternative-text="Deploying..." size="small"></lightning-spinner>
+                    </template>
+                    <lightning-button label="Close" onclick={closeMcaPush} disabled={mcaPushing}></lightning-button>
+                    <lightning-button variant="brand" label="Deploy email" onclick={runMcaPush} disabled={mcaPushing}
                         class="slds-m-left_x-small"></lightning-button>
                 </footer>
             </section>

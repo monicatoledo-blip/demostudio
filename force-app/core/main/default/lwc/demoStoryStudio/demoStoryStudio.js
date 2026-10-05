@@ -14,6 +14,8 @@ import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 import generateSms from '@salesforce/apex/DemoStoryGenerator.generateSms';
 import generateRcs from '@salesforce/apex/DemoStoryGenerator.generateRcs';
+import pushEmailToMca from '@salesforce/apex/StoryMcaExportService.pushEmailToMca';
+import listMcaWorkspaces from '@salesforce/apex/StoryMcaExportService.listMcaWorkspaces';
 
 const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD, CHANNEL_FIELD];
 
@@ -907,6 +909,45 @@ export default class DemoStoryStudio extends LightningElement {
     }
     get saveStatusText() { return this.saved ? 'All changes saved' : 'Unsaved changes'; }
     get saveStatusPillClass() { return 'save-status ' + (this.saved ? 'save-status--saved' : 'save-status--pending'); }
+
+    // ---- Push to Marketing Cloud (deploy the email as a real MCA asset) ----
+    @track showMcaPush = false;
+    @track mcaPushing = false;
+    @track mcaWorkspaceOptions = [];
+    @track mcaWorkspaceId = '';
+    @track mcaResultUrl = '';
+
+    async openMcaPush() {
+        this.showMcaPush = true;
+        this.mcaResultUrl = '';
+        if (!this.mcaWorkspaceOptions.length) {
+            try {
+                const spaces = await listMcaWorkspaces();
+                this.mcaWorkspaceOptions = (spaces || []).map((s) => ({ label: s.label, value: s.value }));
+                const def = (spaces || []).find((s) => s.isDefault);
+                this.mcaWorkspaceId = def ? def.value : (spaces && spaces.length ? spaces[0].value : '');
+            } catch (e) {
+                this.toast('Marketing Cloud', (e && e.body && e.body.message) || e.message, 'error');
+            }
+        }
+    }
+    closeMcaPush() { this.showMcaPush = false; }
+    handleMcaWorkspace(e) { this.mcaWorkspaceId = e.detail.value; }
+    openMcaResult() { if (this.mcaResultUrl) window.open(this.mcaResultUrl, '_blank'); }
+
+    async runMcaPush() {
+        this.mcaPushing = true;
+        try {
+            await this.doSave(); // export reads the saved Config_JSON
+            const r = await pushEmailToMca({ storyId: this.recordId, targetSpaceId: this.mcaWorkspaceId });
+            this.mcaResultUrl = r && r.builderUrl ? r.builderUrl : '';
+            this.toast('Deployed to Marketing Cloud', 'Your email was created in Marketing Cloud.', 'success');
+        } catch (e) {
+            this.toast('Deploy failed', (e && e.body && e.body.message) || e.message, 'error');
+        } finally {
+            this.mcaPushing = false;
+        }
+    }
 
     // ---- AI Generate (industry pack + Einstein) ----
     @track showGenerate = false;
