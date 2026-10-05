@@ -209,8 +209,21 @@ public with sharing class StoryMcaExportService {
 
     // ---- contentBody builder ------------------------------------------------
 
+    // Set by buildBlocks when a hero image block is emitted, so we can wire its
+    // Dynamic Content operation/variant.
+    private static String heroBlockId;
+    private static String heroContentKey;
+
+    // Personalization Point + decision the hero's Dynamic Content binds to. These
+    // are meshmesh demo values (a PP/decision created once in the builder); blank
+    // them to skip DC wiring. QBrix portability: create or let the SE pick a PP.
+    @TestVisible private static String dcPointName   = 'October_5_image_efb5_c_v_1650';
+    @TestVisible private static String dcDecision    = 'Hero_2_1650';
+    @TestVisible private static String dcDataspace   = 'default';
+
     @TestVisible
     private static Map<String, Object> buildEmailContentBody(Map<String, Object> c, String title) {
+        heroBlockId = null; heroContentKey = null;
         List<Object> children = buildBlocks(c);
 
         Map<String, Object> body = new Map<String, Object>{
@@ -245,6 +258,38 @@ public with sharing class StoryMcaExportService {
                 'children' => children
             }
         };
+
+        // Pre-enable Dynamic Content on the hero: a variant operation bound to the
+        // personalization point/decision, plus a placeholder second variation
+        // (same image by default — the SE swaps it live in the builder).
+        if (String.isNotBlank(heroBlockId) && String.isNotBlank(heroContentKey)
+                && String.isNotBlank(dcPointName) && String.isNotBlank(dcDecision)) {
+            String variantId = genId();
+            body.put('sfdc_cms:operations', new List<Object>{
+                new Map<String, Object>{
+                    'definition' => 'sfdc_cms__pspVariantOperation',
+                    'targetId' => heroBlockId,
+                    'attributes' => new Map<String, Object>{
+                        'personalizationPoint' => new Map<String, Object>{ 'dataspace' => dcDataspace, 'name' => dcPointName },
+                        'decisionToVariantList' => new List<Object>{
+                            new Map<String, Object>{ 'decisionName' => dcDecision, 'variantId' => variantId }
+                        }
+                    }
+                }
+            });
+            body.put('sfdc_cms:variants', new List<Object>{
+                new Map<String, Object>{
+                    'id' => variantId,
+                    'name' => 'Variation 2',
+                    'type' => 'personalization',
+                    'body' => new Map<String, Object>{
+                        'sfdc_cms:block' => new Map<String, Object>{
+                            'children' => new List<Object>{ imageBlock(heroContentKey, heroBlockId) }
+                        }
+                    }
+                }
+            });
+        }
         return body;
     }
 
@@ -260,7 +305,9 @@ public with sharing class StoryMcaExportService {
                 String url = sec.substring(5);
                 String contentKey = createImageMedia(url, str(c, 'brandName', 'Hero') + ' hero');
                 if (String.isNotBlank(contentKey)) {
-                    out.add(imageBlock(contentKey));
+                    heroBlockId = genId();
+                    heroContentKey = contentKey;
+                    out.add(imageBlock(contentKey, heroBlockId));
                 } else {
                     // Fallback to an HTML img if media creation failed.
                     out.add(htmlBlock('<img src="' + esc(url) + '" alt="" style="width:100%;display:block" />'));
@@ -301,10 +348,11 @@ public with sharing class StoryMcaExportService {
     }
 
     // Native image block referencing a CMS image by contentKey (full-width hero).
-    private static Map<String, Object> imageBlock(String contentKey) {
+    // id is passed so the base block and its Dynamic-Content variant can share it.
+    private static Map<String, Object> imageBlock(String contentKey, String blockId) {
         return new Map<String, Object>{
             'definition' => 'lightning/image',
-            'id' => genId(),
+            'id' => blockId,
             'type' => 'block',
             'attributes' => new Map<String, Object>{
                 'imageFitConfig' => new Map<String, Object>{ 'width' => new Map<String, Object>{ 'unit' => '%', 'value' => 100 } },
