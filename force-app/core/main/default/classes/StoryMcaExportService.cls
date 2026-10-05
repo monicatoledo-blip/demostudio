@@ -49,11 +49,18 @@ public with sharing class StoryMcaExportService {
     // is flagged so the UI can pre-select it.
     @AuraEnabled
     public static List<Map<String, Object>> listMcaWorkspaces() {
+        getApiSessionId(); // pre-warm before any callout (getContent ordering)
         List<Map<String, Object>> out = new List<Map<String, Object>>();
         String def;
         try { def = resolveSpaceId(); } catch (Exception e) { def = null; }
         try {
             HttpResponse res = send('GET', '/services/data/v62.0/connect/cms/spaces', null);
+            // Surface a non-200 instead of silently returning an empty picker —
+            // that was hiding the Lightning-session 401 (modal opened, dropdown
+            // empty, no toast). Now the SE sees why.
+            if (res.getStatusCode() != 200) {
+                throw new ExportException('List workspaces failed (' + res.getStatusCode() + '): ' + res.getBody());
+            }
             if (res.getStatusCode() == 200) {
                 Object parsed = JSON.deserializeUntyped(res.getBody());
                 if (parsed instanceof Map<String, Object>) {
@@ -81,6 +88,7 @@ public with sharing class StoryMcaExportService {
 
     @TestVisible
     public static Result pushEmailToMcaImpl(Id storyId) {
+        getApiSessionId(); // pre-warm before any callout (getContent ordering)
         Two_Way_Simulator__c s = [
             SELECT Id, Name, Channel__c, Config_JSON__c
             FROM Two_Way_Simulator__c WHERE Id = :storyId LIMIT 1
@@ -129,11 +137,34 @@ public with sharing class StoryMcaExportService {
     }
 
     // ---- callout (same-org session token) -----------------------------------
+
+    // An API-enabled session id. UserInfo.getSessionId() returns a UI-only
+    // session in a Lightning @AuraEnabled context, which the Connect REST API
+    // rejects with 401 INVALID_SESSION_ID (anonymous Apex gives an API session,
+    // which is why this works from anon but not from the button). A session
+    // sourced from a Visualforce page's {!$Api.Session_ID} IS API-enabled.
+    // getContent() can't run after an HTTP callout in the same transaction, so
+    // the @AuraEnabled entry points pre-warm this before any callout fires.
+    // Cached per transaction. Falls back to UserInfo on any failure (and in
+    // tests, where getContent() is unsupported).
+    @TestVisible private static String apiSessionId;
+    private static String getApiSessionId() {
+        if (String.isNotBlank(apiSessionId)) return apiSessionId;
+        if (!Test.isRunningTest()) {
+            try {
+                String sid = Page.StoryMcaSession.getContent().toString().trim();
+                if (String.isNotBlank(sid)) { apiSessionId = sid; return apiSessionId; }
+            } catch (Exception e) { /* fall back */ }
+        }
+        apiSessionId = UserInfo.getSessionId();
+        return apiSessionId;
+    }
+
     private static HttpResponse send(String method, String path, String bodyJson) {
         HttpRequest req = new HttpRequest();
         req.setEndpoint(URL.getOrgDomainUrl().toExternalForm() + path);
         req.setMethod(method);
-        req.setHeader('Authorization', 'Bearer ' + UserInfo.getSessionId());
+        req.setHeader('Authorization', 'Bearer ' + getApiSessionId());
         req.setHeader('Content-Type', 'application/json');
         req.setTimeout(120000);
         if (bodyJson != null) req.setBody(bodyJson);

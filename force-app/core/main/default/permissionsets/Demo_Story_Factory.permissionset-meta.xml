@@ -69,6 +69,10 @@
         <apexPage>StoryEmailPreview</apexPage>
         <enabled>true</enabled>
     </pageAccesses>
+    <pageAccesses>
+        <apexPage>StoryMcaSession</apexPage>
+        <enabled>true</enabled>
+    </pageAccesses>
     <tabSettings>
         <tab>Two_Way_Simulator__c</tab>
         <visibility>Visible</visibility>
