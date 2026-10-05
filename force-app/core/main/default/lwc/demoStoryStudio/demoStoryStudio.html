@@ -14,7 +14,8 @@
                 <span class={saveStatusPillClass}>
                     <span class="save-status-text">{saveStatusText}</span>
                 </span>
-                <lightning-button variant="neutral" label="Download HTML" icon-name="utility:download"
+                <lightning-button variant="neutral" label="Download Simulator File" icon-name="utility:download"
+                    title="Download this 2-Way Simulator as a standalone, shareable HTML file"
                     onclick={handleDownload} disabled={loading} class="slds-m-left_small"></lightning-button>
                 <lightning-button variant="brand" label="Save" onclick={handleSave} disabled={loading}
                     class="slds-m-left_x-small"></lightning-button>
