@@ -236,25 +236,36 @@ public with sharing class StoryMcaExportService {
     // REST. Sets dcPointName/dcDecision/dcDataspace so buildEmailContentBody wires
     // the hero to it. On any failure, blanks them so the hero deploys plain.
     // Orgs name their profile data graph differently, so don't hardcode it:
-    // discover it from an existing point. The LIST endpoint isn't enabled, but
-    // GET-by-id returns profileDataGraphName — so grab one point id via SOQL then
-    // GET it. Falls back to the `dataGraph` static (and if that's wrong the point
-    // create fails and the hero deploys plain). Sets the static so the email's
-    // data providers use the same graph.
+    // discover it from an existing point OF THE SAME KIND we create. Read the graph
+    // API name straight off the PersonalizationPoint -> DataGraph FK via SOQL
+    // (ProfileDataGraph.DataGraphApiName == the REST profileDataGraphName; verified
+    // identical on meshmesh + Cumulus Jr). This also sidesteps the REST LIST
+    // endpoint, which returns INSUFFICIENT_ACCESS "List Personalization Points
+    // feature is not enabled".
+    //   FILTERING MATTERS: on an org that also runs web/SP personalization (e.g.
+    // Cumulus Jr), the newest Active point of ANY kind can be a PersonalizationApp
+    // point bound to a REALTIME web graph (Real_Time_Profile_Data_Graph) — wrong for
+    // an email hero. So scope to Source='BlockBuilder' + ExperienceVariation and to
+    // the dataspace we deploy into, matching the point provisionHeroPoint creates.
+    // Falls back to the `dataGraph` static (and if that's wrong the point create
+    // fails and the hero deploys plain). Sets the static so the email's data
+    // providers use the same graph.
     @TestVisible
     private static String resolveDataGraph() {
+        String ds = String.isBlank(dcDataspace) ? 'default' : dcDataspace;
         try {
             for (PersonalizationPoint pp : [
-                SELECT Id FROM PersonalizationPoint
-                WHERE Status = 'Active' ORDER BY LastModifiedDate DESC LIMIT 1
+                SELECT ProfileDataGraph.DataGraphApiName
+                FROM PersonalizationPoint
+                WHERE Status = 'Active'
+                  AND Source = 'BlockBuilder'
+                  AND PersonalizationSchemaEnum = 'ExperienceVariation'
+                  AND DataSpace.Name = :ds
+                ORDER BY LastModifiedDate DESC LIMIT 1
             ]) {
-                HttpResponse res = send('GET', P13N_POINTS_PATH + '/' + pp.Id, null);
-                if (res.getStatusCode() == 200) {
-                    Object parsed = JSON.deserializeUntyped(res.getBody());
-                    if (parsed instanceof Map<String, Object>) {
-                        Object g = ((Map<String, Object>) parsed).get('profileDataGraphName');
-                        if (g != null && String.isNotBlank(String.valueOf(g))) return String.valueOf(g);
-                    }
+                if (pp.ProfileDataGraph != null
+                        && String.isNotBlank(pp.ProfileDataGraph.DataGraphApiName)) {
+                    return pp.ProfileDataGraph.DataGraphApiName;
                 }
             }
         } catch (Exception e) { /* fall back to the static default */ }
