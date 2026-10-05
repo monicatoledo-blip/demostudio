@@ -202,28 +202,35 @@ function messagingSeedFor(industry) {
 // RCS seed — showcases the channel's signature pieces: quick-reply chips on
 // the opening message and a rich card as the agent's answer, ending on an
 // agent escalation. Returns fresh (deep) objects each call.
+// Exact Experience-Generator default RCS thread (getDefaultRcsMessages),
+// brand/first-name tokenized so it re-brands. Default media points at the live
+// EG asset host; the SE can swap it. "Download the App" is a quickReply with a
+// rich-card response → plays the next card (positional pairing).
+const RCS_ASSET_HOST = 'https://whispering-coast-03303-5bb1f6fb1c95.herokuapp.com';
 function rcsSeedFor() {
-    // Interactive showcase: an opening message with quick-reply chips (one
-    // chips→rich-card pairing), then the paired rich card with card buttons
-    // (openUrl + a quickReply that answers inline and escalates to a human).
-    // The ported RCS runtime plays taps, typing, echoes, and responses.
     const seed = [
-        { sender: 'bot', type: 'quickReplies', typingDuration: 'short',
-          text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]] ✨ We lined up something just for you.',
-          chips: [
-            { label: 'Show me', action: 'quickReply', responseType: 'richCard' },
-            { label: 'Use my points', action: 'quickReply', response: 'Good news — your points can be applied at checkout. Want me to connect you with a specialist to finalize?' },
-            { label: 'Not now', action: 'quickReply', response: 'No problem — I’ll keep this handy. Reach out anytime!' }
-          ] },
-        { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium',
+        { sender: 'bot', type: 'richCardVertical', typingDuration: 'off',
           card: {
-            mediaType: 'image', mediaUrl: '', mediaSize: 'medium',
-            title: 'Members-only offer',
-            description: 'A pick tailored to you from [[BRAND_NAME]] — available for a limited time.',
-            buttons: [
-              { label: 'View details', action: 'openUrl', target: '[[BRAND_DOMAIN]]/offer' },
-              { label: 'Hold it for me', action: 'quickReply', response: 'Done — I’ve placed a 24-hour hold. Want me to connect you with a specialist to finalize?' }
-            ] } }
+            mediaType: 'video', mediaUrl: RCS_ASSET_HOST + '/rcs-defaults/cumulus-video.mp4', mediaSize: 'medium',
+            title: 'Smart Wealth is ready for you, [[CUSTOMER_FIRST_NAME]]',
+            description: 'Round-ups, auto-savings, and personalized offers — all synced to your [[BRAND_NAME]] checking account.',
+            buttons: [{ label: 'Open my dashboard', action: 'openUrl', target: 'https://cumulusfinserv-ad61ddfc9e8c.herokuapp.com/' }]
+          } },
+        { sender: 'bot', type: 'suggestedActions', typingDuration: 'off',
+          chips: [
+            { label: 'Go Paperless', action: 'openUrl', target: 'https://' },
+            { label: 'Download the App', action: 'quickReply', responseType: 'richCard' },
+            { label: 'Call my Banker', action: 'dial', target: '+15551234567' }
+          ] },
+        { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium', triggeredBy: 'Download the App',
+          card: {
+            mediaType: 'image', mediaUrl: RCS_ASSET_HOST + '/rcs-defaults/cumulus-bank-on-go.jpg', mediaSize: 'medium',
+            title: 'Let’s make it official',
+            description: 'Did you know you can have [[BRAND_NAME]] with you on the go whenever you need us? Download on your app store today!',
+            buttons: [{ label: 'Take me to the App Store', action: 'openUrl', target: 'https://apps.apple.com/us/iphone/CumulusApp' }]
+          } },
+        { sender: 'user', type: 'text', text: 'Am I eligible for a refi on my mortgage with [[BRAND_NAME]]?' },
+        { sender: 'bot', type: 'text', typingDuration: 'long', text: 'Let me get someone who can help! Your banker will get in touch with you shortly.' }
     ];
     return JSON.parse(JSON.stringify(seed)); // deep clone
 }
