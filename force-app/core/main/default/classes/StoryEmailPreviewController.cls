@@ -478,14 +478,13 @@ public with sharing class StoryEmailPreviewController {
         String url = str(card, 'mediaUrl', '');
         String size = str(card, 'mediaSize', 'medium');
         if (String.isBlank(url)) {
-            // Logo-on-white placeholder: logos are designed for light backgrounds,
-            // so a clean white card reads correctly for transparent logos (a
-            // brand-color gradient clashes / shows a logo's own dark box).
+            // Transparent logo centered on a brand-color gradient (looks right for
+            // transparent logos; the SE can override by setting card media).
             String logo = String.isBlank(brandLogo) ? '' :
-                '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:66%;max-height:58%;object-fit:contain;" referrerpolicy="no-referrer" />';
+                '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:60%;max-height:60%;object-fit:contain;" referrerpolicy="no-referrer" />';
             return '<div class="rcs-card-media rcs-card-media-' + escapeSms(size)
-                + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:#ffffff;padding:18px;">'
-                + logo + '</div>';
+                + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
+                + escapeSms(brandColor) + ' 0%, #ffffff 170%);">' + logo + '</div>';
         }
         Boolean isVideo = str(card, 'mediaType', 'image') == 'video';
         String mediaInner = isVideo
