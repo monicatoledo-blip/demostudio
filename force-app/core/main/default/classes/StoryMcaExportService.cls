@@ -31,15 +31,52 @@ public with sharing class StoryMcaExportService {
     }
 
     // ---- @AuraEnabled boundary (converts to AuraHandledException) -----------
+    // targetSpaceId optional — when blank, resolveSpaceId() picks the default
+    // marketing workspace.
     @AuraEnabled
-    public static Result pushEmailToMca(Id storyId) {
+    public static Result pushEmailToMca(Id storyId, String targetSpaceId) {
         try {
+            if (String.isNotBlank(targetSpaceId)) spaceId = targetSpaceId;
             return pushEmailToMcaImpl(storyId);
         } catch (Exception e) {
             AuraHandledException ahe = new AuraHandledException(e.getMessage());
             ahe.setMessage(e.getMessage());
             throw ahe;
         }
+    }
+
+    // Workspaces the SE can deploy into (the picker list). The resolved default
+    // is flagged so the UI can pre-select it.
+    @AuraEnabled
+    public static List<Map<String, Object>> listMcaWorkspaces() {
+        List<Map<String, Object>> out = new List<Map<String, Object>>();
+        String def;
+        try { def = resolveSpaceId(); } catch (Exception e) { def = null; }
+        try {
+            HttpResponse res = send('GET', '/services/data/v62.0/connect/cms/spaces', null);
+            if (res.getStatusCode() == 200) {
+                Object parsed = JSON.deserializeUntyped(res.getBody());
+                if (parsed instanceof Map<String, Object>) {
+                    Object sp = ((Map<String, Object>) parsed).get('spaces');
+                    if (sp instanceof List<Object>) {
+                        for (Object o : (List<Object>) sp) {
+                            Map<String, Object> m = (Map<String, Object>) o;
+                            String id = String.valueOf(m.get('id'));
+                            out.add(new Map<String, Object>{
+                                'value' => id,
+                                'label' => String.valueOf(m.get('name')),
+                                'isDefault' => (id == def)
+                            });
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            AuraHandledException ahe = new AuraHandledException(e.getMessage());
+            ahe.setMessage(e.getMessage());
+            throw ahe;
+        }
+        return out;
     }
 
     @TestVisible
@@ -174,10 +211,7 @@ public with sharing class StoryMcaExportService {
 
     @TestVisible
     private static Map<String, Object> buildEmailContentBody(Map<String, Object> c, String title) {
-        List<Object> children = new List<Object>();
-        for (String html : sectionHtml(c)) {
-            if (String.isNotBlank(html)) children.add(htmlBlock(html));
-        }
+        List<Object> children = buildBlocks(c);
 
         Map<String, Object> body = new Map<String, Object>{
             // Neutral canvas (brand color stays in the header bar, not the whole bg).
@@ -214,6 +248,79 @@ public with sharing class StoryMcaExportService {
         return body;
     }
 
+    // Turn the ordered sections into MCA blocks: HTML blocks for everything,
+    // except the hero (marked "IMG::<url>") which becomes a NATIVE lightning/image
+    // block so the MCA builder treats it as a real image with Dynamic Content.
+    @TestVisible
+    private static List<Object> buildBlocks(Map<String, Object> c) {
+        List<Object> out = new List<Object>();
+        for (String sec : sectionHtml(c)) {
+            if (String.isBlank(sec)) continue;
+            if (sec.startsWith('IMG::')) {
+                String url = sec.substring(5);
+                String contentKey = createImageMedia(url, str(c, 'brandName', 'Hero') + ' hero');
+                if (String.isNotBlank(contentKey)) {
+                    out.add(imageBlock(contentKey));
+                } else {
+                    // Fallback to an HTML img if media creation failed.
+                    out.add(htmlBlock('<img src="' + esc(url) + '" alt="" style="width:100%;display:block" />'));
+                }
+            } else {
+                out.add(htmlBlock(sec));
+            }
+        }
+        return out;
+    }
+
+    // Create an sfdc_cms__image from an absolute URL (platform fetches it) and
+    // return its contentKey (apiName) for a native image block to reference.
+    private static String createImageMedia(String url, String title) {
+        if (String.isBlank(url) || !(url.toLowerCase().startsWith('http'))) return '';
+        Map<String, Object> payload = new Map<String, Object>{
+            'contentSpaceOrFolderId' => resolveSpaceId(),
+            'contentType' => 'sfdc_cms__image',
+            'title' => title,
+            'urlName' => slug(title) + '-' + String.valueOf(Datetime.now().getTime()),
+            'contentBody' => new Map<String, Object>{
+                'sfdc_cms:media' => new Map<String, Object>{
+                    'source' => new Map<String, Object>{ 'type' => 'url', 'url' => url }
+                }
+            }
+        };
+        try {
+            HttpResponse res = send('POST', CMS_PATH, JSON.serialize(payload));
+            if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
+                Object parsed = JSON.deserializeUntyped(res.getBody());
+                if (parsed instanceof Map<String, Object>) {
+                    Object ak = ((Map<String, Object>) parsed).get('apiName');
+                    if (ak != null) return String.valueOf(ak);
+                }
+            }
+        } catch (Exception e) { /* fall back */ }
+        return '';
+    }
+
+    // Native image block referencing a CMS image by contentKey (full-width hero).
+    private static Map<String, Object> imageBlock(String contentKey) {
+        return new Map<String, Object>{
+            'definition' => 'lightning/image',
+            'id' => genId(),
+            'type' => 'block',
+            'attributes' => new Map<String, Object>{
+                'imageFitConfig' => new Map<String, Object>{ 'width' => new Map<String, Object>{ 'unit' => '%', 'value' => 100 } },
+                'imageInfo' => new Map<String, Object>{
+                    'altText' => '', 'overrideAltText' => false,
+                    'source' => new Map<String, Object>{
+                        'type' => 'imageReference',
+                        'ref' => new Map<String, Object>{ 'contentKey' => contentKey }
+                    },
+                    'url' => '/cms/media/' + contentKey
+                },
+                'lightning:horizontalAlignment' => 'center'
+            }
+        };
+    }
+
     // Each logical section becomes its own lightning/html block (an individually
     // editable component in the MCA builder). Tokens are resolved to literal
     // brand/recipient text for v1.
@@ -246,10 +353,11 @@ public with sharing class StoryMcaExportService {
                 + '<h1 style="margin:0;color:' + esc(headColor) + ';font:700 24px Arial">' + esc(head) + '</h1></div>');
         }
 
-        // 3) Hero image — its own block (so Dynamic Content can be applied to it)
+        // 3) Hero — marked so buildBlocks emits it as a NATIVE image block
+        // (Dynamic-Content-capable), not an HTML img.
         String hero = resolveImg(str(c, 'heroImageUrl', ''));
         if (String.isNotBlank(hero)) {
-            out.add('<img src="' + esc(hero) + '" alt="" style="width:100%;display:block" />');
+            out.add('IMG::' + hero);
         }
 
         // 4) Feature 2-column (accent bar), before the body
