@@ -389,7 +389,7 @@ public with sharing class StoryEmailPreviewController {
             // A rich card (bot only) replaces the bubble; else a text bubble
             // (if any) followed by a quick-reply chip row (if any).
             if (sender == 'bot' && card != null && rcsCardHasContent(card)) {
-                parts += rcsCardRow(card);
+                parts += rcsCardRow(card, str(c, 'primaryColor', '#2A94D6'), str(c, 'logoUrl', messagingHeaderAvatar(c)));
             } else {
                 if (String.isNotBlank(text)) parts += rcsBubbleRow(sender, text);
                 if (sender == 'bot' && !chips.isEmpty()) parts += rcsChipsRow(chips);
@@ -423,12 +423,19 @@ public with sharing class StoryEmailPreviewController {
             || String.isNotBlank(str(card, 'mediaUrl', ''));
     }
 
-    private static String rcsCardRow(Map<String, Object> card) {
-        String media = '';
+    private static String rcsCardRow(Map<String, Object> card, String brandColor, String brandLogo) {
         String url = str(card, 'mediaUrl', '');
+        String media;
         if (String.isNotBlank(url)) {
             media = '<div class="rcs-card-media rcs-card-media-medium"><img alt="" src="' + escapeSms(url)
                 + '" loading="lazy" referrerpolicy="no-referrer" /></div>';
+        } else {
+            // Rich cards always show media — fall back to a branded placeholder
+            // (brand gradient + centered logo) so the card never looks empty.
+            String logo = String.isBlank(brandLogo) ? '' :
+                '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:52%;max-height:62%;object-fit:contain;" referrerpolicy="no-referrer" />';
+            media = '<div class="rcs-card-media rcs-card-media-medium" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
+                + escapeSms(brandColor) + ' 0%, #ffffff 160%);">' + logo + '</div>';
         }
         String title = String.isNotBlank(str(card, 'title', '')) ? '<h4 class="rcs-card-title-text">' + smsBubble(str(card, 'title', '')) + '</h4>' : '';
         String descHtml = String.isNotBlank(str(card, 'description', '')) ? '<p class="rcs-card-desc">' + smsBubble(str(card, 'description', '')) + '</p>' : '';

@@ -1032,6 +1032,7 @@
       }
       @keyframes rcsblink { 50% { opacity: 0; } }
       .c-send.rcs-ready, .i-composer-mic.rcs-ready { color: var(--rcs-brand, #2a94d6); cursor: pointer; }
+      .rcs-chip, .rcs-card-btn { cursor: pointer; }
       .rcs-typing-dots { display: inline-flex; gap: 4px; align-items: center; padding: 2px 0; }
       .rcs-typing-dots .tdot {
         width: 7px; height: 7px; border-radius: 50%; background: currentColor; opacity: 0.5;
@@ -1338,14 +1339,34 @@
         }
         function hideTyping() { var t = document.getElementById("rcsTypingRow"); if (t && t.parentNode) t.parentNode.removeChild(t); }
 
-        function sendRecipient() {
-          if (mode !== "ready") return;
-          reveal(rows[idx]); idx += 1; resetPill(); mode = "idle";
+        function advanceAfterRecipient() {
+          resetPill(); mode = "idle";
           if (idx < rows.length && senderOf(rows[idx]) === "bot") {
             showTyping();
             setTimeout(function () { hideTyping(); playBrandRun(); }, 1100);
           } else { playBrandRun(); }
         }
+        function sendRecipient() {
+          if (mode !== "ready") return;
+          reveal(rows[idx]); idx += 1;
+          advanceAfterRecipient();
+        }
+        // Tapping a quick-reply chip (or card button) IS the recipient replying:
+        // post the pill's label as their message and continue the thread.
+        function pillReply(label) {
+          if (mode !== "awaiting" && mode !== "ready" && mode !== "typing") return;
+          if (idx >= rows.length || senderOf(rows[idx]) !== "user") return;
+          var copy = rows[idx].querySelector(".rcs-copy");
+          if (copy && label) copy.textContent = label;
+          reveal(rows[idx]); idx += 1;
+          advanceAfterRecipient();
+        }
+        thread.addEventListener("click", function (e) {
+          var pill = e.target.closest(".rcs-chip, .rcs-card-btn");
+          if (!pill) return;
+          e.stopPropagation();
+          pillReply((pill.getAttribute("data-label") || pill.textContent || "").trim());
+        });
 
         if (pill) pill.addEventListener("click", function (e) {
           e.stopPropagation();
