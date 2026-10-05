@@ -225,50 +225,58 @@ public with sharing class StoryMcaExportService {
         String logo = resolveImg(str(c, 'logoUrl', ''));
         String first = str(c, 'customerFirstName', 'there');
 
+        String headColor = str(c, 'headlineTextColor', '#FFFFFF');
         List<String> out = new List<String>();
 
-        // Header — brand bar + logo
-        String logoImg = String.isBlank(logo) ? ('<span style="color:#fff;font:700 20px Arial">' + esc(brand) + '</span>')
-            : ('<img src="' + esc(logo) + '" alt="' + esc(brand) + '" style="max-height:40px;max-width:200px" />');
-        out.add('<div style="background:' + esc(primary) + ';padding:20px;text-align:center">' + logoImg + '</div>');
+        // 1) Logo — on WHITE (matches the sim; logo sits above the headline bar)
+        String logoW = str(c, 'logoWidth', '180');
+        if (!logoW.contains('px') && !logoW.contains('%')) logoW += 'px';
+        String logoImg = String.isBlank(logo)
+            ? ('<span style="color:' + esc(primary) + ';font:700 24px Arial">' + esc(brand) + '</span>')
+            : ('<img src="' + esc(logo) + '" alt="' + esc(brand) + '" style="width:' + esc(logoW) + ';max-width:70%;height:auto;display:block;margin:0 auto" />');
+        out.add('<div style="background:#ffffff;padding:24px;text-align:center">' + logoImg + '</div>');
 
-        // Hero image (if any)
+        // 2) Headline in a brand-color bar
+        String head = tok(str(c, 'headline', ''), brand, first);
+        if (String.isNotBlank(head)) {
+            out.add('<div style="background:' + esc(primary) + ';padding:18px 24px;text-align:center">'
+                + '<h1 style="margin:0;color:' + esc(headColor) + ';font:700 24px Arial">' + esc(head) + '</h1></div>');
+        }
+
+        // 3) Hero image — its own block (so Dynamic Content can be applied to it)
         String hero = resolveImg(str(c, 'heroImageUrl', ''));
         if (String.isNotBlank(hero)) {
             out.add('<img src="' + esc(hero) + '" alt="" style="width:100%;display:block" />');
         }
 
-        // Headline + subheadline
-        String head = tok(str(c, 'headline', ''), brand, first);
-        String sub = tok(str(c, 'subHeadline', ''), brand, first);
-        if (String.isNotBlank(head) || String.isNotBlank(sub)) {
-            String h = '<div style="padding:24px 24px 8px;text-align:center;font-family:Arial">';
-            if (String.isNotBlank(head)) h += '<h1 style="margin:0 0 8px;color:#1a1a1a;font-size:26px">' + esc(head) + '</h1>';
-            if (String.isNotBlank(sub)) h += '<p style="margin:0;color:#555;font-size:16px">' + esc(sub) + '</p>';
-            out.add(h + '</div>');
-        }
-
-        // Feature 2-column (comes before the body, matching the Story email)
+        // 4) Feature 2-column (accent bar), before the body
         String f1 = tok(str(c, 'featureColumn1', ''), brand, first);
         String f2 = tok(str(c, 'featureColumn2', ''), brand, first);
         if (String.isNotBlank(f1) || String.isNotBlank(f2)) {
             String tc = str(c, 'featureColumnTextColor', '#FFFFFF');
-            String col = '<td width="50%" valign="top" style="padding:16px;color:' + esc(tc) + ';font:14px/1.5 Arial">';
+            String col = '<td width="50%" valign="top" style="padding:18px;color:' + esc(tc) + ';font:14px/1.5 Arial">';
             out.add('<table width="100%" cellpadding="0" cellspacing="0" style="background:' + esc(accent) + '"><tr>'
                 + col + esc(f1) + '</td>' + col + esc(f2) + '</td></tr></table>');
         }
 
-        // Body paragraphs
+        // 5) Subheadline (bold, centered)
+        String sub = tok(str(c, 'subHeadline', ''), brand, first);
+        if (String.isNotBlank(sub)) {
+            out.add('<div style="padding:24px 24px 4px;text-align:center">'
+                + '<p style="margin:0;font:700 18px Arial;color:#1a1a1a">' + esc(sub) + '</p></div>');
+        }
+
+        // 6) Body paragraphs
         String bodyRaw = tok(str(c, 'bodyParagraph', ''), brand, first);
         if (String.isNotBlank(bodyRaw)) {
             String paras = '';
             for (String p : bodyRaw.split('\\n\\n+')) {
                 if (String.isNotBlank(p)) paras += '<p style="margin:0 0 16px;font:14px/1.6 Arial;color:#393939">' + esc(p.trim()) + '</p>';
             }
-            out.add('<div style="padding:0 24px">' + paras + '</div>');
+            out.add('<div style="padding:16px 24px 0">' + paras + '</div>');
         }
 
-        // Bullets
+        // 7) Bullets
         Object sbRaw = c.get('showBullets');
         Boolean showBullets = (sbRaw == null) ? true : (sbRaw == true);
         if (showBullets) {
@@ -277,17 +285,33 @@ public with sharing class StoryMcaExportService {
                 String bl = tok(str(c, k, ''), brand, first);
                 if (String.isNotBlank(bl)) lis += '<li style="margin:0 0 8px">' + esc(bl) + '</li>';
             }
-            if (String.isNotBlank(lis)) out.add('<ul style="padding:16px 40px;font:14px/1.6 Arial;color:#393939">' + lis + '</ul>');
+            if (String.isNotBlank(lis)) out.add('<ul style="padding:8px 40px;font:14px/1.6 Arial;color:#393939">' + lis + '</ul>');
         }
 
-        // CTA button
+        // 8) Reply prompt (the AI-concierge invite)
+        String rpH = tok(str(c, 'replyPromptHeadline', ''), brand, first);
+        String rpB = tok(str(c, 'replyPromptBody', ''), brand, first);
+        if (String.isNotBlank(rpH) || String.isNotBlank(rpB)) {
+            String r = '<div style="padding:12px 24px">';
+            if (String.isNotBlank(rpH)) r += '<p style="margin:0 0 4px;font:700 14px Arial;color:#1a1a1a">💬 ' + esc(rpH) + '</p>';
+            if (String.isNotBlank(rpB)) r += '<p style="margin:0;font:14px/1.6 Arial;color:#393939">' + esc(rpB) + '</p>';
+            out.add(r + '</div>');
+        }
+
+        // 9) Signature
+        out.add('<div style="padding:12px 24px 0"><p style="margin:0;font:14px/1.6 Arial;color:#393939">Best,<br>' + esc(brand) + '</p></div>');
+
+        // 10) CTA button
         String cta = tok(str(c, 'ctaButtonText', ''), brand, first);
         if (String.isNotBlank(cta)) {
             String cc = str(c, 'ctaButtonColor', primary);
-            out.add('<div style="padding:8px 24px 28px;text-align:center"><a href="#" '
+            out.add('<div style="padding:20px 24px 28px;text-align:center"><a href="#" '
                 + 'style="display:inline-block;background:' + esc(cc) + ';color:#fff;text-decoration:none;'
-                + 'padding:12px 28px;border-radius:6px;font:700 15px Arial">' + esc(cta) + '</a></div>');
+                + 'padding:14px 32px;border-radius:24px;font:700 15px Arial">' + esc(cta) + '</a></div>');
         }
+
+        // 11) Footer
+        out.add('<div style="padding:20px 24px;text-align:center;color:#999;font:12px Arial">© ' + esc(brand) + '. All rights reserved.</div>');
 
         return out;
     }
