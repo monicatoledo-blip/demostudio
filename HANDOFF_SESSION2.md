@@ -33,6 +33,8 @@ Working in `~/DemoStudio` (repo `monicatoledo-blip/demostudio`, branch `main`, d
 6. **DC auto-create (BIG, commit 2694b2b)** ✅ — proved email-hero Personalization Points ARE creatable via Data 360 Personalization REST (BlockBuilder/ExperienceVariation), contradicting an earlier wrong "not creatable" claim. The push now auto-creates its OWN point+decision per email behind a **"Make the hero dynamic" toggle** (no borrowing, no picker), wires the hero, sets sourceRecordId back to the email. Monica confirmed it renders as "Variation 2" Dynamic Content in the MCA builder. Full recipe + the create/update/delete via the **data360 MCP** (`d360_p13n_point_*` — the `sf api request rest` CLI has a DELETE "mode" bug) in [[reference-mca-email-content-model]].
    - THROWAWAYS to delete (ask-before-delete): spike PP `9ppKh000000wkLLIAY` (ZZ_DemoStudio_HeroPP_sp1) + email MC `20YKh000001WzboMAC`/EC `6ROKh000000D1AvOAK`. (First spike PP already deleted.)
 
+7. **Email-only styling moved + data graph per-org (commit b567bf8)** ✅ — Headline Text Color, Logo Width, Logo Background Color moved from Branding into the Email Template section (email-specific, tuned against the preview); Logo picker + Primary Hex Color stay in Branding. `resolveDataGraph()` discovers `profileDataGraphName` from an existing point (GET-by-id; LIST is disabled) instead of hardcoding — VERIFY on an org with a differently-named graph.
+
 ### STILL OPEN after session 3
 - Verify DC picker live (pick a point e.g. "October image efb5" → decision "Hero 2" → push → confirm 2 variations in the MCA builder). Verify workspace list now shows all + destination label.
 - BU-first picker: only if Monica wants the cosmetic grouping/context (feeds dataspace to DC). Low value.
