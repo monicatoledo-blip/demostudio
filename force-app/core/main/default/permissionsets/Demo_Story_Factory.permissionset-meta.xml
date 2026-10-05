@@ -73,6 +73,7 @@
     <fieldPermissions><field>Demo_Persona__c.Avatar_URL__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Story__c.Accent_Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Story__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Rtom_Enabled__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Story__c.Brand_Domain__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Story__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Story__c.Connector_Id__c</field><editable>true</editable><readable>true</readable></fieldPermissions>

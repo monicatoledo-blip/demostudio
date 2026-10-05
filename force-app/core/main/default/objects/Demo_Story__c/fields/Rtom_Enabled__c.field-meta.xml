@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Rtom_Enabled__c</fullName>
+    <label>Real Time Offer Management</label>
+    <description>When on, the Personalized Website renders (and will provision) a Real Time Offer Management section. Roadmap: wires to RTOM backend; today it is the toggle/scaffold.</description>
+    <defaultValue>false</defaultValue>
+    <type>Checkbox</type>
+</CustomField>

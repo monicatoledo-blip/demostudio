@@ -11,12 +11,12 @@
     <enableSharing>true</enableSharing>
     <enableStreamingApi>true</enableStreamingApi>
     <externalSharingModel>ReadWrite</externalSharingModel>
-    <label>Demo Story</label>
+    <label>Personalized Website</label>
     <nameField>
-        <label>Story Name</label>
+        <label>Experience Name</label>
         <type>Text</type>
     </nameField>
-    <pluralLabel>Demo Stories</pluralLabel>
+    <pluralLabel>Personalized Websites</pluralLabel>
     <searchLayouts/>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>
