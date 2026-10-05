@@ -1,0 +1,55 @@
+<apex:page controller="WebExperiencePreviewController" showHeader="false" sidebar="false"
+    standardStylesheets="false" applyHtmlTag="true" applyBodyTag="true" cache="false"
+    docType="html-5.0">
+<style>
+    html, body { margin: 0; padding: 0; height: 100%; background: #fff; }
+    #sim { border: 0; width: 100%; height: 100vh; display: block; }
+    #shim { display: none; }
+    #err { font-family: monospace; padding: 16px; color: #611; white-space: pre-wrap; }
+</style>
+<div id="shim"></div>
+<iframe id="sim" title="Adaptive Web preview"></iframe>
+<!-- Ported EG content engine (verbatim). Loaded before the bootstrap so its
+     function declarations are global by the time we call them. -->
+<script src="{!URLFOR($Resource.demoWebEngine)}"></script>
+<script>
+    (function () {
+        var CFG, TPL_URL = '{!URLFOR($Resource.demoWebTemplate)}';
+        try { CFG = JSON.parse('{!JSENCODE(configJson)}'); } catch (e) { CFG = { dom: {}, form: {} }; }
+
+        // Build the hidden shim inputs the engine reads via getElementById. Only the
+        // ids present in CFG.dom are created; everything else is absent, so the
+        // engine falls back to its per-industry defaults.
+        var shim = document.getElementById('shim');
+        var dom = CFG.dom || {};
+        Object.keys(dom).forEach(function (id) {
+            var el = document.createElement('input');
+            el.type = 'hidden';
+            el.id = id;
+            el.value = dom[id] == null ? '' : String(dom[id]);
+            shim.appendChild(el);
+        });
+
+        function fail(msg) {
+            var f = document.getElementById('sim');
+            f.setAttribute('srcdoc', '<div id="err">' + msg + '</div>');
+        }
+
+        fetch(TPL_URL)
+            .then(function (r) { return r.text(); })
+            .then(function (tpl) {
+                var html;
+                try {
+                    // The engine prefers live DOM .value (the shim) and takes
+                    // colors/logo/images from the formData arg (CFG.form).
+                    html = applyAdaptiveWebTemplateReplacements(tpl, CFG.form || {});
+                } catch (e) {
+                    fail('Engine error: ' + (e && e.message ? e.message : e));
+                    return;
+                }
+                document.getElementById('sim').setAttribute('srcdoc', html);
+            })
+            .catch(function (e) { fail('Template load failed: ' + (e && e.message ? e.message : e)); });
+    })();
+</script>
+</apex:page>

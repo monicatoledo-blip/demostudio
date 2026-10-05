@@ -8,6 +8,10 @@
         <enabled>true</enabled>
     </classAccesses>
     <classAccesses>
+        <apexClass>WebExperiencePreviewController</apexClass>
+        <enabled>true</enabled>
+    </classAccesses>
+    <classAccesses>
         <apexClass>StoryMcaExportService</apexClass>
         <enabled>true</enabled>
     </classAccesses>
@@ -46,6 +50,8 @@
         <modifyAllRecords>false</modifyAllRecords>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
+    <objectPermissions><allowCreate>true</allowCreate><allowDelete>true</allowDelete><allowEdit>true</allowEdit><allowRead>true</allowRead><modifyAllRecords>true</modifyAllRecords><object>Demo_Story__c</object><viewAllRecords>true</viewAllRecords></objectPermissions>
+    <objectPermissions><allowCreate>true</allowCreate><allowDelete>true</allowDelete><allowEdit>true</allowEdit><allowRead>true</allowRead><modifyAllRecords>true</modifyAllRecords><object>Demo_Stage__c</object><viewAllRecords>true</viewAllRecords></objectPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Two_Way_Simulator__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
@@ -65,9 +71,31 @@
     <fieldPermissions><field>Demo_Persona__c.Primary_Phone__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Persona__c.Primary_Address__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
     <fieldPermissions><field>Demo_Persona__c.Avatar_URL__c</field><editable>false</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Accent_Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Brand__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Brand_Domain__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Config_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Connector_Id__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Data_Space__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Deployed_Artifacts__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Industry__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Last_Deployed__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Logo_URL__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Persona__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Primary_Color__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Story__c.Profile_Data_Graph__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Stage__c.Channel__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Stage__c.Content_JSON__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Stage__c.Sort_Order__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Stage__c.Stage_Type__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
+    <fieldPermissions><field>Demo_Stage__c.Surface__c</field><editable>true</editable><readable>true</readable></fieldPermissions>
     <pageAccesses>
-        <apexPage>StoryEmailPreview</apexPage>
         <enabled>true</enabled>
+        <apexPage>WebExperiencePreview</apexPage>
+    </pageAccesses>
+    <pageAccesses>
+        <enabled>true</enabled>
+        <apexPage>StoryEmailPreview</apexPage>
     </pageAccesses>
     <pageAccesses>
         <apexPage>StoryMcaSession</apexPage>
