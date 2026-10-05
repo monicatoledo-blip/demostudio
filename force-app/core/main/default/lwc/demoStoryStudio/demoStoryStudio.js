@@ -345,8 +345,16 @@ export default class DemoStoryStudio extends LightningElement {
         if (this.config.channel !== channel) { this.config = { ...this.config, channel }; }
         // Fresh messaging record: seed the marketing-first 2-way thread for the
         // record's industry (the email industry packs are recipient-first).
+        const prevInd = this._recordIndustry;
         if (!raw && channel !== 'Email') {
             this.config = { ...this.config, messages: messagingSeedFor(ind) };
+        } else if (raw && channel !== 'Email' && ind && prevInd && ind !== prevInd && this.isPristineThread()) {
+            // Existing messaging record whose Industry changed and whose thread
+            // is still an unedited seed — swap in the new industry's thread and
+            // persist it. (Hand-edited threads are left untouched.)
+            this.config = { ...this.config, messages: messagingSeedFor(ind) };
+            this.saved = false;
+            this.scheduleAutosave();
         }
         // If the active section isn't valid for this channel (e.g. Email Template
         // on an SMS record), fall back to the first valid section.
@@ -378,6 +386,15 @@ export default class DemoStoryStudio extends LightningElement {
         const fn = this.firstName;
         const br = this.config.brandName || 'the brand';
         return (text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn).replace(/\[\[BRAND_NAME\]\]/g, br);
+    }
+
+    // True when the current thread still equals one of the industry seed packs
+    // (i.e. the SE hasn't hand-edited it), so it's safe to re-seed on an
+    // Industry change. Compared on sender+text only.
+    isPristineThread() {
+        const norm = (arr) => JSON.stringify((arr || []).map((m) => ({ sender: m.sender, text: m.text })));
+        const cur = norm(this.config.messages);
+        return Object.keys(MESSAGING_PACKS).some((k) => norm(MESSAGING_PACKS[k]) === cur);
     }
 
     // ---- channel ----
