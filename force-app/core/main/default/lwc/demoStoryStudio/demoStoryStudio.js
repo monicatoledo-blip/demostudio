@@ -203,17 +203,29 @@ function messagingSeedFor(industry) {
 // the opening message and a rich card as the agent's answer, ending on an
 // agent escalation. Returns fresh (deep) objects each call.
 function rcsSeedFor() {
-    return [
-        { sender: 'bot', text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]] ✨ We lined up something just for you.',
-          chips: ['Show me', 'Use my points', 'Talk to someone'] },
-        { sender: 'user', text: 'Show me' },
-        { sender: 'bot', card: {
-            mediaUrl: '', title: 'Members-only offer',
+    // Interactive showcase: an opening message with quick-reply chips (one
+    // chips→rich-card pairing), then the paired rich card with card buttons
+    // (openUrl + a quickReply that answers inline and escalates to a human).
+    // The ported RCS runtime plays taps, typing, echoes, and responses.
+    const seed = [
+        { sender: 'bot', type: 'quickReplies', typingDuration: 'short',
+          text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]] ✨ We lined up something just for you.',
+          chips: [
+            { label: 'Show me', action: 'quickReply', responseType: 'richCard' },
+            { label: 'Use my points', action: 'quickReply', response: 'Good news — your points can be applied at checkout. Want me to connect you with a specialist to finalize?' },
+            { label: 'Not now', action: 'quickReply', response: 'No problem — I’ll keep this handy. Reach out anytime!' }
+          ] },
+        { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium',
+          card: {
+            mediaType: 'image', mediaUrl: '', mediaSize: 'medium',
+            title: 'Members-only offer',
             description: 'A pick tailored to you from [[BRAND_NAME]] — available for a limited time.',
-            buttons: ['View details', 'Hold it for me'] } },
-        { sender: 'user', text: 'Can my points cover it?' },
-        { sender: 'bot', text: 'Great question — yes, your points can apply here. Want me to connect you with a specialist to finalize?' }
-    ].map((m) => ({ ...m, chips: m.chips ? [...m.chips] : undefined, card: m.card ? { ...m.card, buttons: [...(m.card.buttons || [])] } : undefined }));
+            buttons: [
+              { label: 'View details', action: 'openUrl', target: '[[BRAND_DOMAIN]]/offer' },
+              { label: 'Hold it for me', action: 'quickReply', response: 'Done — I’ve placed a 24-hour hold. Want me to connect you with a specialist to finalize?' }
+            ] } }
+    ];
+    return JSON.parse(JSON.stringify(seed)); // deep clone
 }
 // Seed the right thread for a messaging channel.
 function seedFor(channel, industry) {
@@ -512,11 +524,11 @@ export default class DemoStoryStudio extends LightningElement {
                 // RCS extras (shown only on RCS, bot messages)
                 isBot: (m.sender || 'user') === 'bot',
                 showRcs: this.isRcs && (m.sender || 'user') === 'bot',
-                chipsStr: Array.isArray(m.chips) ? m.chips.join(', ') : '',
+                chipsStr: this._labels(m.chips),
                 cardTitle: this.resolveTokens(card.title),
                 cardDesc: this.resolveTokens(card.description),
                 cardMedia: card.mediaUrl || '',
-                cardButtonsStr: Array.isArray(card.buttons) ? card.buttons.join(', ') : ''
+                cardButtonsStr: this._labels(card.buttons)
             };
         });
     }
@@ -527,14 +539,35 @@ export default class DemoStoryStudio extends LightningElement {
     _patchCard(i, field, value) {
         const msgs = this.config.messages.map((m, idx) => {
             if (idx !== i) return m;
-            return { ...m, card: { ...(m.card || {}), [field]: value } };
+            const card = { ...(m.card || {}), [field]: value };
+            // A message becomes a rich card once it has any card content; clears
+            // back to a text bubble when all card content is removed.
+            const hasCard = ['title', 'description', 'mediaUrl'].some((k) => (card[k] || '').trim())
+                || (Array.isArray(card.buttons) && card.buttons.length);
+            let type = m.type;
+            if (hasCard && type !== 'richCardHorizontal') type = 'richCardVertical';
+            else if (!hasCard && (type === 'richCardVertical' || type === 'richCardHorizontal')) type = 'text';
+            return { ...m, card, type };
         });
         this._commit({ messages: msgs });
     }
+    // Comma-separated labels, preserving any action/response on existing items
+    // (chips/buttons can be rich objects {label,action,response,...}).
+    _labels(arr) {
+        return Array.isArray(arr) ? arr.map((x) => (x && typeof x === 'object' ? (x.label || '') : x)).join(', ') : '';
+    }
+    _mergeLabels(existing, value) {
+        const labels = (value || '').split(',').map((s) => s.trim()).filter((s) => s);
+        const prev = Array.isArray(existing) ? existing : [];
+        return labels.map((label, i) => {
+            const p = prev[i];
+            if (p && typeof p === 'object') return { ...p, label };
+            return { label, action: 'quickReply' };
+        });
+    }
     handleChips(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
-        const chips = (e.target.value || '').split(',').map((s) => s.trim()).filter((s) => s);
-        this._patchMsg(i, { chips });
+        this._patchMsg(i, { chips: this._mergeLabels(this.config.messages[i].chips, e.target.value) });
     }
     handleCardText(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
@@ -542,8 +575,8 @@ export default class DemoStoryStudio extends LightningElement {
     }
     handleCardButtons(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
-        const buttons = (e.target.value || '').split(',').map((s) => s.trim()).filter((s) => s);
-        this._patchCard(i, 'buttons', buttons);
+        const existing = (this.config.messages[i].card || {}).buttons;
+        this._patchCard(i, 'buttons', this._mergeLabels(existing, e.target.value));
     }
     handleCardImage(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);

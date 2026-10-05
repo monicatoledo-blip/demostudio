@@ -376,83 +376,166 @@ public with sharing class StoryEmailPreviewController {
         return (d == 'ios') ? 'ios' : 'android';
     }
 
+    // Exact port of buildRcsThreadHtml (script.js:7948). Each message becomes a
+    // .rcs-msg-group (carrying data-msg-index/kind/typing-ms) wrapping one or
+    // more .rcs-row units; the ported runtime adds hidden-msg + plays them.
     private static String buildRcsThread(Map<String, Object> c) {
+        String brandColor = str(c, 'primaryColor', '#2A94D6');
+        String brandLogo = str(c, 'logoUrl', messagingHeaderAvatar(c));
         String parts = '';
+        Integer msgIdx = 0;
         for (Object o : msgList(c)) {
-            if (!(o instanceof Map<String, Object>)) continue;
+            if (!(o instanceof Map<String, Object>)) { msgIdx++; continue; }
             Map<String, Object> m = (Map<String, Object>) o;
             String sender = String.valueOf(m.get('sender')) == 'user' ? 'user' : 'bot';
-            String text = m.get('text') == null ? '' : String.valueOf(m.get('text'));
-            Map<String, Object> card = (m.get('card') instanceof Map<String, Object>) ? (Map<String, Object>) m.get('card') : null;
+            String type = str(m, 'type', 'text');
+            String text = str(m, 'text', '');
             List<Object> chips = (m.get('chips') instanceof List<Object>) ? (List<Object>) m.get('chips') : new List<Object>();
-
-            // A rich card (bot only) replaces the bubble; else a text bubble
-            // (if any) followed by a quick-reply chip row (if any).
-            if (sender == 'bot' && card != null && rcsCardHasContent(card)) {
-                parts += rcsCardRow(card, str(c, 'primaryColor', '#2A94D6'), str(c, 'logoUrl', messagingHeaderAvatar(c)));
+            String rowsHtml = '';
+            if (type == 'quickReplies') {
+                if (String.isNotBlank(text)) rowsHtml += rcsBubbleHtml(sender, text);
+                if (!chips.isEmpty()) rowsHtml += rcsChipsRowHtml(chips);
+            } else if (type == 'richCardVertical' || type == 'richCardHorizontal') {
+                String layout = type == 'richCardHorizontal' ? 'horizontal' : 'vertical';
+                Map<String, Object> cardObj = (m.get('card') instanceof Map<String, Object>) ? (Map<String, Object>) m.get('card') : m;
+                rowsHtml += rcsCardHtml(sender, cardObj, layout, brandColor, brandLogo);
+            } else if (type == 'cardCarousel') {
+                List<Object> cards = (m.get('cards') instanceof List<Object>) ? (List<Object>) m.get('cards') : new List<Object>();
+                if (!cards.isEmpty()) rowsHtml += rcsCarouselHtml(sender, cards, brandColor, brandLogo);
+            } else if (type == 'suggestedActions') {
+                if (!chips.isEmpty()) rowsHtml += rcsChipsRowHtml(chips);
             } else {
-                if (String.isNotBlank(text)) parts += rcsBubbleRow(sender, text);
-                if (sender == 'bot' && !chips.isEmpty()) parts += rcsChipsRow(chips);
+                // 'text' (and any legacy row): bubble, plus chips if present.
+                if (String.isNotBlank(text)) rowsHtml += rcsBubbleHtml(sender, text);
+                if (!chips.isEmpty()) rowsHtml += rcsChipsRowHtml(chips);
             }
+            if (String.isNotBlank(rowsHtml)) {
+                Integer typingMs = sender == 'bot' ? rcsTypingMs(str(m, 'typingDuration', 'off')) : 0;
+                parts += '<div class="rcs-msg-group" data-msg-index="' + msgIdx + '" data-msg-kind="'
+                    + escapeSms(type) + '" data-typing-ms="' + typingMs + '">' + rowsHtml + '</div>';
+            }
+            msgIdx++;
         }
         return parts;
     }
 
-    private static String rcsBubbleRow(String sender, String text) {
+    private static Integer rcsTypingMs(String setting) {
+        if (setting == 'short') return 800;
+        if (setting == 'medium') return 1600;
+        if (setting == 'long') return 2800;
+        return 0;
+    }
+
+    private static String rcsBubbleHtml(String sender, String text) {
         String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
         String skin = sender == 'user' ? 'rcs-bubble-user' : 'rcs-bubble-bot';
-        return '<div class="rcs-row ' + side + ' hidden-msg" data-sender="' + sender + '">'
-            + '<div class="rcs-bubble ' + skin + '"><div class="rcs-copy">' + smsBubble(text) + '</div></div></div>';
+        return '<div class="rcs-row ' + side + '"><div class="rcs-bubble ' + skin
+            + '"><div class="rcs-copy">' + smsBubble(text) + '</div></div></div>';
     }
 
-    private static String rcsChipsRow(List<Object> chips) {
+    // Chip may be a plain string (label) or a map {label,action,target,response,responseType}.
+    private static String rcsChipsRowHtml(List<Object> chips) {
         String items = '';
         for (Object ch : chips) {
-            String label = (ch == null) ? '' : String.valueOf(ch);
+            String label; String action = 'quickReply'; String target = ''; String resp = ''; String respType = '';
+            if (ch instanceof Map<String, Object>) {
+                Map<String, Object> cm = (Map<String, Object>) ch;
+                label = str(cm, 'label', '');
+                action = str(cm, 'action', 'quickReply');
+                target = str(cm, 'target', '');
+                resp = str(cm, 'response', '');
+                respType = str(cm, 'responseType', '');
+            } else {
+                label = (ch == null) ? '' : String.valueOf(ch);
+            }
             if (String.isBlank(label)) continue;
-            items += '<button type="button" class="rcs-chip" data-action="quickReply" data-label="'
-                + escapeSms(label) + '"><span class="rcs-chip-label-text">' + escapeSms(label) + '</span></button>';
+            String icon = rcsChipIconSvg(action);
+            String respAttr = String.isNotBlank(resp) ? ' data-response="' + escapeSms(resp) + '"' : '';
+            String respTypeAttr = String.isNotBlank(respType) ? ' data-response-type="' + escapeSms(respType) + '"' : '';
+            items += '<button type="button" class="rcs-chip' + (String.isNotBlank(icon) ? ' rcs-chip-has-icon' : '')
+                + '" data-action="' + escapeSms(action) + '" data-target="' + escapeSms(target) + '" data-label="'
+                + escapeSms(label) + '"' + respAttr + respTypeAttr + '>' + icon
+                + '<span class="rcs-chip-label-text">' + escapeSms(label) + '</span></button>';
         }
         if (String.isBlank(items)) return '';
-        return '<div class="rcs-row rcs-row-bot hidden-msg" data-sender="bot">'
-            + '<div class="rcs-chips-row">' + items + '</div></div>';
+        return '<div class="rcs-row rcs-row-bot"><div class="rcs-chips-row">' + items + '</div></div>';
     }
 
-    private static Boolean rcsCardHasContent(Map<String, Object> card) {
-        return String.isNotBlank(str(card, 'title', '')) || String.isNotBlank(str(card, 'description', ''))
-            || String.isNotBlank(str(card, 'mediaUrl', ''));
+    private static String rcsChipIconSvg(String action) {
+        if (action == 'openUrl') return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm6.9 6h-2.9a15.7 15.7 0 0 0-1.4-3.6A8 8 0 0 1 18.9 8zM12 4c.8 1.2 1.5 2.5 1.9 4h-3.8c.4-1.5 1.1-2.8 1.9-4zM4.3 14c-.2-.6-.3-1.3-.3-2s.1-1.4.3-2h3.4c-.1.6-.1 1.3-.1 2s0 1.4.1 2H4.3zm.8 2h3c.3 1.3.8 2.5 1.4 3.6A8 8 0 0 1 5.1 16zm3-8H5.1a8 8 0 0 1 4.3-3.6c-.6 1.1-1.1 2.3-1.4 3.6zM12 20c-.8-1.2-1.5-2.5-1.9-4h3.8c-.4 1.5-1.1 2.8-1.9 4zm2.3-6H9.7c-.1-.6-.2-1.3-.2-2s.1-1.4.2-2h4.7c.1.6.2 1.3.2 2s-.1 1.4-.3 2zm.3 5.6c.6-1.1 1.1-2.3 1.4-3.6h2.9a8 8 0 0 1-4.3 3.6zM16.4 14c.1-.6.1-1.3.1-2s0-1.4-.1-2h3.4c.1.6.2 1.3.2 2s-.1 1.4-.2 2h-3.4z"/></svg>';
+        if (action == 'dial') return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M20 15.5c-1.2 0-2.5-.2-3.6-.6a1 1 0 0 0-1 .2l-2.2 2.2a15 15 0 0 1-6.6-6.6l2.2-2.2a1 1 0 0 0 .2-1c-.4-1.2-.6-2.4-.6-3.6a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1c0 9.4 7.6 17 17 17a1 1 0 0 0 1-1v-3.4a1 1 0 0 0-1-1z"/></svg>';
+        if (action == 'viewLocation') return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M12 2a7 7 0 0 0-7 7c0 5.3 7 13 7 13s7-7.7 7-13a7 7 0 0 0-7-7zm0 9.5a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5z"/></svg>';
+        if (action == 'createCalendarEvent') return '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><path fill="currentColor" d="M19 3h-1V1h-2v2H8V1H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2zm0 16H5V8h14v11z"/></svg>';
+        return '';
     }
 
-    private static String rcsCardRow(Map<String, Object> card, String brandColor, String brandLogo) {
+    // Card media — image or autoplaying muted video (ported renderRcsCardMedia).
+    // Falls back to a branded placeholder (gradient + logo) when no media is set
+    // so a rich card never looks empty.
+    private static String rcsCardMedia(Map<String, Object> card, String brandColor, String brandLogo) {
         String url = str(card, 'mediaUrl', '');
-        String media;
-        if (String.isNotBlank(url)) {
-            media = '<div class="rcs-card-media rcs-card-media-medium"><img alt="" src="' + escapeSms(url)
-                + '" loading="lazy" referrerpolicy="no-referrer" /></div>';
-        } else {
-            // Rich cards always show media — fall back to a branded placeholder
-            // (brand gradient + centered logo) so the card never looks empty.
+        String size = str(card, 'mediaSize', 'medium');
+        if (String.isBlank(url)) {
             String logo = String.isBlank(brandLogo) ? '' :
                 '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:52%;max-height:62%;object-fit:contain;" referrerpolicy="no-referrer" />';
-            media = '<div class="rcs-card-media rcs-card-media-medium" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
+            return '<div class="rcs-card-media rcs-card-media-' + escapeSms(size)
+                + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
                 + escapeSms(brandColor) + ' 0%, #ffffff 160%);">' + logo + '</div>';
         }
+        Boolean isVideo = str(card, 'mediaType', 'image') == 'video';
+        String mediaInner = isVideo
+            ? '<video autoplay muted loop playsinline preload="metadata" src="' + escapeSms(url) + '"></video>'
+            : '<img alt="" src="' + escapeSms(url) + '" loading="lazy" referrerpolicy="no-referrer" />';
+        return '<div class="rcs-card-media rcs-card-media-' + escapeSms(size) + '">' + mediaInner + '</div>';
+    }
+
+    // Card buttons (ported from renderRcsCard button map).
+    private static String rcsCardButtons(Object b) {
+        if (!(b instanceof List<Object>)) return '';
+        String btns = '';
+        for (Object o : (List<Object>) b) {
+            String label; String action = 'openUrl'; String target = ''; String resp = ''; String respType = '';
+            if (o instanceof Map<String, Object>) {
+                Map<String, Object> bm = (Map<String, Object>) o;
+                label = str(bm, 'label', '');
+                action = str(bm, 'action', 'openUrl');
+                target = str(bm, 'target', '');
+                resp = str(bm, 'response', '');
+                respType = str(bm, 'responseType', '');
+            } else {
+                label = (o == null) ? '' : String.valueOf(o);
+            }
+            if (String.isBlank(label)) continue;
+            String respAttr = String.isNotBlank(resp) ? ' data-response="' + escapeSms(resp) + '"' : '';
+            String respTypeAttr = String.isNotBlank(respType) ? ' data-response-type="' + escapeSms(respType) + '"' : '';
+            btns += '<button type="button" class="rcs-card-btn" data-action="' + escapeSms(action)
+                + '" data-target="' + escapeSms(target) + '" data-label="' + escapeSms(label) + '"'
+                + respAttr + respTypeAttr + '>' + escapeSms(label) + '</button>';
+        }
+        return String.isBlank(btns) ? '' : '<div class="rcs-card-buttons">' + btns + '</div>';
+    }
+
+    private static String rcsCardBody(Map<String, Object> card) {
         String title = String.isNotBlank(str(card, 'title', '')) ? '<h4 class="rcs-card-title-text">' + smsBubble(str(card, 'title', '')) + '</h4>' : '';
         String descHtml = String.isNotBlank(str(card, 'description', '')) ? '<p class="rcs-card-desc">' + smsBubble(str(card, 'description', '')) + '</p>' : '';
-        String buttons = '';
-        Object b = card.get('buttons');
-        if (b instanceof List<Object>) {
-            String btns = '';
-            for (Object o : (List<Object>) b) {
-                String label = (o == null) ? '' : String.valueOf(o);
-                if (String.isBlank(label)) continue;
-                btns += '<button type="button" class="rcs-card-btn" data-action="openUrl" data-label="'
-                    + escapeSms(label) + '">' + escapeSms(label) + '</button>';
-            }
-            if (String.isNotBlank(btns)) buttons = '<div class="rcs-card-buttons">' + btns + '</div>';
+        return '<div class="rcs-card-body">' + title + descHtml + rcsCardButtons(card.get('buttons')) + '</div>';
+    }
+
+    private static String rcsCardHtml(String sender, Map<String, Object> card, String layout, String brandColor, String brandLogo) {
+        String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
+        return '<div class="rcs-row ' + side + '"><div class="rcs-card rcs-card-' + escapeSms(layout) + '">'
+            + rcsCardMedia(card, brandColor, brandLogo) + rcsCardBody(card) + '</div></div>';
+    }
+
+    private static String rcsCarouselHtml(String sender, List<Object> cards, String brandColor, String brandLogo) {
+        String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
+        String items = '';
+        for (Object o : cards) {
+            if (!(o instanceof Map<String, Object>)) continue;
+            Map<String, Object> cd = (Map<String, Object>) o;
+            items += '<div class="rcs-carousel-item rcs-card rcs-card-vertical">'
+                + rcsCardMedia(cd, brandColor, brandLogo) + rcsCardBody(cd) + '</div>';
         }
-        return '<div class="rcs-row rcs-row-bot hidden-msg" data-sender="bot">'
-            + '<div class="rcs-card rcs-card-vertical">' + media
-            + '<div class="rcs-card-body">' + title + descHtml + buttons + '</div></div></div>';
+        return '<div class="rcs-row ' + side + '"><div class="rcs-carousel">' + items + '</div></div>';
     }
 }
