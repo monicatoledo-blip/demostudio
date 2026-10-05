@@ -16,9 +16,8 @@
  */
 public with sharing class StoryMcaExportService {
 
-    // meshmesh-specific for v1 (demo org). Future: look these up per-org.
-    @TestVisible private static String spaceId   = '0ZuKh000000tebDKAQ';          // CMS space "DEMOS"
-    @TestVisible private static String brandKey  = 'MCVQ4OFG7HIFB2TEXNLI2ZCVMZ5E'; // email brand source
+    // Optional overrides (tests / explicit targeting). When null, resolved per-org.
+    @TestVisible private static String spaceId;    // CMS content space id (resolved if null)
     @TestVisible private static String dataGraph = 'Marketing_Content_Personalizat';
     private static final String CMS_PATH = '/services/data/v62.0/connect/cms/contents';
 
@@ -63,7 +62,7 @@ public with sharing class StoryMcaExportService {
         Map<String, Object> body = buildEmailContentBody(cfg, title);
 
         Map<String, Object> payload = new Map<String, Object>{
-            'contentSpaceOrFolderId' => spaceId,
+            'contentSpaceOrFolderId' => resolveSpaceId(),
             'contentType' => 'sfdc_cms__email',
             'title' => title,
             'urlName' => urlName,
@@ -113,6 +112,45 @@ public with sharing class StoryMcaExportService {
         return (parsed instanceof Map<String, Object>) ? (Map<String, Object>) parsed : new Map<String, Object>();
     }
 
+    // ---- target space resolution (QBrix-portable) --------------------------
+    // No hardcoded space. Default = the content space that already holds the most
+    // MC email content (the active BU's default email workspace). Falls back to a
+    // "Marketing Cloud"-named CMS space, else the first space. Override via the
+    // `spaceId` static (or a future per-org setting) to target a specific BU.
+    @TestVisible
+    private static String resolveSpaceId() {
+        if (String.isNotBlank(spaceId)) return spaceId;
+        List<AggregateResult> ars = [
+            SELECT AuthoredManagedContentSpaceId sid, COUNT(Id) n
+            FROM ManagedContent
+            WHERE ContentTypeFullyQualifiedName = 'sfdc_cms__email'
+            GROUP BY AuthoredManagedContentSpaceId
+            ORDER BY COUNT(Id) DESC LIMIT 1
+        ];
+        if (!ars.isEmpty() && ars[0].get('sid') != null) {
+            return String.valueOf(ars[0].get('sid'));
+        }
+        // Fresh org with no email yet — pick a CMS space by name.
+        HttpResponse res = send('GET', '/services/data/v62.0/connect/cms/spaces', null);
+        if (res.getStatusCode() == 200) {
+            Map<String, Object> j = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
+            Object sp = j.get('spaces');
+            if (sp instanceof List<Object> && !((List<Object>) sp).isEmpty()) {
+                List<Object> spaces = (List<Object>) sp;
+                String fallback;
+                for (Object o : spaces) {
+                    Map<String, Object> m = (Map<String, Object>) o;
+                    String id = String.valueOf(m.get('id'));
+                    String nm = String.valueOf(m.get('name'));
+                    if (fallback == null) fallback = id;
+                    if (nm != null && nm.toLowerCase().contains('marketing cloud')) return id;
+                }
+                if (fallback != null) return fallback;
+            }
+        }
+        throw new ExportException('No Marketing Cloud content space found in this org to create the email in.');
+    }
+
     @TestVisible
     private static String apiName(String s) {
         if (String.isBlank(s)) return 'Email';
@@ -142,9 +180,10 @@ public with sharing class StoryMcaExportService {
         }
 
         Map<String, Object> body = new Map<String, Object>{
-            'backgroundColor' => str(c, 'logoBgColor', '#f3f3f3'),
-            'lightning:brandSource' => new Map<String, Object>{ 'contentKey' => brandKey },
-            'lightning:colorScheme' => '{!$brand.colorScheme}',
+            // Neutral canvas (brand color stays in the header bar, not the whole bg).
+            'backgroundColor' => '#f3f3f3',
+            // No brand source — leave the builder's Brand picker empty so the SE
+            // chooses (defaulting to a specific brand would be misleading).
             'lightning:dataProviders' => new List<Object>{
                 new Map<String, Object>{
                     'attributes' => new Map<String, Object>{ 'objectApiName' => 'UnifiedIndividual__dlm' },
@@ -254,23 +293,13 @@ public with sharing class StoryMcaExportService {
     }
 
     private static Map<String, Object> htmlBlock(String rawHtml) {
+        // rawHtml only — no {!$brand...} refs, since the email is brand-agnostic
+        // (self-contained inline styles) and has no brand source to resolve them.
         return new Map<String, Object>{
             'definition' => 'lightning/html',
             'id' => genId(),
             'type' => 'block',
-            'attributes' => new Map<String, Object>{
-                'rawHtml' => rawHtml,
-                'lightning:borderRadius' => '{!$brand.borderRadius.square}',
-                'lightning:borderWidth' => '{!$brand.borderWeight.none}',
-                'lightning:margin' => '{!$brand.spacing.none}',
-                'lightning:padding' => '{!$brand.spacing.none}',
-                'lightning:colorGroup' => new Map<String, Object>{
-                    'backgroundColor' => '{!$brand.colorScheme.root}',
-                    'borderColor' => '{!$brand.colorScheme.neutral}',
-                    'linkColor' => '{!$brand.colorScheme.primaryAccent}',
-                    'textColor' => '{!$brand.colorScheme.contrast}'
-                }
-            }
+            'attributes' => new Map<String, Object>{ 'rawHtml' => rawHtml }
         };
     }
 
