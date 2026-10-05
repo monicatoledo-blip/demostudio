@@ -220,6 +220,9 @@ public with sharing class StoryMcaExportService {
     @TestVisible private static String dcPointName   = 'October_5_image_efb5_c_v_1650';
     @TestVisible private static String dcDecision    = 'Hero_2_1650';
     @TestVisible private static String dcDataspace   = 'default';
+    // Image for the hero's second variation (so it visibly differs from the
+    // default). Blank -> variation reuses the default image as a placeholder.
+    @TestVisible private static String dcVariantImageUrl = 'https://res.cloudinary.com/dfx98jgdc/image/upload/v1784760107/experience-generator/weg2v6yofhlu0gkszudd.jpg';
 
     @TestVisible
     private static Map<String, Object> buildEmailContentBody(Map<String, Object> c, String title) {
@@ -265,6 +268,12 @@ public with sharing class StoryMcaExportService {
         if (String.isNotBlank(heroBlockId) && String.isNotBlank(heroContentKey)
                 && String.isNotBlank(dcPointName) && String.isNotBlank(dcDecision)) {
             String variantId = genId();
+            // Second variation image (distinct from default when configured).
+            String variantKey = heroContentKey;
+            if (String.isNotBlank(dcVariantImageUrl)) {
+                String vk = createImageMedia(dcVariantImageUrl, 'Hero variation 2');
+                if (String.isNotBlank(vk)) variantKey = vk;
+            }
             body.put('sfdc_cms:operations', new List<Object>{
                 new Map<String, Object>{
                     'definition' => 'sfdc_cms__pspVariantOperation',
@@ -284,7 +293,7 @@ public with sharing class StoryMcaExportService {
                     'type' => 'personalization',
                     'body' => new Map<String, Object>{
                         'sfdc_cms:block' => new Map<String, Object>{
-                            'children' => new List<Object>{ imageBlock(heroContentKey, heroBlockId) }
+                            'children' => new List<Object>{ imageBlock(variantKey, heroBlockId) }
                         }
                     }
                 }
