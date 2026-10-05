@@ -65,9 +65,8 @@
                         <lightning-button variant="base" label={brandChangeLabel} onclick={toggleBrandPicker}></lightning-button>
                     </div>
                     <template lwc:if={showBrandPicker}>
-                        <input type="search" placeholder="Search brands…"
-                            value={brandSearch} oninput={handleBrandSearch}
-                            class="slds-input slds-m-vertical_x-small" />
+                        <lightning-input type="search" variant="label-hidden" placeholder="Search brands…"
+                            value={brandSearch} onchange={handleBrandSearch} class="slds-m-vertical_x-small"></lightning-input>
                         <div class="kit-grid">
                             <template for:each={filteredBrandTiles} for:item="k">
                                 <button key={k.id} class={k.cls} data-kitid={k.id} onclick={handlePickKit} title={k.label}>
