@@ -10,8 +10,9 @@
             </header>
             <div class="new-body">
                 <div class="ta">
-                    <lightning-input type="search" label="Brand Kit" placeholder="Type to search brands…"
-                        value={brandQuery} oninput={handleBrandInput} onfocus={handleBrandFocus} onblur={handleBrandBlur}></lightning-input>
+                    <label class="slds-form-element__label">Brand Kit</label>
+                    <input type="search" class="slds-input" placeholder="Type to search brands…"
+                        value={brandQuery} oninput={handleBrandInput} onfocus={handleBrandFocus} onblur={handleBrandBlur} />
                     <template lwc:if={brandOpen}>
                         <ul class="ta-list">
                             <template for:each={brandMatches} for:item="o">
@@ -23,8 +24,9 @@
                 <lightning-combobox label="Channel" options={channelOptions} value={channel} onchange={handleChannel}></lightning-combobox>
                 <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
                 <div class="ta">
-                    <lightning-input type="search" label="Persona" placeholder="Type to search personas…"
-                        value={personaQuery} oninput={handlePersonaInput} onfocus={handlePersonaFocus} onblur={handlePersonaBlur}></lightning-input>
+                    <label class="slds-form-element__label">Persona</label>
+                    <input type="search" class="slds-input" placeholder="Type to search personas…"
+                        value={personaQuery} oninput={handlePersonaInput} onfocus={handlePersonaFocus} onblur={handlePersonaBlur} />
                     <template lwc:if={personaOpen}>
                         <ul class="ta-list">
                             <template for:each={personaMatches} for:item="o">
