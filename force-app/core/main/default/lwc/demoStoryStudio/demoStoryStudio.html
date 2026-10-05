@@ -388,12 +388,10 @@
                     </template>
                     <p class="gen-hint">Builds a real MCA email asset in the chosen workspace (remembers your last pick). The hero comes through as a Dynamic-Content-ready image component.</p>
                     <div class="mca-dc-picker">
-                        <p class="gen-hint"><strong>Dynamic Content (optional)</strong> — pre-wire the hero to swap per audience. Leave as None to deploy a plain hero image.</p>
-                        <lightning-combobox label="Personalization Point" placeholder="None (plain image)"
-                            value={dcPointName} options={dcPointSelectOptions} onchange={handleDcPoint}></lightning-combobox>
-                        <lightning-combobox label="Decision" placeholder="None"
-                            value={dcDecisionName} options={dcDecisionSelectOptions} onchange={handleDcDecision}
-                            disabled={dcDecisionDisabled} class="slds-m-top_x-small"></lightning-combobox>
+                        <lightning-input type="toggle" label="Make the hero dynamic"
+                            message-toggle-active="Creates a personalization point so the hero can swap per audience"
+                            message-toggle-inactive="Hero deploys as a plain image (add a variation later in the builder)"
+                            checked={makeHeroDynamic} onchange={handleMakeHeroDynamic}></lightning-input>
                     </div>
                     <template lwc:if={mcaResultUrl}>
                         <div class="gen-copy-callout">

@@ -16,8 +16,6 @@ import generateSms from '@salesforce/apex/DemoStoryGenerator.generateSms';
 import generateRcs from '@salesforce/apex/DemoStoryGenerator.generateRcs';
 import pushEmailToMca from '@salesforce/apex/StoryMcaExportService.pushEmailToMca';
 import listMcaWorkspaces from '@salesforce/apex/StoryMcaExportService.listMcaWorkspaces';
-import listPersonalizationPoints from '@salesforce/apex/StoryMcaExportService.listPersonalizationPoints';
-import listDecisions from '@salesforce/apex/StoryMcaExportService.listDecisions';
 
 const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD, CHANNEL_FIELD];
 
@@ -951,21 +949,10 @@ export default class DemoStoryStudio extends LightningElement {
     @track mcaWorkspaceId = '';
     @track mcaWorkspaceSearch = '';
     @track mcaResultUrl = '';
-    // Optional Dynamic Content: the SE picks a Personalization Point + decision so
-    // the hero is pre-wired to swap per audience (portable across orgs). Blank =
-    // the hero deploys as a plain image (no DC). '' value = the "None" option.
-    @track dcPointOptions = [];
-    @track dcDecisionOptions = [];
-    @track dcPointName = '';
-    @track dcDecisionName = '';
-    dcDataspace = '';
-    get dcPointSelectOptions() {
-        return [{ label: '— None (plain image) —', value: '' }, ...(this.dcPointOptions || [])];
-    }
-    get dcDecisionSelectOptions() {
-        return [{ label: '— None —', value: '' }, ...(this.dcDecisionOptions || [])];
-    }
-    get dcDecisionDisabled() { return !this.dcPointName; }
+    // Optional: create a fresh Personalization Point + decision for this email's
+    // hero so it ships as a dynamic (swappable) image. Off = plain hero image.
+    @track makeHeroDynamic = false;
+    handleMakeHeroDynamic(e) { this.makeHeroDynamic = e.target.checked; }
 
     // Remembers the last workspace the SE deployed into (per browser), so the
     // next deploy pre-selects it — still swappable before Deploy. Overrides the
@@ -1037,34 +1024,9 @@ export default class DemoStoryStudio extends LightningElement {
         const sel = opts.find((o) => o.value === this.mcaWorkspaceId);
         this.mcaWorkspaceSearch = sel ? sel.label : '';
         this.showMcaWsList = false;
-        // Load the org's Personalization Points for the optional DC picker.
-        if (!this.dcPointOptions.length) {
-            try {
-                const pts = await listPersonalizationPoints();
-                this.dcPointOptions = (pts || []).map((p) => ({ label: p.label, value: p.value, dataspace: p.dataspace }));
-            } catch (e) {
-                this.dcPointOptions = []; // DC picker just stays empty; push still works
-            }
-        }
     }
     closeMcaPush() { this.showMcaPush = false; }
     handleMcaWorkspace(e) { this.mcaWorkspaceId = e.detail.value; }
-    async handleDcPoint(e) {
-        this.dcPointName = e.detail.value;
-        this.dcDecisionName = '';
-        this.dcDecisionOptions = [];
-        const picked = (this.dcPointOptions || []).find((p) => p.value === this.dcPointName);
-        this.dcDataspace = picked && picked.dataspace ? picked.dataspace : '';
-        if (this.dcPointName) {
-            try {
-                const decs = await listDecisions({ pointDeveloperName: this.dcPointName });
-                this.dcDecisionOptions = (decs || []).map((d) => ({ label: d.label, value: d.value }));
-            } catch (err) {
-                this.dcDecisionOptions = [];
-            }
-        }
-    }
-    handleDcDecision(e) { this.dcDecisionName = e.detail.value; }
     openMcaResult() { if (this.mcaResultUrl) window.open(this.mcaResultUrl, '_blank'); }
 
     async runMcaPush() {
@@ -1074,9 +1036,7 @@ export default class DemoStoryStudio extends LightningElement {
             const r = await pushEmailToMca({
                 storyId: this.recordId,
                 targetSpaceId: this.mcaWorkspaceId,
-                dcPoint: this.dcPointName || null,
-                dcDecisionName: this.dcDecisionName || null,
-                dcSpace: this.dcDataspace || null
+                makeHeroDynamic: this.makeHeroDynamic
             });
             this.mcaResultUrl = r && r.builderUrl ? r.builderUrl : '';
             this.rememberMcaWorkspace(this.mcaWorkspaceId); // sticky for next time

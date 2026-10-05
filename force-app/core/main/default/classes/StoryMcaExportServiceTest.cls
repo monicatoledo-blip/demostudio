@@ -41,6 +41,10 @@ private class StoryMcaExportServiceTest {
                     res.setStatusCode(201);
                     res.setBody('{"apiName":"TESTKEY_ABCDEF"}');
                 }
+            } else if (ep.contains('/personalization/personalization-points')) {
+                // Hero point create (POST) returns an id; reverse-link (PUT) 200.
+                res.setStatusCode(m == 'POST' ? 201 : 200);
+                res.setBody('{"id":"9ppTEST000000001AAA","status":"Processing"}');
             } else {
                 res.setStatusCode(200);
                 res.setBody('{}');
@@ -95,8 +99,8 @@ private class StoryMcaExportServiceTest {
         Test.setMock(HttpCalloutMock.class, new Mock(false, false));
         Test.startTest();
         // Blank targetSpaceId -> resolveSpaceId() runs (aggregate empty -> GET spaces mock).
-        // Pass a DC point+decision so the hero's Dynamic-Content wiring block runs.
-        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '', 'Hero_Point', 'Hero_Decision', 'default');
+        // makeHeroDynamic=true -> provisionHeroPoint + the hero DC wiring block run.
+        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '', true);
         Test.stopTest();
         System.assertNotEquals(null, r, 'Result returned');
         System.assert(String.isNotBlank(r.name), 'Email name set from the sim record: ' + r.name);
@@ -109,8 +113,8 @@ private class StoryMcaExportServiceTest {
         Test.setMock(HttpCalloutMock.class, new Mock(false, false));
         Test.startTest();
         // Explicit targetSpaceId -> resolveSpaceId() short-circuits to it.
-        // No DC point/decision -> hero deploys as a plain native image (DC skipped).
-        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '0ZuKh000000EXPLCT', null, null, null);
+        // makeHeroDynamic=false -> hero deploys as a plain native image (no point).
+        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '0ZuKh000000EXPLCT', false);
         Test.stopTest();
         System.assertNotEquals(null, r, 'Result returned with explicit space');
     }

@@ -25,6 +25,13 @@ public with sharing class StoryMcaExportService {
     // (verified in Cumulus Jr: DEMOS + the second-BU workspace were missing until
     // pageSize was raised). 200 returns all of them in the orgs we target.
     private static final String SPACES_PATH = '/services/data/v62.0/connect/cms/spaces?pageSize=200';
+    // Data 360 Personalization REST (v67) — create/update the hero's point+decision.
+    private static final String P13N_POINTS_PATH = '/services/data/v67.0/personalization/personalization-points';
+    // When true, pushEmailToMcaImpl provisions a fresh BlockBuilder point for the
+    // hero. createdPointId + heroPointPayload carry state to the sourceRecordId PUT.
+    @TestVisible private static Boolean createHeroPoint = false;
+    private static String createdPointId;
+    private static Map<String, Object> heroPointPayload;
 
     public class ExportException extends Exception {}
 
@@ -39,15 +46,14 @@ public with sharing class StoryMcaExportService {
     // targetSpaceId optional — when blank, resolveSpaceId() picks the default
     // marketing workspace.
     @AuraEnabled
-    public static Result pushEmailToMca(Id storyId, String targetSpaceId, String dcPoint, String dcDecisionName, String dcSpace) {
+    public static Result pushEmailToMca(Id storyId, String targetSpaceId, Boolean makeHeroDynamic) {
         try {
             if (String.isNotBlank(targetSpaceId)) spaceId = targetSpaceId;
-            // Per-org Dynamic Content selection from the modal. Blank point/decision
-            // => the hero deploys as a plain native image (no DC wiring). This
-            // replaces the old hardcoded meshmesh pair so the push is portable.
-            dcPointName = dcPoint;
-            dcDecision  = dcDecisionName;
-            if (String.isNotBlank(dcSpace)) dcDataspace = dcSpace;
+            // When true, the push CREATES a fresh Personalization Point + decision
+            // for this email's hero (via Data 360 Personalization REST) and wires
+            // the hero to it — no borrowing an existing point. Portable to any org;
+            // if point creation fails the hero falls back to a plain image.
+            createHeroPoint = (makeHeroDynamic == true);
             return pushEmailToMcaImpl(storyId);
         } catch (Exception e) {
             AuraHandledException ahe = new AuraHandledException(e.getMessage());
@@ -171,6 +177,13 @@ public with sharing class StoryMcaExportService {
 
         String title = (s.Name == null ? 'DemoStudio Email' : s.Name);
         String urlName = slug(title) + '-' + String.valueOf(Datetime.now().getTime());
+
+        // If asked, create a fresh hero point+decision BEFORE building the body so
+        // buildEmailContentBody wires the hero to it. Only when there's a hero to
+        // bind; failures blank the names so the hero just deploys as a plain image.
+        if (createHeroPoint && String.isNotBlank(str(cfg, 'heroImageUrl', ''))) {
+            provisionHeroPoint(title);
+        }
         Map<String, Object> body = buildEmailContentBody(cfg, title);
 
         Map<String, Object> payload = new Map<String, Object>{
@@ -205,7 +218,56 @@ public with sharing class StoryMcaExportService {
             r.builderUrl = URL.getOrgDomainUrl().toExternalForm()
                 + '/lightning/r/ManagedContent/' + r.managedContentId + '/view?navigationLocation=content_page';
         }
+
+        // Reverse-link the created point to this email (mirrors the builder). The
+        // email already references the point by name; this is best-effort polish.
+        if (createHeroPoint && String.isNotBlank(createdPointId)
+                && r.managedContentId != null && heroPointPayload != null) {
+            try {
+                heroPointPayload.put('sourceRecordId', r.managedContentId);
+                send('PUT', P13N_POINTS_PATH + '/' + createdPointId, JSON.serialize(heroPointPayload));
+            } catch (Exception e) { /* reverse-link is non-critical */ }
+        }
         return r;
+    }
+
+    // Create a fresh BlockBuilder/ExperienceVariation Personalization Point + one
+    // Live "Variation" decision for this email's hero, via Data 360 Personalization
+    // REST. Sets dcPointName/dcDecision/dcDataspace so buildEmailContentBody wires
+    // the hero to it. On any failure, blanks them so the hero deploys plain.
+    private static void provisionHeroPoint(String title) {
+        try {
+            String uniq = String.valueOf(Datetime.now().getTime());
+            String base = apiName(title);
+            if (base.length() > 30) base = base.substring(0, 30);
+            dcPointName = base + '_Hero_' + uniq;
+            dcDecision  = 'Variation_2_' + uniq;
+            if (String.isBlank(dcDataspace)) dcDataspace = 'default';
+            Map<String, Object> dec = new Map<String, Object>{
+                'name' => dcDecision, 'label' => 'Variation 2', 'state' => 'Live',
+                'attributeValues' => new List<Object>{
+                    new Map<String, Object>{ 'attributeEnum' => 'Variation', 'value' => dcDecision }
+                }
+            };
+            heroPointPayload = new Map<String, Object>{
+                'name' => dcPointName, 'label' => 'Hero - ' + title, 'dataSpaceName' => dcDataspace,
+                'profileDataGraphName' => dataGraph, 'source' => 'BlockBuilder',
+                'schemaEnum' => 'ExperienceVariation', 'isAuthenticationRequired' => false,
+                'decisions' => new List<Object>{ dec }
+            };
+            HttpResponse res = send('POST', P13N_POINTS_PATH, JSON.serialize(heroPointPayload));
+            if (res.getStatusCode() >= 200 && res.getStatusCode() < 300) {
+                Object parsed = JSON.deserializeUntyped(res.getBody());
+                if (parsed instanceof Map<String, Object>) {
+                    Object pid = ((Map<String, Object>) parsed).get('id');
+                    if (pid != null) createdPointId = String.valueOf(pid);
+                }
+            } else {
+                dcPointName = null; dcDecision = null; heroPointPayload = null;
+            }
+        } catch (Exception e) {
+            dcPointName = null; dcDecision = null; heroPointPayload = null;
+        }
     }
 
     // ---- callout (same-org session token) -----------------------------------
