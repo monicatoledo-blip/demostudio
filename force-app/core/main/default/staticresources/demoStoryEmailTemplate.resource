@@ -412,12 +412,13 @@
             font-weight: 500;
             flex-shrink: 0;
         }
-        /* Flash the agent's reply when it arrives so it's noticeable off-screen. */
+        /* Gentle entrance for the agent's reply — a soft rise + fade so an
+           off-screen arrival registers as motion, without a loud highlight. */
         @keyframes msgArrive {
-            0%, 18% { box-shadow: 0 0 0 3px #ffd54f; }
-            100% { box-shadow: 0 0 0 0 rgba(255, 213, 79, 0); }
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        .message-card.just-arrived { animation: msgArrive 2.4s ease-out; border-radius: 8px; }
+        .message-card.just-arrived { animation: msgArrive 0.45s ease-out; }
 
         .sender-avatar.marketing-avatar {
             background: #ffffff;
