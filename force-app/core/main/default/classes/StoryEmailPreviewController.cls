@@ -322,7 +322,9 @@ public with sharing class StoryEmailPreviewController {
             'AGENT_NAME' => agent,
             'AGENT_INITIALS' => initials(agent),
             'MARKETING_INITIALS' => initials(agent),
-            'AGENT_AVATAR_URL' => str(c, 'agentAvatarUrl', ''),
+            // Agent avatar falls back to the secondary logo (Marketing Sender
+            // Avatar) when not set, so the agent's reply shows a brand mark.
+            'AGENT_AVATAR_URL' => str(c, 'agentAvatarUrl', str(c, 'marketingAvatarUrl', '')),
             'MARKETING_AVATAR_URL' => str(c, 'marketingAvatarUrl', ''),
             'CUSTOMER_AVATAR_URL' => str(c, 'customerAvatarUrl', ''),
             'CUSTOMER_NAME' => name,

@@ -402,6 +402,7 @@
             width: 40px;
             height: 40px;
             border-radius: 50%;
+            overflow: hidden;
             background: #4285f4;
             display: flex;
             align-items: center;
@@ -411,6 +412,12 @@
             font-weight: 500;
             flex-shrink: 0;
         }
+        /* Flash the agent's reply when it arrives so it's noticeable off-screen. */
+        @keyframes msgArrive {
+            0%, 18% { box-shadow: 0 0 0 3px #ffd54f; }
+            100% { box-shadow: 0 0 0 0 rgba(255, 213, 79, 0); }
+        }
+        .message-card.just-arrived { animation: msgArrive 2.4s ease-out; border-radius: 8px; }
 
         .sender-avatar.marketing-avatar {
             background: #ffffff;
@@ -1392,8 +1399,18 @@
             threadContainer.appendChild(messageHeader);
             threadContainer.appendChild(messageCard);
 
-            if (contentArea) {
-                contentArea.scrollTop = contentArea.scrollHeight;
+            // Highlight the agent's reply so an off-screen arrival is noticeable.
+            if (isAgent) {
+                messageCard.classList.add('just-arrived');
+                setTimeout(() => messageCard.classList.remove('just-arrived'), 2600);
+            }
+            // scrollIntoView bubbles across the same-origin VF iframe to scroll the
+            // preview pane itself (contentArea.scrollTop only scrolled an inner div,
+            // so the reply landed below the fold and you had to scroll by hand).
+            try {
+                messageHeader.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {
+                if (contentArea) contentArea.scrollTop = contentArea.scrollHeight;
             }
         }
 
