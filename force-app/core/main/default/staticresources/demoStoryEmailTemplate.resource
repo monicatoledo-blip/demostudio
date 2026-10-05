@@ -1333,7 +1333,11 @@
 
             let avatarHtml;
             if (avatarUrl && avatarUrl.trim() !== '' && !avatarUrl.includes('[[')) {
-                avatarHtml = `<div class="sender-avatar ${avatarClass}" style="background-color: transparent !important;"><img src="${avatarUrl}" alt="${sender}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
+                // The agent avatar is the brand logo, so sit it on the Logo
+                // Background Color (use `background` to clear the .agent gradient).
+                // The subscriber avatar stays transparent.
+                const avBg = isAgent ? '[[LOGO_BG_COLOR]]' : 'transparent';
+                avatarHtml = `<div class="sender-avatar ${avatarClass}" style="background: ${avBg} !important;"><img src="${avatarUrl}" alt="${sender}" style="width: 100%; height: 100%; object-fit: cover;"></div>`;
             } else {
                 avatarHtml = `<div class="sender-avatar ${avatarClass}">${avatarLetter}</div>`;
             }
