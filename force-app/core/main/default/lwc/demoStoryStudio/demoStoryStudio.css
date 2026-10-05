@@ -188,3 +188,17 @@
     padding: 0.6rem; margin-bottom: 0.5rem;
 }
 .rcs-chip-edit lightning-input, .rcs-chip-edit lightning-combobox, .rcs-chip-edit lightning-textarea { display:block; margin-bottom: 0.4rem; }
+
+/* MCA deploy: single-field workspace typeahead (input + inline dropdown). */
+.mca-typeahead { position: relative; }
+.mca-ta-list {
+    position: absolute; z-index: 9001; left: 0; right: 0; top: 100%;
+    margin: 2px 0 0; padding: 4px 0; list-style: none;
+    max-height: 240px; overflow-y: auto;
+    background: #fff; border: 1px solid #c9c9c9; border-radius: 8px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.14);
+}
+.mca-ta-item { padding: 8px 12px; cursor: pointer; font-size: 13px; color: #16325c; }
+.mca-ta-item:hover { background: #f3f6ff; }
+.mca-ta-item-sel { font-weight: 700; background: #eef3ff; }
+.mca-ta-empty { padding: 8px 12px; font-size: 13px; color: #706e6b; }

@@ -68,6 +68,15 @@ public with sharing class StoryMcaExportService {
                     if (sp instanceof List<Object>) {
                         for (Object o : (List<Object>) sp) {
                             Map<String, Object> m = (Map<String, Object>) o;
+                            // Only "marketing"-type spaces can hold MCA email
+                            // content; skip Commerce/content/Brand-Center/etc.
+                            // (MCA and MCAE both report spaceType "marketing" and
+                            // can share a space — that's fine, both deploy to MCA.)
+                            Object stObj = m.get('spaceType');
+                            String st = (stObj instanceof Map<String, Object>)
+                                ? String.valueOf(((Map<String, Object>) stObj).get('apiName'))
+                                : String.valueOf(stObj);
+                            if (st != 'marketing') continue;
                             String id = String.valueOf(m.get('id'));
                             out.add(new Map<String, Object>{
                                 'value' => id,

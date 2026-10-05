@@ -29,7 +29,10 @@ private class StoryMcaExportServiceTest {
                 res.setStatusCode(200);
                 res.setBody(noSpaces
                     ? '{"spaces":[]}'
-                    : '{"spaces":[{"id":"0ZuKh000000TESTIAW","name":"Content Workspace for Marketing Cloud"}]}');
+                    : '{"spaces":[' +
+                        '{"id":"0ZuKh000000TESTIAW","name":"Content Workspace for Marketing Cloud","spaceType":{"apiName":"marketing"}},' +
+                        '{"id":"0ZuKh000000CMMRCE","name":"Commerce Content","spaceType":{"apiName":"content"}}' +
+                      ']}');
             } else if (ep.contains('/connect/cms/contents') && m == 'POST') {
                 if (failCreate) {
                     res.setStatusCode(400);
@@ -116,7 +119,7 @@ private class StoryMcaExportServiceTest {
         Test.startTest();
         List<Map<String, Object>> ws = StoryMcaExportService.listMcaWorkspaces();
         Test.stopTest();
-        System.assert(!ws.isEmpty(), 'At least one workspace returned');
+        System.assertEquals(1, ws.size(), 'Only the marketing space is kept; the content/commerce space is filtered out');
         System.assertEquals('0ZuKh000000TESTIAW', ws[0].get('value'), 'Workspace id surfaced');
         System.assertEquals(true, ws[0].get('isDefault'), 'Resolved space is flagged default');
     }

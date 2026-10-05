@@ -366,10 +366,22 @@
                         class="gen-close" onclick={closeMcaPush}></lightning-button-icon>
                 </header>
                 <div class="gen-body">
-                    <lightning-input type="search" label="Workspace" placeholder="Search workspaces…"
-                        value={mcaWorkspaceSearch} onchange={handleMcaWorkspaceSearch}></lightning-input>
-                    <lightning-combobox variant="label-hidden" options={filteredMcaWorkspaces} value={mcaWorkspaceId}
-                        onchange={handleMcaWorkspace} placeholder="Choose a workspace…" class="slds-m-top_xx-small"></lightning-combobox>
+                    <div class="mca-typeahead">
+                        <lightning-input type="search" label="Workspace" placeholder="Search workspaces…"
+                            value={mcaWorkspaceSearch} onchange={handleMcaWorkspaceSearch}
+                            onfocus={openMcaWsList} onclick={openMcaWsList} onblur={blurMcaWsList}></lightning-input>
+                        <template lwc:if={showMcaWsList}>
+                            <ul class="mca-ta-list" role="listbox">
+                                <template for:each={filteredMcaWorkspaces} for:item="ws">
+                                    <li key={ws.value} data-value={ws.value} class={ws.itemClass}
+                                        role="option" onmousedown={pickMcaWorkspace}>{ws.label}</li>
+                                </template>
+                                <template lwc:if={noMcaMatches}>
+                                    <li class="mca-ta-empty">No workspaces match that search.</li>
+                                </template>
+                            </ul>
+                        </template>
+                    </div>
                     <p class="gen-hint">Lands in the chosen content workspace (remembers your last pick). The hero comes through as a Dynamic-Content-ready image component.</p>
                     <template lwc:if={mcaResultUrl}>
                         <div class="gen-copy-callout">

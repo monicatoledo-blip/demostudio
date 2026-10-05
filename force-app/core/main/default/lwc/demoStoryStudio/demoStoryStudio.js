@@ -929,14 +929,33 @@ export default class DemoStoryStudio extends LightningElement {
         try { if (id) window.localStorage.setItem(this.LAST_MCA_WS_KEY, id); } catch (e) { /* localStorage blocked */ }
     }
 
-    // Searchable typeahead over the workspace list (mirrors the Brand/Persona
-    // pickers). The combobox is fed by this filtered getter.
+    // Single-field typeahead: one input, type to filter an inline dropdown,
+    // click to pick. When the field holds the current selection's label (no new
+    // typing), show the FULL list so it's easy to switch.
+    @track showMcaWsList = false;
     get filteredMcaWorkspaces() {
-        const q = (this.mcaWorkspaceSearch || '').toLowerCase();
         const all = this.mcaWorkspaceOptions || [];
-        return q ? all.filter((o) => (o.label || '').toLowerCase().includes(q)) : all;
+        const sel = all.find((o) => o.value === this.mcaWorkspaceId);
+        const q = (this.mcaWorkspaceSearch || '').toLowerCase();
+        const showAll = !q || (sel && q === (sel.label || '').toLowerCase());
+        const list = showAll ? all : all.filter((o) => (o.label || '').toLowerCase().includes(q));
+        return list.map((o) => ({
+            ...o,
+            itemClass: o.value === this.mcaWorkspaceId ? 'mca-ta-item mca-ta-item-sel' : 'mca-ta-item'
+        }));
     }
-    handleMcaWorkspaceSearch(e) { this.mcaWorkspaceSearch = e.target.value; }
+    get noMcaMatches() { return this.filteredMcaWorkspaces.length === 0; }
+    handleMcaWorkspaceSearch(e) { this.mcaWorkspaceSearch = e.target.value; this.showMcaWsList = true; }
+    openMcaWsList() { this.showMcaWsList = true; }
+    // Delay close so an option's mousedown registers before blur hides the list.
+    blurMcaWsList() { this.mcaWsBlurTimer = setTimeout(() => { this.showMcaWsList = false; }, 200); }
+    pickMcaWorkspace(e) {
+        const v = e.currentTarget.dataset.value;
+        const o = (this.mcaWorkspaceOptions || []).find((x) => x.value === v);
+        this.mcaWorkspaceId = v;
+        this.mcaWorkspaceSearch = o ? o.label : '';
+        this.showMcaWsList = false;
+    }
 
     async openMcaPush() {
         this.showMcaPush = true;
@@ -945,7 +964,7 @@ export default class DemoStoryStudio extends LightningElement {
         if (!this.mcaWorkspaceOptions.length) {
             try {
                 const spaces = await listMcaWorkspaces();
-                this.mcaWorkspaceOptions = (spaces || []).map((s) => ({ label: s.label, value: s.value }));
+                this.mcaWorkspaceOptions = (spaces || []).map((s) => ({ label: s.label, value: s.value, isDefault: s.isDefault }));
             } catch (e) {
                 this.toast('Marketing Cloud', (e && e.body && e.body.message) || e.message, 'error');
             }
@@ -953,11 +972,16 @@ export default class DemoStoryStudio extends LightningElement {
         // Pre-select: last-used (if still available) > org default > first.
         const opts = this.mcaWorkspaceOptions || [];
         const remembered = this.lastMcaWorkspaceId;
+        const def = opts.find((o) => o.isDefault);
         if (remembered && opts.some((o) => o.value === remembered)) {
             this.mcaWorkspaceId = remembered;
         } else if (!this.mcaWorkspaceId || !opts.some((o) => o.value === this.mcaWorkspaceId)) {
-            this.mcaWorkspaceId = opts.length ? opts[0].value : '';
+            this.mcaWorkspaceId = def ? def.value : (opts.length ? opts[0].value : '');
         }
+        // Show the selected workspace's label in the typeahead field.
+        const sel = opts.find((o) => o.value === this.mcaWorkspaceId);
+        this.mcaWorkspaceSearch = sel ? sel.label : '';
+        this.showMcaWsList = false;
     }
     closeMcaPush() { this.showMcaPush = false; }
     handleMcaWorkspace(e) { this.mcaWorkspaceId = e.detail.value; }
