@@ -271,6 +271,18 @@ public with sharing class StoryEmailPreviewController {
         return out.length() > 2 ? out.substring(0, 2).toUpperCase() : out.toUpperCase();
     }
 
+    // A circular initials avatar as an SVG data URI (same look as the img onerror
+    // fallback). Used when no subscriber/customer avatar image is set so the
+    // avatar shows initials instead of an empty img (onerror doesn't fire on an
+    // empty src) — mirrors the marketing avatar's initials fallback.
+    private static String initialsAvatar(String ini) {
+        String t = (ini == null ? '' : ini);
+        return 'data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E'
+            + '%3Ccircle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23667eea\'/%3E'
+            + '%3Ctext x=\'50\' y=\'50\' text-anchor=\'middle\' dy=\'.3em\' fill=\'white\' font-size=\'35\' font-family=\'Arial\'%3E'
+            + t + '%3C/text%3E%3C/svg%3E';
+    }
+
     private static String renderEmail(String tpl, Map<String, Object> c) {
         String name = str(c, 'customerName', 'Rachel Green');
         String first = str(c, 'customerFirstName', name.split(' ')[0]);
@@ -326,7 +338,8 @@ public with sharing class StoryEmailPreviewController {
             // Avatar) when not set, so the agent's reply shows a brand mark.
             'AGENT_AVATAR_URL' => str(c, 'agentAvatarUrl', str(c, 'marketingAvatarUrl', '')),
             'MARKETING_AVATAR_URL' => str(c, 'marketingAvatarUrl', ''),
-            'CUSTOMER_AVATAR_URL' => str(c, 'customerAvatarUrl', ''),
+            'CUSTOMER_AVATAR_URL' => (String.isNotBlank(str(c, 'customerAvatarUrl', ''))
+                ? str(c, 'customerAvatarUrl', '') : initialsAvatar(initials(name))),
             'CUSTOMER_NAME' => name,
             'CUSTOMER_FIRST_NAME' => first,
             'CUSTOMER_INITIALS' => initials(name),
