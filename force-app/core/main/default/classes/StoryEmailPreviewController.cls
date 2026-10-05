@@ -7,6 +7,13 @@
  */
 public with sharing class StoryEmailPreviewController {
 
+    // Test seam. PageReference.getContent() (used to load the static-resource
+    // template) is not supported in test context, so tests set this to a small
+    // template string and getHtml() uses it instead. Only consulted under
+    // Test.isRunningTest(). Mirrors EinsteinProvider.mockGeneratedText.
+    @TestVisible
+    private static String mockTemplate;
+
     // When ?download=1, set a filename so the browser downloads the HTML instead
     // of rendering it inline (used by the Story Studio "Download HTML" button).
     public String getPageContentType() {
@@ -51,6 +58,15 @@ public with sharing class StoryEmailPreviewController {
             channel = String.valueOf(c.get('channel'));
         }
 
+        // Resolve every injected image URL to something that loads outside the
+        // Lightning domain. A brand logo/avatar is often a RELATIVE Salesforce
+        // `/sfc/servlet.shepherd/version/download/<CV>` URL, which 404s both in
+        // the cross-domain *.vf.force.com preview iframe AND in downloaded HTML
+        // (resolves to file:///sfc/...). We inline such ContentVersion images as
+        // base64 data URIs (work offline + cross-domain, no session) and absolute-
+        // prefix any other relative URL. Absolute http(s)/data URLs pass through.
+        resolveConfigImages(c);
+
         // Pick the ported template + renderer by channel. Email is the default
         // and its behavior is unchanged; SMS/WhatsApp/RCS are additive branches.
         String ch = channel == null ? 'email' : channel.toLowerCase();
@@ -60,8 +76,12 @@ public with sharing class StoryEmailPreviewController {
         else if (ch == 'rcs') resource = 'demoStoryRcsTemplate';
 
         String tpl;
-        try { tpl = new PageReference('/resource/' + resource).getContent().toString(); }
-        catch (Exception e) { return '<p style="font-family:Arial">Template load failed: ' + e.getMessage() + '</p>'; }
+        if (Test.isRunningTest() && mockTemplate != null) {
+            tpl = mockTemplate;
+        } else {
+            try { tpl = new PageReference('/resource/' + resource).getContent().toString(); }
+            catch (Exception e) { return '<p style="font-family:Arial">Template load failed: ' + e.getMessage() + '</p>'; }
+        }
 
         if (ch == 'sms') return renderSms(tpl, c);
         else if (ch == 'whatsapp') return renderWhatsapp(tpl, c);
@@ -72,6 +92,121 @@ public with sharing class StoryEmailPreviewController {
     private static String str(Map<String, Object> c, String k, String dflt) {
         Object v = c.get(k);
         return v == null ? dflt : String.valueOf(v);
+    }
+
+    // ----------------------------------------------------------------------
+    // Image-URL resolution — see getHtml(). Relative /sfc/ ContentVersion URLs
+    // are inlined as base64 data URIs; other relative URLs are absolute-prefixed.
+    // ----------------------------------------------------------------------
+
+    // Max ContentVersion size we inline as base64. The data URI can appear
+    // several times in one page (header banner + card), and getHtml() runs in
+    // the 6 MB synchronous VF heap, so keep this modest — brand logos/avatars
+    // (the only /sfc/ images we inline) are small; larger assets fall back to an
+    // absolute core-domain URL.
+    private static final Integer MAX_INLINE_BYTES = 800000;
+
+    // Dedupe cache so the same logo across header + card is only queried once.
+    private static Map<String, String> resolvedUrlCache = new Map<String, String>();
+
+    // Config keys that hold a single image URL (resolved in place).
+    private static final List<String> IMG_KEYS = new List<String>{
+        'logoUrl', 'marketingAvatarUrl', 'customerAvatarUrl', 'agentAvatarUrl', 'heroImageUrl'
+    };
+
+    @TestVisible
+    private static void resolveConfigImages(Map<String, Object> c) {
+        if (c == null || c.isEmpty()) return;
+        for (String k : IMG_KEYS) {
+            Object v = c.get(k);
+            if (v != null && String.isNotBlank(String.valueOf(v))) {
+                c.put(k, resolveImgUrl(String.valueOf(v)));
+            }
+        }
+        // Rich-card / carousel media URLs inside the RCS/messaging thread.
+        Object m = c.get('messages');
+        if (m instanceof List<Object>) {
+            for (Object o : (List<Object>) m) {
+                if (!(o instanceof Map<String, Object>)) continue;
+                Map<String, Object> msg = (Map<String, Object>) o;
+                resolveCardMedia(msg.get('card'));
+                Object cards = msg.get('cards');
+                if (cards instanceof List<Object>) {
+                    for (Object co : (List<Object>) cards) resolveCardMedia(co);
+                }
+            }
+        }
+    }
+
+    private static void resolveCardMedia(Object cardObj) {
+        if (!(cardObj instanceof Map<String, Object>)) return;
+        Map<String, Object> card = (Map<String, Object>) cardObj;
+        Object mu = card.get('mediaUrl');
+        if (mu != null && String.isNotBlank(String.valueOf(mu))) {
+            card.put('mediaUrl', resolveImgUrl(String.valueOf(mu)));
+        }
+    }
+
+    // Turn any image URL into one that loads cross-domain / offline.
+    @TestVisible
+    private static String resolveImgUrl(String url) {
+        if (String.isBlank(url)) return url;
+        String u = url.trim();
+        if (resolvedUrlCache.containsKey(u)) return resolvedUrlCache.get(u);
+        String resolved = u;
+        String lower = u.toLowerCase();
+        if (lower.startsWith('http://') || lower.startsWith('https://') || lower.startsWith('data:')) {
+            // Already absolute / inline — nothing to do.
+            resolved = u;
+        } else {
+            // Extract a ContentVersion id from a shepherd download URL and inline
+            // the bytes; fall back to an absolute core-domain URL on any failure.
+            Id cvId = contentVersionIdFrom(u);
+            String dataUri = (cvId == null) ? null : inlineContentVersion(cvId);
+            resolved = (dataUri != null) ? dataUri : absolutize(u);
+        }
+        resolvedUrlCache.put(u, resolved);
+        return resolved;
+    }
+
+    // Pull the 15/18-char ContentVersion id out of a
+    // /sfc/servlet.shepherd/version/download/<id>[?params] URL.
+    private static Id contentVersionIdFrom(String u) {
+        Matcher mm = Pattern.compile('(?i)/sfc/servlet\\.shepherd/version/download/([a-zA-Z0-9]{15,18})').matcher(u);
+        if (!mm.find()) return null;
+        try { return (Id) mm.group(1); } catch (Exception e) { return null; }
+    }
+
+    private static String inlineContentVersion(Id cvId) {
+        try {
+            for (ContentVersion cv : [
+                SELECT VersionData, FileType, ContentSize
+                FROM ContentVersion WHERE Id = :cvId LIMIT 1
+            ]) {
+                if (cv.VersionData == null || cv.ContentSize == null || cv.ContentSize > MAX_INLINE_BYTES) return null;
+                return 'data:' + mimeForFileType(cv.FileType) + ';base64,' + EncodingUtil.base64Encode(cv.VersionData);
+            }
+        } catch (Exception e) {
+            // No access / not found — fall back to absolute URL.
+        }
+        return null;
+    }
+
+    private static String mimeForFileType(String fileType) {
+        String ft = fileType == null ? '' : fileType.toUpperCase();
+        if (ft == 'PNG') return 'image/png';
+        if (ft == 'JPG' || ft == 'JPEG') return 'image/jpeg';
+        if (ft == 'GIF') return 'image/gif';
+        if (ft == 'SVG') return 'image/svg+xml';
+        if (ft == 'WEBP') return 'image/webp';
+        return 'image/png';
+    }
+
+    // Prefix a root-relative URL with the org base domain so it is absolute.
+    private static String absolutize(String u) {
+        if (!u.startsWith('/')) return u;
+        try { return URL.getOrgDomainUrl().toExternalForm() + u; }
+        catch (Exception e) { return u; }
     }
 
     private static String initials(String s) {
