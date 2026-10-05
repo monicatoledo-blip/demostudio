@@ -564,7 +564,18 @@ export default class DemoStoryStudio extends LightningElement {
     }
     removeMessage(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
-        this._commit({ messages: this.config.messages.filter((m, idx) => idx !== i) });
+        const msgs = this.config.messages || [];
+        const remove = new Set([i]);
+        // Preserve the quickReply->richCard pairing: deleting the triggering
+        // message also removes its coupled follow-up (the next message if it's
+        // triggeredBy), and deleting a triggered card removes nothing extra.
+        const cur = msgs[i];
+        const triggers = cur && []
+            .concat(Array.isArray(cur.chips) ? cur.chips : [])
+            .concat(cur.card && Array.isArray(cur.card.buttons) ? cur.card.buttons : [])
+            .some((x) => x && typeof x === 'object' && x.responseType === 'richCard');
+        if (triggers && msgs[i + 1] && msgs[i + 1].triggeredBy) remove.add(i + 1);
+        this._commit({ messages: msgs.filter((m, idx) => !remove.has(idx)) });
     }
     _commit(patch) {
         this.config = { ...this.config, ...patch };
@@ -576,6 +587,12 @@ export default class DemoStoryStudio extends LightningElement {
             const card = m.card || {};
             const type = m.type || 'text';
             const tone = RCS_TONES[type] || RCS_TONES.text;
+            // Pairing banners: a chip/button whose response is a rich card
+            // triggers the next message; the paired card carries triggeredBy.
+            const trig = []
+                .concat(Array.isArray(m.chips) ? m.chips : [])
+                .concat(Array.isArray(card.buttons) ? card.buttons : [])
+                .find((x) => x && typeof x === 'object' && x.responseType === 'richCard');
             return {
                 i, sender: m.sender || 'user', text: this.resolveTokens(m.text),
                 imageUrl: m.imageUrl || '',
@@ -586,6 +603,8 @@ export default class DemoStoryStudio extends LightningElement {
                 rcsType: type,
                 typingDuration: m.typingDuration || 'off',
                 help: RCS_HELP[type] || '',
+                triggeredByLabel: m.triggeredBy || '',
+                triggersRichCard: !!trig,
                 badgeStyle: 'background:' + tone.accent + ';',
                 rowStyle: '--rcs-accent:' + tone.accent + ';--rcs-bg:' + tone.bg + ';--rcs-label:' + tone.label + ';',
                 // which body to render (RCS)

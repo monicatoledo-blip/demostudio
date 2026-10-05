@@ -171,3 +171,12 @@
 .rcs-row-del { margin-left: auto; border: none; background: transparent; color: #c23934; font-size: 0.78rem; cursor: pointer; font-family: inherit; }
 .rcs-type-pick { min-width: 12rem; flex: 1 1 12rem; }
 .rcs-sender-pick, .rcs-typing-pick { min-width: 9rem; flex: 0 1 10rem; }
+
+/* RCS pairing banners (quickReply -> rich card). */
+.rcs-pair-banner {
+    display: block; font-size: 0.72rem; color: #1b5faa;
+    background: #eef5fe; border: 1px solid #d4e5fb; border-radius: 7px;
+    padding: 0.4rem 0.6rem; margin: 0 0 0.5rem; line-height: 1.3;
+}
+.rcs-pair-in { margin-top: 0.1rem; }
+.rcs-pair-out { margin-top: 0.5rem; margin-bottom: 0; }

@@ -164,6 +164,9 @@
                                         onchange={handleTyping}></lightning-combobox>
                                     <button class="rcs-row-del" data-i={m.i} onclick={removeMessage}>Delete</button>
                                 </div>
+                                <template lwc:if={m.triggeredByLabel}>
+                                    <div class="rcs-pair-banner rcs-pair-in">↩ Triggered by tap on <strong>{m.triggeredByLabel}</strong></div>
+                                </template>
                                 <p class="rcs-row-help">{m.help}</p>
                                 <!-- Text / Text + quick replies -->
                                 <template lwc:if={m.isText}>
@@ -195,6 +198,9 @@
                                 </template>
                                 <template lwc:if={m.showRcsImage}>
                                     <c-demo-story-image label="Attach image (optional)" value={m.imageUrl} data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
+                                </template>
+                                <template lwc:if={m.triggersRichCard}>
+                                    <div class="rcs-pair-banner rcs-pair-out">↗ Triggers a new rich card message inserted right after this one.</div>
                                 </template>
                             </div>
                         </template>
