@@ -340,7 +340,10 @@ public with sharing class StoryEmailPreviewController {
             'MARKETING_INITIALS' => initials(agent),
             // Agent avatar falls back to the secondary logo (Marketing Sender
             // Avatar) when not set, so the agent's reply shows a brand mark.
-            'AGENT_AVATAR_URL' => str(c, 'agentAvatarUrl', str(c, 'marketingAvatarUrl', '')),
+            // Blank-aware fallback: str() only defaults on null, but agentAvatarUrl
+            // is often an empty string, so fall back to the secondary logo explicitly.
+            'AGENT_AVATAR_URL' => (String.isNotBlank(str(c, 'agentAvatarUrl', ''))
+                ? str(c, 'agentAvatarUrl', '') : str(c, 'marketingAvatarUrl', '')),
             'MARKETING_AVATAR_URL' => str(c, 'marketingAvatarUrl', ''),
             'CUSTOMER_AVATAR_URL' => (String.isNotBlank(str(c, 'customerAvatarUrl', ''))
                 ? str(c, 'customerAvatarUrl', '') : initialsAvatar(initials(name))),
