@@ -251,6 +251,39 @@ const CHANNEL_META = {
     RCS: { icon: 'utility:comments', label: 'RCS' }
 };
 
+// RCS message types + per-type tone (color separation) + help text — ported
+// from the Experience Generator's RCS message builder (RCS_STEP_TONES).
+const RCS_TYPES = [
+    { value: 'text', label: 'Text' },
+    { value: 'quickReplies', label: 'Text + quick replies' },
+    { value: 'richCardVertical', label: 'Rich card — vertical' },
+    { value: 'richCardHorizontal', label: 'Rich card — horizontal' },
+    { value: 'cardCarousel', label: 'Card carousel' },
+    { value: 'suggestedActions', label: 'Suggested actions (chips only)' }
+];
+const RCS_TONES = {
+    text: { accent: '#2a94d6', bg: '#f3f9fd', label: '#1c6fa6' },
+    quickReplies: { accent: '#7a5af0', bg: '#f7f5ff', label: '#5a3fd0' },
+    richCardVertical: { accent: '#e0892a', bg: '#fdf7ee', label: '#b56a12' },
+    richCardHorizontal: { accent: '#e0892a', bg: '#fdf7ee', label: '#b56a12' },
+    cardCarousel: { accent: '#1f9d6b', bg: '#f1faf5', label: '#147a51' },
+    suggestedActions: { accent: '#c15b90', bg: '#fdf4f9', label: '#8a3a67' }
+};
+const RCS_HELP = {
+    text: 'A plain message bubble.',
+    quickReplies: 'A message with tappable quick-reply chips (up to 11) beneath it.',
+    richCardVertical: 'Rich card with media on top, then title, description, and buttons.',
+    richCardHorizontal: 'Rich card with media beside the title, description, and buttons.',
+    cardCarousel: 'Horizontally scrolling set of cards (2–10). Vertical layout per card.',
+    suggestedActions: 'Standalone chip row — no anchor message. Great for follow-up options ("Continue", "Learn more") after a card.'
+};
+const RCS_TYPING = [
+    { value: 'off', label: 'No typing indicator' },
+    { value: 'short', label: 'Typing… short' },
+    { value: 'medium', label: 'Typing… medium' },
+    { value: 'long', label: 'Typing… long' }
+];
+
 export default class DemoStoryStudio extends LightningElement {
     @api recordId;
     @track config = { ...DEFAULTS };
@@ -450,6 +483,16 @@ export default class DemoStoryStudio extends LightningElement {
     get deviceOptions() {
         return [{ label: 'Android', value: 'android' }, { label: 'iPhone', value: 'ios' }];
     }
+    get rcsTypeOptions() { return RCS_TYPES; }
+    get rcsTypingOptions() { return RCS_TYPING; }
+    handleRcsType(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        this._patchMsg(i, { type: e.detail.value });
+    }
+    handleTyping(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        this._patchMsg(i, { typingDuration: e.detail.value });
+    }
 
     // ---- sections / nav
     get visibleSections() {
@@ -485,6 +528,13 @@ export default class DemoStoryStudio extends LightningElement {
         this._commit({ [e.currentTarget.dataset.field]: e.detail.url });
     }
     get senderOptions() {
+        // RCS mirrors the EG labels (Brand / Recipient); others keep Customer/Agent.
+        if (this.isRcs) {
+            return [
+                { label: 'Brand', value: 'bot' },
+                { label: 'Recipient', value: 'user' }
+            ];
+        }
         return [
             { label: 'Customer', value: 'user' },
             { label: 'Agent', value: 'bot' }
@@ -517,13 +567,29 @@ export default class DemoStoryStudio extends LightningElement {
     get decoratedMessages() {
         return (this.config.messages || []).map((m, i) => {
             const card = m.card || {};
+            const type = m.type || 'text';
+            const tone = RCS_TONES[type] || RCS_TONES.text;
             return {
                 i, sender: m.sender || 'user', text: this.resolveTokens(m.text),
                 imageUrl: m.imageUrl || '',
                 rowLabel: 'Message ' + (i + 1),
-                // RCS extras (shown only on RCS, bot messages)
                 isBot: (m.sender || 'user') === 'bot',
-                showRcs: this.isRcs && (m.sender || 'user') === 'bot',
+                // ---- RCS authoring row (EG parity) ----
+                rcs: this.isRcs,
+                rcsType: type,
+                typingDuration: m.typingDuration || 'off',
+                help: RCS_HELP[type] || '',
+                badgeStyle: 'background:' + tone.accent + ';',
+                rowStyle: '--rcs-accent:' + tone.accent + ';--rcs-bg:' + tone.bg + ';--rcs-label:' + tone.label + ';',
+                // which body to render (RCS)
+                isText: this.isRcs && type === 'text',
+                isQuickReplies: this.isRcs && type === 'quickReplies',
+                isCard: this.isRcs && (type === 'richCardVertical' || type === 'richCardHorizontal'),
+                isCarousel: this.isRcs && type === 'cardCarousel',
+                isSuggested: this.isRcs && type === 'suggestedActions',
+                // non-RCS messaging keeps the simple bubble+image editor
+                showSimple: !this.isRcs,
+                showRcsImage: this.isRcs && (type === 'text' || type === 'quickReplies'),
                 chipsStr: this._labels(m.chips),
                 cardTitle: this.resolveTokens(card.title),
                 cardDesc: this.resolveTokens(card.description),

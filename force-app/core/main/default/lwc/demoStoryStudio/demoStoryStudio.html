@@ -148,35 +148,75 @@
                     </template>
                     <p class="sec-subtitle">Thread — the back-and-forth 2-way conversation</p>
                     <template for:each={decoratedMessages} for:item="m">
-                        <div key={m.i} class="msg-row">
-                            <div class="msg-row-head">
-                                <lightning-combobox class="msg-sender" variant="label-hidden"
-                                    data-i={m.i} value={m.sender} options={senderOptions}
-                                    onchange={handleSender}></lightning-combobox>
-                                <lightning-button-icon icon-name="utility:delete" variant="border-filled"
-                                    alternative-text="Delete message" title="Delete message"
-                                    data-i={m.i} onclick={removeMessage}></lightning-button-icon>
-                            </div>
-                            <lightning-textarea label={m.rowLabel} variant="label-hidden"
-                                data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
-                            <template lwc:if={isMessaging}>
-                                <c-demo-story-image label="Attach image (optional)" value={m.imageUrl}
-                                    data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
-                            </template>
-                            <template lwc:if={m.showRcs}>
-                                <lightning-input label="Quick-reply chips (comma-separated)" data-i={m.i}
-                                    value={m.chipsStr} onchange={handleChips}
-                                    placeholder="Show me, Use my points, Talk to someone"></lightning-input>
-                                <div class="rcs-card-fields">
-                                    <p class="sec-subtitle">Rich card (optional) — fill a title to show a card instead of a bubble</p>
+                        <!-- RCS authoring row (EG parity): toned badge + type / sender / typing / delete -->
+                        <template lwc:if={m.rcs}>
+                            <div key={m.i} class="rcs-row-card" style={m.rowStyle}>
+                                <div class="rcs-row-top">
+                                    <span class="rcs-row-badge" style={m.badgeStyle}>{m.rowLabel}</span>
+                                    <lightning-combobox variant="label-hidden" class="rcs-type-pick"
+                                        data-i={m.i} value={m.rcsType} options={rcsTypeOptions}
+                                        onchange={handleRcsType}></lightning-combobox>
+                                    <lightning-combobox variant="label-hidden" class="rcs-sender-pick"
+                                        data-i={m.i} value={m.sender} options={senderOptions}
+                                        onchange={handleSender}></lightning-combobox>
+                                    <lightning-combobox variant="label-hidden" class="rcs-typing-pick"
+                                        data-i={m.i} value={m.typingDuration} options={rcsTypingOptions}
+                                        onchange={handleTyping}></lightning-combobox>
+                                    <button class="rcs-row-del" data-i={m.i} onclick={removeMessage}>Delete</button>
+                                </div>
+                                <p class="rcs-row-help">{m.help}</p>
+                                <!-- Text / Text + quick replies -->
+                                <template lwc:if={m.isText}>
+                                    <lightning-textarea label="Message" data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
+                                </template>
+                                <template lwc:if={m.isQuickReplies}>
+                                    <lightning-textarea label="Anchor message" data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
+                                    <lightning-input label="Quick-reply chips (comma-separated, up to 11)" data-i={m.i}
+                                        value={m.chipsStr} onchange={handleChips}
+                                        placeholder="Show me, Use my points, Talk to someone"></lightning-input>
+                                </template>
+                                <!-- Suggested actions (chips only) -->
+                                <template lwc:if={m.isSuggested}>
+                                    <lightning-input label="Chips (comma-separated, up to 11)" data-i={m.i}
+                                        value={m.chipsStr} onchange={handleChips}
+                                        placeholder="Continue, Learn more, Talk to an advisor"></lightning-input>
+                                </template>
+                                <!-- Rich card (vertical / horizontal) -->
+                                <template lwc:if={m.isCard}>
+                                    <c-demo-story-image label="Card image" value={m.cardMedia} data-i={m.i} onpick={handleCardImage}></c-demo-story-image>
                                     <lightning-input label="Card title" data-i={m.i} data-field="title" value={m.cardTitle} onchange={handleCardText}></lightning-input>
                                     <lightning-input label="Card description" data-i={m.i} data-field="description" value={m.cardDesc} onchange={handleCardText}></lightning-input>
-                                    <c-demo-story-image label="Card image" value={m.cardMedia} data-i={m.i} onpick={handleCardImage}></c-demo-story-image>
                                     <lightning-input label="Card buttons (comma-separated)" data-i={m.i} value={m.cardButtonsStr} onchange={handleCardButtons}
                                         placeholder="View details, Hold it for me"></lightning-input>
+                                </template>
+                                <!-- Card carousel -->
+                                <template lwc:if={m.isCarousel}>
+                                    <p class="rcs-row-help">Carousel editing is coming — seed/Generate produces cards; use Rich card for single cards for now.</p>
+                                </template>
+                                <template lwc:if={m.showRcsImage}>
+                                    <c-demo-story-image label="Attach image (optional)" value={m.imageUrl} data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
+                                </template>
+                            </div>
+                        </template>
+                        <!-- Simple row for Email / SMS / WhatsApp -->
+                        <template lwc:if={m.showSimple}>
+                            <div key={m.i} class="msg-row">
+                                <div class="msg-row-head">
+                                    <lightning-combobox class="msg-sender" variant="label-hidden"
+                                        data-i={m.i} value={m.sender} options={senderOptions}
+                                        onchange={handleSender}></lightning-combobox>
+                                    <lightning-button-icon icon-name="utility:delete" variant="border-filled"
+                                        alternative-text="Delete message" title="Delete message"
+                                        data-i={m.i} onclick={removeMessage}></lightning-button-icon>
                                 </div>
-                            </template>
-                        </div>
+                                <lightning-textarea label={m.rowLabel} variant="label-hidden"
+                                    data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
+                                <template lwc:if={isMessaging}>
+                                    <c-demo-story-image label="Attach image (optional)" value={m.imageUrl}
+                                        data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
+                                </template>
+                            </div>
+                        </template>
                     </template>
                     <lightning-button label="+ Add Message" onclick={addMessage}
                         class="slds-m-top_x-small"></lightning-button>

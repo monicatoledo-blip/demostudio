@@ -6,8 +6,8 @@
 }
 
 .studio-frame {
-    display: flex; flex-direction: column; width: 100%; height: 100%;
-    min-height: 820px; background: #f4f6f9; border-radius: 0.75rem;
+    display: flex; flex-direction: column; width: 100%; height: 88vh;
+    min-height: 640px; max-height: 1100px; background: #f4f6f9; border-radius: 0.75rem;
     overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06);
 }
 
@@ -154,3 +154,20 @@
 .preview-reset { margin-left: auto; }
 .studio-resizer { background: #e6e9ee; cursor: col-resize; transition: background 0.15s; }
 .studio-resizer:hover, .studio-resizer:active { background: #0176d3; }
+
+/* RCS authoring row — color separation per message type (EG parity). */
+.rcs-row-card {
+    border: 1px solid #e6e9ee; border-left: 4px solid var(--rcs-accent, #2a94d6);
+    background: var(--rcs-bg, #f8fafc); border-radius: 10px;
+    padding: 0.75rem; margin-bottom: 0.75rem;
+}
+.rcs-row-top { display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; margin-bottom: 0.4rem; }
+.rcs-row-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.5rem; height: 1.5rem; padding: 0 0.6rem; border-radius: 999px;
+    color: #fff; font-size: 0.7rem; font-weight: 700; white-space: nowrap;
+}
+.rcs-row-help { font-size: 0.72rem; color: var(--rcs-label, #555); margin: 0 0 0.5rem; line-height: 1.35; }
+.rcs-row-del { margin-left: auto; border: none; background: transparent; color: #c23934; font-size: 0.78rem; cursor: pointer; font-family: inherit; }
+.rcs-type-pick { min-width: 12rem; flex: 1 1 12rem; }
+.rcs-sender-pick, .rcs-typing-pick { min-width: 9rem; flex: 0 1 10rem; }
