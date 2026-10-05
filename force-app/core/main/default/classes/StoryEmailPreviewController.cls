@@ -383,8 +383,12 @@ public with sharing class StoryEmailPreviewController {
     // more .rcs-row units; the ported runtime adds hidden-msg + plays them.
     private static String buildRcsThread(Map<String, Object> c) {
         String brandColor = str(c, 'primaryColor', '#2A94D6');
-        // Hero card logo placeholder uses the PRIMARY logo (transparent wordmark
-        // reads against the gradient); falls back to the secondary.
+        // Second gradient stop = brand accent (like the brand-kit card). A dark
+        // primary->accent gradient lets even a logo with a dark background blend
+        // in and show the mark, instead of a black box on a light gradient.
+        String brandAccent = str(c, 'featureSectionColor', brandColor);
+        // Hero card logo placeholder uses the PRIMARY logo (reads against the
+        // brand gradient); falls back to the secondary.
         String brandLogo = str(c, 'logoUrl', str(c, 'marketingAvatarUrl', ''));
         String parts = '';
         Integer msgIdx = 0;
@@ -402,10 +406,10 @@ public with sharing class StoryEmailPreviewController {
             } else if (type == 'richCardVertical' || type == 'richCardHorizontal') {
                 String layout = type == 'richCardHorizontal' ? 'horizontal' : 'vertical';
                 Map<String, Object> cardObj = (m.get('card') instanceof Map<String, Object>) ? (Map<String, Object>) m.get('card') : m;
-                rowsHtml += rcsCardHtml(sender, cardObj, layout, brandColor, brandLogo);
+                rowsHtml += rcsCardHtml(sender, cardObj, layout, brandColor, brandAccent, brandLogo);
             } else if (type == 'cardCarousel') {
                 List<Object> cards = (m.get('cards') instanceof List<Object>) ? (List<Object>) m.get('cards') : new List<Object>();
-                if (!cards.isEmpty()) rowsHtml += rcsCarouselHtml(sender, cards, brandColor, brandLogo);
+                if (!cards.isEmpty()) rowsHtml += rcsCarouselHtml(sender, cards, brandColor, brandAccent, brandLogo);
             } else if (type == 'suggestedActions') {
                 if (!chips.isEmpty()) rowsHtml += rcsChipsRowHtml(chips);
             } else {
@@ -476,7 +480,7 @@ public with sharing class StoryEmailPreviewController {
     // Card media — image or autoplaying muted video (ported renderRcsCardMedia).
     // Falls back to a branded placeholder (gradient + logo) when no media is set
     // so a rich card never looks empty.
-    private static String rcsCardMedia(Map<String, Object> card, String brandColor, String brandLogo) {
+    private static String rcsCardMedia(Map<String, Object> card, String brandColor, String brandAccent, String brandLogo) {
         String url = str(card, 'mediaUrl', '');
         String size = str(card, 'mediaSize', 'medium');
         if (String.isBlank(url)) {
@@ -486,7 +490,7 @@ public with sharing class StoryEmailPreviewController {
                 '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:60%;max-height:60%;object-fit:contain;" referrerpolicy="no-referrer" />';
             return '<div class="rcs-card-media rcs-card-media-' + escapeSms(size)
                 + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
-                + escapeSms(brandColor) + ' 0%, #ffffff 170%);">' + logo + '</div>';
+                + escapeSms(brandColor) + ' 0%, ' + escapeSms(brandAccent) + ' 100%);">' + logo + '</div>';
         }
         Boolean isVideo = str(card, 'mediaType', 'image') == 'video';
         String mediaInner = isVideo
@@ -527,20 +531,20 @@ public with sharing class StoryEmailPreviewController {
         return '<div class="rcs-card-body">' + title + descHtml + rcsCardButtons(card.get('buttons')) + '</div>';
     }
 
-    private static String rcsCardHtml(String sender, Map<String, Object> card, String layout, String brandColor, String brandLogo) {
+    private static String rcsCardHtml(String sender, Map<String, Object> card, String layout, String brandColor, String brandAccent, String brandLogo) {
         String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
         return '<div class="rcs-row ' + side + '"><div class="rcs-card rcs-card-' + escapeSms(layout) + '">'
-            + rcsCardMedia(card, brandColor, brandLogo) + rcsCardBody(card) + '</div></div>';
+            + rcsCardMedia(card, brandColor, brandAccent, brandLogo) + rcsCardBody(card) + '</div></div>';
     }
 
-    private static String rcsCarouselHtml(String sender, List<Object> cards, String brandColor, String brandLogo) {
+    private static String rcsCarouselHtml(String sender, List<Object> cards, String brandColor, String brandAccent, String brandLogo) {
         String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
         String items = '';
         for (Object o : cards) {
             if (!(o instanceof Map<String, Object>)) continue;
             Map<String, Object> cd = (Map<String, Object>) o;
             items += '<div class="rcs-carousel-item rcs-card rcs-card-vertical">'
-                + rcsCardMedia(cd, brandColor, brandLogo) + rcsCardBody(cd) + '</div>';
+                + rcsCardMedia(cd, brandColor, brandAccent, brandLogo) + rcsCardBody(cd) + '</div>';
         }
         return '<div class="rcs-row ' + side + '"><div class="rcs-carousel">' + items + '</div></div>';
     }
