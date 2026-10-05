@@ -39,15 +39,68 @@ public with sharing class StoryMcaExportService {
     // targetSpaceId optional — when blank, resolveSpaceId() picks the default
     // marketing workspace.
     @AuraEnabled
-    public static Result pushEmailToMca(Id storyId, String targetSpaceId) {
+    public static Result pushEmailToMca(Id storyId, String targetSpaceId, String dcPoint, String dcDecisionName, String dcSpace) {
         try {
             if (String.isNotBlank(targetSpaceId)) spaceId = targetSpaceId;
+            // Per-org Dynamic Content selection from the modal. Blank point/decision
+            // => the hero deploys as a plain native image (no DC wiring). This
+            // replaces the old hardcoded meshmesh pair so the push is portable.
+            dcPointName = dcPoint;
+            dcDecision  = dcDecisionName;
+            if (String.isNotBlank(dcSpace)) dcDataspace = dcSpace;
             return pushEmailToMcaImpl(storyId);
         } catch (Exception e) {
             AuraHandledException ahe = new AuraHandledException(e.getMessage());
             ahe.setMessage(e.getMessage());
             throw ahe;
         }
+    }
+
+    // ---- Dynamic Content pickers (optional hero personalization) -------------
+    // List the org's real Personalization Points + decisions so the SE picks a
+    // portable pair per org, instead of a hardcoded one. SOQL only (no callout).
+    @AuraEnabled
+    public static List<Map<String, Object>> listPersonalizationPoints() {
+        List<Map<String, Object>> out = new List<Map<String, Object>>();
+        try {
+            for (PersonalizationPoint p : [
+                SELECT Name, DeveloperName, DataSpace.Name
+                FROM PersonalizationPoint WHERE Status = 'Active'
+                ORDER BY Name LIMIT 200
+            ]) {
+                out.add(new Map<String, Object>{
+                    'value' => p.DeveloperName,
+                    'label' => p.Name,
+                    'dataspace' => (p.DataSpace == null ? null : p.DataSpace.Name)
+                });
+            }
+        } catch (Exception e) {
+            AuraHandledException ahe = new AuraHandledException(e.getMessage());
+            ahe.setMessage(e.getMessage());
+            throw ahe;
+        }
+        return out;
+    }
+
+    @AuraEnabled
+    public static List<Map<String, Object>> listDecisions(String pointDeveloperName) {
+        List<Map<String, Object>> out = new List<Map<String, Object>>();
+        if (String.isBlank(pointDeveloperName)) return out;
+        try {
+            for (PersonalizationDecision d : [
+                SELECT Name, DeveloperName
+                FROM PersonalizationDecision
+                WHERE State = 'Live' AND PersonalizationPoint.DeveloperName = :pointDeveloperName
+                ORDER BY Name LIMIT 200
+            ]) {
+                out.add(new Map<String, Object>{ 'value' => d.DeveloperName, 'label' => d.Name });
+            }
+        } catch (Exception e) {
+            AuraHandledException ahe = new AuraHandledException(e.getMessage());
+            ahe.setMessage(e.getMessage());
+            throw ahe;
+        }
+        return out;
     }
 
     // Workspaces the SE can deploy into (the picker list). The resolved default
@@ -264,11 +317,13 @@ public with sharing class StoryMcaExportService {
     private static String heroBlockId;
     private static String heroContentKey;
 
-    // Personalization Point + decision the hero's Dynamic Content binds to. These
-    // are meshmesh demo values (a PP/decision created once in the builder); blank
-    // them to skip DC wiring. QBrix portability: create or let the SE pick a PP.
-    @TestVisible private static String dcPointName   = 'October_5_image_efb5_c_v_1650';
-    @TestVisible private static String dcDecision    = 'Hero_2_1650';
+    // Personalization Point + decision the hero's Dynamic Content binds to. Set
+    // per-push from the Deploy modal's picker (listPersonalizationPoints /
+    // listDecisions) so the wiring is portable to any org. Blank point/decision
+    // => DC is skipped and the hero deploys as a plain native image. (Previously
+    // these were hardcoded meshmesh values, which dangled in every other org.)
+    @TestVisible private static String dcPointName;
+    @TestVisible private static String dcDecision;
     @TestVisible private static String dcDataspace   = 'default';
     // Image for the hero's second variation (so it visibly differs from the
     // default). Blank -> variation reuses the default image as a placeholder.

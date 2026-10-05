@@ -95,7 +95,8 @@ private class StoryMcaExportServiceTest {
         Test.setMock(HttpCalloutMock.class, new Mock(false, false));
         Test.startTest();
         // Blank targetSpaceId -> resolveSpaceId() runs (aggregate empty -> GET spaces mock).
-        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '');
+        // Pass a DC point+decision so the hero's Dynamic-Content wiring block runs.
+        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '', 'Hero_Point', 'Hero_Decision', 'default');
         Test.stopTest();
         System.assertNotEquals(null, r, 'Result returned');
         System.assert(String.isNotBlank(r.name), 'Email name set from the sim record: ' + r.name);
@@ -108,7 +109,8 @@ private class StoryMcaExportServiceTest {
         Test.setMock(HttpCalloutMock.class, new Mock(false, false));
         Test.startTest();
         // Explicit targetSpaceId -> resolveSpaceId() short-circuits to it.
-        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '0ZuKh000000EXPLCT');
+        // No DC point/decision -> hero deploys as a plain native image (DC skipped).
+        StoryMcaExportService.Result r = StoryMcaExportService.pushEmailToMca(sim, '0ZuKh000000EXPLCT', null, null, null);
         Test.stopTest();
         System.assertNotEquals(null, r, 'Result returned with explicit space');
     }
@@ -180,5 +182,20 @@ private class StoryMcaExportServiceTest {
         System.assertEquals('Hello_World', StoryMcaExportService.apiName('Hello World'));
         System.assertEquals('Email', StoryMcaExportService.apiName(''));
         System.assert(StoryMcaExportService.apiName('9lives').startsWith('E'), 'Leading-digit apiName prefixed');
+    }
+
+    @isTest
+    static void dcPickers_queryWithoutError() {
+        // PersonalizationPoint/Decision are setup-style objects (not insertable in
+        // tests), so these return empty here — assert they run cleanly and the
+        // blank-point guard short-circuits listDecisions.
+        Test.startTest();
+        List<Map<String, Object>> pts = StoryMcaExportService.listPersonalizationPoints();
+        List<Map<String, Object>> decsBlank = StoryMcaExportService.listDecisions('');
+        List<Map<String, Object>> decs = StoryMcaExportService.listDecisions('Some_Point');
+        Test.stopTest();
+        System.assertNotEquals(null, pts, 'Points list returned');
+        System.assertEquals(0, decsBlank.size(), 'Blank point -> no decisions');
+        System.assertNotEquals(null, decs, 'Decisions list returned');
     }
 }
