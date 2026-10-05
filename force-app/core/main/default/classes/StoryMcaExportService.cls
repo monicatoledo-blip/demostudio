@@ -235,8 +235,35 @@ public with sharing class StoryMcaExportService {
     // Live "Variation" decision for this email's hero, via Data 360 Personalization
     // REST. Sets dcPointName/dcDecision/dcDataspace so buildEmailContentBody wires
     // the hero to it. On any failure, blanks them so the hero deploys plain.
+    // Orgs name their profile data graph differently, so don't hardcode it:
+    // discover it from an existing point. The LIST endpoint isn't enabled, but
+    // GET-by-id returns profileDataGraphName — so grab one point id via SOQL then
+    // GET it. Falls back to the `dataGraph` static (and if that's wrong the point
+    // create fails and the hero deploys plain). Sets the static so the email's
+    // data providers use the same graph.
+    @TestVisible
+    private static String resolveDataGraph() {
+        try {
+            for (PersonalizationPoint pp : [
+                SELECT Id FROM PersonalizationPoint
+                WHERE Status = 'Active' ORDER BY LastModifiedDate DESC LIMIT 1
+            ]) {
+                HttpResponse res = send('GET', P13N_POINTS_PATH + '/' + pp.Id, null);
+                if (res.getStatusCode() == 200) {
+                    Object parsed = JSON.deserializeUntyped(res.getBody());
+                    if (parsed instanceof Map<String, Object>) {
+                        Object g = ((Map<String, Object>) parsed).get('profileDataGraphName');
+                        if (g != null && String.isNotBlank(String.valueOf(g))) return String.valueOf(g);
+                    }
+                }
+            }
+        } catch (Exception e) { /* fall back to the static default */ }
+        return dataGraph;
+    }
+
     private static void provisionHeroPoint(String title) {
         try {
+            dataGraph = resolveDataGraph(); // per-org; also used by the email dataProviders
             String uniq = String.valueOf(Datetime.now().getTime());
             String base = apiName(title);
             if (base.length() > 30) base = base.substring(0, 30);

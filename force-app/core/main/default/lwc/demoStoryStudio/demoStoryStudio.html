@@ -87,13 +87,8 @@
                     <template lwc:if={isEmail}>
                         <c-demo-story-image label="Marketing Sender Avatar" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                         <c-demo-story-image label="Logo" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
-                        <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
-                        <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
                     </template>
                     <div class="color-field"><label class="color-label">Primary Hex Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="primaryColor" value={config.primaryColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input></div></div>
-                    <template lwc:if={isEmail}>
-                        <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
-                    </template>
                     <template lwc:if={isMessaging}>
                         <lightning-combobox label="Phone Theme" data-field="theme" value={config.theme}
                             options={themeOptions} onchange={handleDetailField}
@@ -109,8 +104,11 @@
                 <template lwc:if={isTemplate}>
                     <h2 class="sec-title">Email Template</h2>
                     <lightning-input label="Email Subject Line" data-field="subjectLine" value={emailDisplay.subjectLine} onchange={handleInput}></lightning-input>
+                    <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput} field-level-help="Resize the email's logo until it looks right in the preview."></lightning-input>
+                    <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
                     <c-demo-story-image label="Hero Image" value={config.heroImageUrl} data-field="heroImageUrl" onpick={handleImagePick}></c-demo-story-image>
                     <lightning-input label="Headline" data-field="headline" value={emailDisplay.headline} onchange={handleInput}></lightning-input>
+                    <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
                     <lightning-input label="Sub-headline" data-field="subHeadline" value={emailDisplay.subHeadline} onchange={handleInput}></lightning-input>
                     <lightning-textarea label="2-Column Copy: Left" data-field="featureColumn1" value={emailDisplay.featureColumn1} onchange={handleInput}></lightning-textarea>
                     <lightning-textarea label="2-Column Copy: Right" data-field="featureColumn2" value={emailDisplay.featureColumn2} onchange={handleInput}></lightning-textarea>
