@@ -85,8 +85,10 @@
     font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em;
     color: #6b7280; background: #fff; border-bottom: 1px solid #e6e9ee;
 }
-.preview-canvas { flex: 1 1 auto; padding: 1rem; overflow: hidden; display: flex; justify-content: center; background: #e5e8ec; }
-.preview-iframe { width: 100%; height: 100%; min-height: 720px; border: 1px solid #d8dde6; border-radius: 8px; background: #fff; }
+/* Scrollable so tall previews (the ~960px phone sims, long emails) aren't
+   clipped — the canvas scrolls to reveal the full content. */
+.preview-canvas { flex: 1 1 auto; padding: 1rem; overflow-y: auto; overflow-x: hidden; display: flex; justify-content: center; align-items: flex-start; background: #e5e8ec; }
+.preview-iframe { width: 100%; height: 100%; min-height: 1040px; border: 1px solid #d8dde6; border-radius: 8px; background: #fff; }
 .preview-diag{margin-left:auto;font-weight:400;text-transform:none;letter-spacing:0;color:#9aa5b1;font-size:0.7rem;}
 .msg-row { border: 1px solid #e6e9ee; border-radius: 8px; padding: 0.5rem 0.6rem 0.6rem; margin-bottom: 0.6rem; background: #fbfcfd; }
 .msg-row-head { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-bottom: 0.35rem; }
