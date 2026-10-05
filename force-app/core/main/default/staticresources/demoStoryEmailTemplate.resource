@@ -1041,7 +1041,7 @@
                         <div class="sender-info">
                             <div>
                                 <span class="sender-name">[[BRAND_NAME]]</span>
-                                <span class="sender-email">&lt;marketing@[[BRAND_DOMAIN]].com&gt;</span>
+                                <span class="sender-email">&lt;marketing@[[BRAND_DOMAIN]]&gt;</span>
                             </div>
                             <div class="recipient-info">to [[CUSTOMER_FIRST_NAME]] ▼</div>
                         </div>
@@ -1502,7 +1502,7 @@
                 // Agent message - show immediately
                 addMessageToThread(
                     '[[AGENT_NAME]]',
-                    'agent@[[BRAND_DOMAIN]].com',
+                    'agent@[[BRAND_DOMAIN]]',
                     currentMsg.text,
                     '[[AGENT_INITIALS]]',
                     'agent',

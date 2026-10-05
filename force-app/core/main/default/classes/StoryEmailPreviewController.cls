@@ -94,6 +94,16 @@ public with sharing class StoryEmailPreviewController {
         return v == null ? dflt : String.valueOf(v);
     }
 
+    // The Logo Width input stores a bare number (e.g. "140"); the template emits
+    // it into `width: [[LOGO_WIDTH]];`, so without a unit the browser ignores the
+    // declaration and the logo never resizes. Append px when the value is purely
+    // numeric; pass through if the SE already typed a unit (px/%/em/rem/vw).
+    private static String normWidth(String w) {
+        if (String.isBlank(w)) return '140px';
+        String t = w.trim();
+        return t.isNumeric() ? t + 'px' : t;
+    }
+
     // ----------------------------------------------------------------------
     // Image-URL resolution — see getHtml(). Relative /sfc/ ContentVersion URLs
     // are inlined as base64 data URIs; other relative URLs are absolute-prefixed.
@@ -293,7 +303,7 @@ public with sharing class StoryEmailPreviewController {
             'BRAND_DOMAIN' => str(c, 'brandDomain', 'cumulusfinserv.com'),
             'LOGO_URL' => str(c, 'logoUrl', ''),
             'LOGO_BG_COLOR' => str(c, 'logoBgColor', '#0A1F44'),
-            'LOGO_WIDTH' => str(c, 'logoWidth', '140'),
+            'LOGO_WIDTH' => normWidth(str(c, 'logoWidth', '140')),
             'PRIMARY_COLOR' => str(c, 'primaryColor', '#0A1F44'),
             'HERO_IMAGE_URL' => str(c, 'heroImageUrl', ''),
             'SUBJECT_LINE' => str(c, 'subjectLine', ''),

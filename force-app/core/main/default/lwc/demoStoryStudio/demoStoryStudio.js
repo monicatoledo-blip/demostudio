@@ -900,7 +900,12 @@ export default class DemoStoryStudio extends LightningElement {
 
     // ---- draggable divider between editor and preview ----
     @track editorWidth = 440;
+    @track isResizing = false;
     get splitStyle() { return 'grid-template-columns: 200px ' + this.editorWidth + 'px 8px 1fr;'; }
+    // While dragging the divider, add `resizing` so CSS can disable pointer events
+    // on the preview iframe — otherwise the iframe swallows mousemove/mouseup and
+    // the drag never ends ("the handle won't let go"), worst on the tall RCS sim.
+    get splitClass() { return this.isResizing ? 'studio-split resizing' : 'studio-split'; }
     // Re-theme the Story Studio chrome to the selected brand (like Persona Studio).
     get frameStyle() {
         const p = this.config.primaryColor || '#0A1F44';
@@ -914,12 +919,14 @@ export default class DemoStoryStudio extends LightningElement {
         this.editorWidth = Math.max(300, Math.min(900, w));
     };
     _onUp = () => {
+        this.isResizing = false;
         window.removeEventListener('mousemove', this._onMove);
         window.removeEventListener('mouseup', this._onUp);
     };
     startResize(e) {
         this._startX = e.clientX;
         this._startW = this.editorWidth;
+        this.isResizing = true;
         window.addEventListener('mousemove', this._onMove);
         window.addEventListener('mouseup', this._onUp);
         e.preventDefault();

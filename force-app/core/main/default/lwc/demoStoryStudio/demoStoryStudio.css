@@ -156,6 +156,10 @@
 .preview-reset { margin-left: auto; }
 .studio-resizer { background: #e6e9ee; cursor: col-resize; transition: background 0.15s; }
 .studio-resizer:hover, .studio-resizer:active { background: #0176d3; }
+/* While dragging the divider, keep the cursor and stop the preview iframe from
+   capturing the mouse — otherwise mouseup lands in the iframe and the drag sticks. */
+.studio-split.resizing { cursor: col-resize; user-select: none; }
+.studio-split.resizing .preview-iframe { pointer-events: none; }
 
 /* RCS authoring row — color separation per message type (EG parity). */
 .rcs-row-card {
