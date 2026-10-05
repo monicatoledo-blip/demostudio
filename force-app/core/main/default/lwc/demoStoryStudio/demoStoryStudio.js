@@ -13,6 +13,7 @@ import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import getPersona from '@salesforce/apex/DemoBrandKitService.getPersona';
 import generateEmail from '@salesforce/apex/DemoStoryGenerator.generateEmail';
 import generateSms from '@salesforce/apex/DemoStoryGenerator.generateSms';
+import generateRcs from '@salesforce/apex/DemoStoryGenerator.generateRcs';
 
 const FIELDS = [CFG, BRAND_KIT, PERSONA_FIELD, INDUSTRY_FIELD, CHANNEL_FIELD];
 
@@ -207,36 +208,97 @@ function messagingSeedFor(industry) {
 // EG asset host; the SE can swap it. "Download the App" is a quickReply with a
 // rich-card response → plays the next card (positional pairing).
 const RCS_ASSET_HOST = 'https://whispering-coast-03303-5bb1f6fb1c95.herokuapp.com';
-function rcsSeedFor() {
+// Per-industry copy for the RCS seed. Structure (card → chips → paired card →
+// recipient Q → brand reply) stays constant; copy verticalizes. Financial
+// Services is the base; others override.
+const RCS_VERTICALS = {
+    'Health & Life Sciences': {
+        t1: 'Your care plan is ready, [[CUSTOMER_FIRST_NAME]]', d1: 'Appointments, reminders, and results — all in one place with [[BRAND_NAME]].', cta1: 'View my care plan',
+        chipA: 'See benefits', chipRich: 'Get the app', chipDial: 'Call the nurse line',
+        t3: 'Care in your pocket', d3: 'Message your care team, refill prescriptions, and join video visits from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'Can I message my doctor through the app?', a: 'Let me connect you with a care coordinator who can set that up for you.'
+    },
+    'Retail & Consumer Goods': {
+        t1: 'Your cart misses you, [[CUSTOMER_FIRST_NAME]]', d1: 'The items you loved are still here — plus a members-only offer from [[BRAND_NAME]].', cta1: 'Complete my order',
+        chipA: 'See the offer', chipRich: 'Get the app', chipDial: 'Call support',
+        t3: 'Shop faster in the app', d3: 'Save your cart, track orders, and get early access to drops with the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'Do you have this in a medium?', a: 'Let me get a shopping specialist to confirm stock and help you check out.'
+    },
+    'Manufacturing': {
+        t1: 'Your service window is open, [[CUSTOMER_FIRST_NAME]]', d1: 'Schedule preventive maintenance and avoid downtime with [[BRAND_NAME]].', cta1: 'Book service',
+        chipA: 'See coverage', chipRich: 'Get the app', chipDial: 'Call your rep',
+        t3: 'Manage equipment on the go', d3: 'Track service history, parts, and warranties from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'What does the service plan cover?', a: 'Let me connect you with your account manager to walk through the plan.'
+    },
+    'Communications, Media & Technology': {
+        t1: 'Your upgrade is ready, [[CUSTOMER_FIRST_NAME]]', d1: 'Faster speeds, same bill — [[BRAND_NAME]] has an upgrade waiting for you.', cta1: 'See my upgrade',
+        chipA: 'See plans', chipRich: 'Get the app', chipDial: 'Call us',
+        t3: 'Manage your plan in the app', d3: 'Check data, pay bills, and get support from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'Will I need a new router?', a: 'Let me get a specialist to confirm what you need and finish the setup.'
+    },
+    'Public Sector': {
+        t1: 'Action needed, [[CUSTOMER_FIRST_NAME]]', d1: 'Your renewal is due soon — handle it by text with [[BRAND_NAME]].', cta1: 'Start renewal',
+        chipA: 'See requirements', chipRich: 'Get the app', chipDial: 'Call a caseworker',
+        t3: 'Services in the app', d3: 'Submit forms, track status, and get reminders from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'What documents do I need?', a: 'Let me connect you with a representative who can walk you through it.'
+    },
+    'Consumer Business Services': {
+        t1: 'Your getaway is calling, [[CUSTOMER_FIRST_NAME]]', d1: 'Member rates on your next stay, reserved by [[BRAND_NAME]].', cta1: 'See member rates',
+        chipA: 'See offers', chipRich: 'Get the app', chipDial: 'Call concierge',
+        t3: 'Travel with the app', d3: 'Book stays, manage trips, and unlock perks from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'Can I use points toward a beach weekend?', a: 'Let me get a concierge to hold the dates and finalize with you.'
+    },
+    'Travel & Hospitality': {
+        t1: 'Where to next, [[CUSTOMER_FIRST_NAME]]?', d1: 'Member fares to your favorite spots just unlocked with [[BRAND_NAME]].', cta1: 'See member fares',
+        chipA: 'See deals', chipRich: 'Get the app', chipDial: 'Call travel desk',
+        t3: 'Your trips, in the app', d3: 'Book flights and stays, get gate alerts, and manage trips with the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'Any deals for a long weekend somewhere warm?', a: 'Let me get a travel concierge to hold an itinerary and finalize with you.'
+    },
+    'Energy & Utilities': {
+        t1: 'Lower your bill, [[CUSTOMER_FIRST_NAME]]', d1: 'Shift usage off-peak and save — [[BRAND_NAME]] made you a free plan.', cta1: 'See my plan',
+        chipA: 'See the plan', chipRich: 'Get the app', chipDial: 'Call us',
+        t3: 'Manage energy in the app', d3: 'Track usage, pay bills, and get outage alerts from the [[BRAND_NAME]] app.', cta3: 'Download the app',
+        q: 'How does the off-peak plan work?', a: 'Let me connect you with a representative to enroll you — no equipment needed.'
+    }
+};
+// Financial Services base copy (the EG default); verticals override it.
+const RCS_FINANCE = {
+    t1: 'Smart Wealth is ready for you, [[CUSTOMER_FIRST_NAME]]',
+    d1: 'Round-ups, auto-savings, and personalized offers — all synced to your [[BRAND_NAME]] checking account.',
+    cta1: 'Open my dashboard',
+    chipA: 'Go Paperless', chipRich: 'Download the App', chipDial: 'Call my Banker',
+    t3: 'Let’s make it official',
+    d3: 'Did you know you can have [[BRAND_NAME]] with you on the go whenever you need us? Download on your app store today!',
+    cta3: 'Take me to the App Store',
+    q: 'Am I eligible for a refi on my mortgage with [[BRAND_NAME]]?',
+    a: 'Let me get someone who can help! Your banker will get in touch with you shortly.'
+};
+function rcsSeedFor(industry) {
+    const v = { ...RCS_FINANCE, ...(RCS_VERTICALS[industry] || {}) };
     const seed = [
         { sender: 'bot', type: 'richCardVertical', typingDuration: 'off',
-          card: {
-            mediaType: 'video', mediaUrl: RCS_ASSET_HOST + '/rcs-defaults/cumulus-video.mp4', mediaSize: 'medium',
-            title: 'Smart Wealth is ready for you, [[CUSTOMER_FIRST_NAME]]',
-            description: 'Round-ups, auto-savings, and personalized offers — all synced to your [[BRAND_NAME]] checking account.',
-            buttons: [{ label: 'Open my dashboard', action: 'openUrl', target: 'https://cumulusfinserv-ad61ddfc9e8c.herokuapp.com/' }]
-          } },
+          // Initial card media = brand primary logo (blank -> logo-on-gradient placeholder).
+          card: { mediaType: 'image', mediaUrl: '', mediaSize: 'medium',
+            title: v.t1, description: v.d1,
+            buttons: [{ label: v.cta1, action: 'openUrl', target: '' }] } },
         { sender: 'bot', type: 'suggestedActions', typingDuration: 'off',
           chips: [
-            { label: 'Go Paperless', action: 'openUrl', target: 'https://' },
-            { label: 'Download the App', action: 'quickReply', responseType: 'richCard' },
-            { label: 'Call my Banker', action: 'dial', target: '+15551234567' }
+            { label: v.chipA, action: 'openUrl', target: 'https://' },
+            { label: v.chipRich, action: 'quickReply', responseType: 'richCard' },
+            { label: v.chipDial, action: 'dial', target: '+15551234567' }
           ] },
-        { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium', triggeredBy: 'Download the App',
-          card: {
-            mediaType: 'image', mediaUrl: RCS_ASSET_HOST + '/rcs-defaults/cumulus-bank-on-go.jpg', mediaSize: 'medium',
-            title: 'Let’s make it official',
-            description: 'Did you know you can have [[BRAND_NAME]] with you on the go whenever you need us? Download on your app store today!',
-            buttons: [{ label: 'Take me to the App Store', action: 'openUrl', target: 'https://apps.apple.com/us/iphone/CumulusApp' }]
-          } },
-        { sender: 'user', type: 'text', text: 'Am I eligible for a refi on my mortgage with [[BRAND_NAME]]?' },
-        { sender: 'bot', type: 'text', typingDuration: 'long', text: 'Let me get someone who can help! Your banker will get in touch with you shortly.' }
+        { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium', triggeredBy: v.chipRich,
+          card: { mediaType: 'image', mediaUrl: RCS_ASSET_HOST + '/rcs-defaults/cumulus-bank-on-go.jpg', mediaSize: 'medium',
+            title: v.t3, description: v.d3,
+            buttons: [{ label: v.cta3, action: 'openUrl', target: 'https://apps.apple.com/' }] } },
+        { sender: 'user', type: 'text', text: v.q },
+        { sender: 'bot', type: 'text', typingDuration: 'long', text: v.a }
     ];
     return JSON.parse(JSON.stringify(seed)); // deep clone
 }
 // Seed the right thread for a messaging channel.
 function seedFor(channel, industry) {
-    return channel === 'RCS' ? rcsSeedFor() : messagingSeedFor(industry);
+    return channel === 'RCS' ? rcsSeedFor(industry) : messagingSeedFor(industry);
 }
 
 const SECTIONS = [
@@ -880,10 +942,12 @@ export default class DemoStoryStudio extends LightningElement {
         this.generating = true;
         try {
             const args = { industry: this.genIndustry, brand: this.config.brandName, context: this.genContext, angle: this.genAngle };
-            // Messaging channels generate just the 2-way thread; email generates
-            // the full email + thread.
-            const raw = this.isMessaging ? await generateSms(args) : await generateEmail(args);
-            this.applyGenJson(JSON.parse(raw));
+            // RCS generates the structured row model; other messaging channels a
+            // text thread; email the full email + thread.
+            const raw = this.isRcs ? await generateRcs(args)
+                : this.isMessaging ? await generateSms(args) : await generateEmail(args);
+            if (this.isRcs) this.applyGenRcsJson(JSON.parse(raw));
+            else this.applyGenJson(JSON.parse(raw));
             this.showGenerate = false;
             const what = this.isMessaging ? 'AI drafted your 2-way conversation. Edit anything.' : 'AI drafted your email + conversation. Edit anything.';
             this.toast('Generated', what, 'success');
@@ -912,6 +976,42 @@ export default class DemoStoryStudio extends LightningElement {
         if (full) {
             patch.customerName = full;
             patch.customerFirstName = (gen.customerFirstName || full).trim().split(/\s+/)[0];
+        }
+        this._commit(patch);
+    }
+
+    // Apply a structured RCS payload (types + chips + cards + pairing). Sanitizes
+    // to the Studio's message shape and keeps mediaUrl blank so the SE adds art.
+    applyGenRcsJson(gen) {
+        const patch = {};
+        const full = gen.customerName || gen.customerFirstName;
+        if (full) {
+            patch.customerName = full;
+            patch.customerFirstName = (gen.customerFirstName || full).trim().split(/\s+/)[0];
+        }
+        const okAction = (a) => ['quickReply', 'openUrl', 'dial', 'viewLocation', 'createCalendarEvent'].includes(a) ? a : 'quickReply';
+        const okResp = (r) => (r === 'richCard' || r === 'text') ? r : '';
+        const mapItem = (x) => (x && typeof x === 'object') ? {
+            label: x.label || '', action: okAction(x.action), target: x.target || '',
+            response: x.response || '', responseType: okResp(x.responseType)
+        } : { label: String(x || ''), action: 'quickReply' };
+        const mapCard = (c) => c && typeof c === 'object' ? {
+            mediaType: c.mediaType === 'video' ? 'video' : 'image', mediaUrl: '', mediaSize: c.mediaSize || 'medium',
+            title: c.title || '', description: c.description || '',
+            buttons: Array.isArray(c.buttons) ? c.buttons.map(mapItem) : []
+        } : undefined;
+        const TYPES = ['text', 'quickReplies', 'richCardVertical', 'richCardHorizontal', 'cardCarousel', 'suggestedActions'];
+        if (Array.isArray(gen.messages) && gen.messages.length) {
+            patch.messages = gen.messages.map((m) => {
+                const type = TYPES.includes(m.type) ? m.type : 'text';
+                const out = { sender: m.sender === 'user' ? 'user' : 'bot', type };
+                if (m.typingDuration) out.typingDuration = m.typingDuration;
+                if (m.triggeredBy) out.triggeredBy = m.triggeredBy;
+                if (m.text) out.text = m.text;
+                if (Array.isArray(m.chips)) out.chips = m.chips.map(mapItem);
+                if (m.card) out.card = mapCard(m.card);
+                return out;
+            });
         }
         this._commit(patch);
     }

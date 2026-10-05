@@ -75,12 +75,20 @@
                     </template>
                     <lightning-input label="Brand Name" data-field="brandName" value={config.brandName} onchange={handleInput}></lightning-input>
                     <lightning-input label="Brand Domain" data-field="brandDomain" value={config.brandDomain} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Marketing Sender Avatar" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
-                    <c-demo-story-image label="Logo" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
-                    <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
-                    <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
+                    <template lwc:if={isMessaging}>
+                        <c-demo-story-image label="Primary Logo (banner / card art)" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
+                        <c-demo-story-image label="Secondary Logo (chat avatar — fits a circle)" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    </template>
+                    <template lwc:if={isEmail}>
+                        <c-demo-story-image label="Marketing Sender Avatar" kind="avatar" value={config.marketingAvatarUrl} data-field="marketingAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                        <c-demo-story-image label="Logo" kind="logo" value={config.logoUrl} data-field="logoUrl" onpick={handleImagePick}></c-demo-story-image>
+                        <lightning-input type="number" label="Logo Width (px)" data-field="logoWidth" value={config.logoWidth} onchange={handleInput}></lightning-input>
+                        <div class="color-field"><label class="color-label">Logo Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="logoBgColor" value={config.logoBgColor} onchange={handleInput}></lightning-input></div></div>
+                    </template>
                     <div class="color-field"><label class="color-label">Primary Hex Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="primaryColor" value={config.primaryColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="primaryColor" value={config.primaryColor} onchange={handleInput}></lightning-input></div></div>
-                    <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
+                    <template lwc:if={isEmail}>
+                        <div class="color-field"><label class="color-label">Headline Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="headlineTextColor" value={config.headlineTextColor} onchange={handleInput}></lightning-input></div></div>
+                    </template>
                     <template lwc:if={isMessaging}>
                         <lightning-combobox label="Phone Theme" data-field="theme" value={config.theme}
                             options={themeOptions} onchange={handleDetailField}
@@ -120,14 +128,17 @@
                         value={personaSearch} onchange={handlePersonaSearch}></lightning-input>
                     <lightning-combobox variant="label-hidden" placeholder="Select a persona…"
                         options={filteredPersonaOptions} value={config.personaId} onchange={handlePersona}></lightning-combobox>
-                    <p class="sec-subtitle">Fills name, email, title, company &amp; avatar from the Demo Persona. Override below.</p>
+                    <p class="sec-subtitle">Fills the recipient identity from the Demo Persona. Override below.</p>
                     <lightning-input label="Customer Name" data-field="customerName" value={config.customerName} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Customer Email" data-field="customerEmail" value={config.customerEmail} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Customer Avatar" kind="avatar" value={config.customerAvatarUrl} data-field="customerAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
-                    <lightning-input label="Customer Title" data-field="customerTitle" value={config.customerTitle} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Customer Company" data-field="customerCompany" value={config.customerCompany} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Customer Mobile" data-field="customerMobile" value={config.customerMobile} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Address" data-field="address" value={config.address} onchange={handleInput}></lightning-input>
+                    <!-- These fields only render in the Email sim; the phone sims show just the name. -->
+                    <template lwc:if={isEmail}>
+                        <lightning-input label="Customer Email" data-field="customerEmail" value={config.customerEmail} onchange={handleInput}></lightning-input>
+                        <c-demo-story-image label="Customer Avatar" kind="avatar" value={config.customerAvatarUrl} data-field="customerAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                        <lightning-input label="Customer Title" data-field="customerTitle" value={config.customerTitle} onchange={handleInput}></lightning-input>
+                        <lightning-input label="Customer Company" data-field="customerCompany" value={config.customerCompany} onchange={handleInput}></lightning-input>
+                        <lightning-input label="Customer Mobile" data-field="customerMobile" value={config.customerMobile} onchange={handleInput}></lightning-input>
+                        <lightning-input label="Address" data-field="address" value={config.address} onchange={handleInput}></lightning-input>
+                    </template>
                 </template>
 
                 <template lwc:if={isAgent}>

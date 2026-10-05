@@ -354,8 +354,10 @@ public with sharing class StoryEmailPreviewController {
             'RCS_BRAND_COLOR' => str(c, 'primaryColor', '#2A94D6'),
             'RCS_BRAND_NAME' => brand,
             'RCS_BRAND_INITIALS' => initials(brand),
-            'RCS_BRAND_LOGO_URL' => str(c, 'logoUrl', messagingHeaderAvatar(c)),
-            'RCS_BRAND_BANNER_URL' => str(c, 'heroImageUrl', ''),
+            // Circle avatar = SECONDARY logo (fits a circle); the wide banner =
+            // PRIMARY logo (a wordmark cuts off in the circle).
+            'RCS_BRAND_LOGO_URL' => str(c, 'marketingAvatarUrl', str(c, 'logoUrl', '')),
+            'RCS_BRAND_BANNER_URL' => str(c, 'logoUrl', ''),
             'RCS_BRAND_DESC' => str(c, 'rcsBrandDesc', brand + ' on RCS Business Messaging — offers, updates, and help, right in your messages.'),
             'RCS_BRAND_WEBSITE' => domain,
             'RCS_BRAND_EMAIL' => 'support@' + domain,

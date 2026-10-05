@@ -47,6 +47,45 @@ public with sharing class DemoStoryGenerator {
         }, '\n');
     }
 
+    // RCS: generate the structured row model (rich cards + quick-reply chips +
+    // one chip->rich-card pairing), matching the Studio's RCS message shape.
+    @AuraEnabled
+    public static String generateRcs(String industry, String brand, String context, String angle) {
+        return EinsteinProvider.callAndExtractJson(buildRcsPrompt(industry, brand, context, angle));
+    }
+
+    @TestVisible
+    private static String buildRcsPrompt(String industry, String brand, String context, String angle) {
+        String ind = String.isBlank(industry) ? 'Financial Services' : industry;
+        String br = String.isBlank(brand) ? 'the brand' : brand;
+        String ang = String.isBlank(angle) ? 'a relevant marketing offer' : angle;
+        String ctx = String.isBlank(context)
+            ? ('A ' + ang + ' campaign from ' + br + ' for its ' + ind + ' customers.')
+            : context;
+        return String.join(new List<String>{
+            'You are a senior RCS Business Messaging strategist building a Salesforce demo RCS thread for the ' + ind + ' industry.',
+            'Brand: ' + br + '. Campaign angle: ' + ang + '.',
+            'Campaign context:', ctx, '',
+            'If the context names a recipient, set customerName/customerFirstName (first name = first word); else "".',
+            'Return ONLY one JSON object (no prose/code fences) with this EXACT shape:',
+            '{ "customerFirstName": string, "customerName": string, "messages": [',
+            '  {"sender":"bot","type":"richCardVertical","typingDuration":"off","card":{"mediaType":"image","mediaUrl":"","mediaSize":"medium","title":string,"description":string,"buttons":[{"label":string,"action":"openUrl","target":string}]}},',
+            '  {"sender":"bot","type":"suggestedActions","chips":[{"label":string,"action":"quickReply","responseType":"richCard"},{"label":string,"action":"openUrl","target":string},{"label":string,"action":"dial","target":string}]},',
+            '  {"sender":"bot","type":"richCardVertical","typingDuration":"medium","triggeredBy":"<the label of the chip above whose responseType is richCard>","card":{"mediaType":"image","mediaUrl":"","mediaSize":"medium","title":string,"description":string,"buttons":[{"label":string,"action":"openUrl","target":string}]}},',
+            '  {"sender":"user","type":"text","text":string},',
+            '  {"sender":"bot","type":"text","typingDuration":"long","text":string}',
+            '] }',
+            'Hard rules:',
+            '- Keep EXACTLY these five messages in this order and these types.',
+            '- Message 2 MUST have exactly one chip with "responseType":"richCard"; message 3 is that chip\'s paired follow-up and its "triggeredBy" MUST equal that chip\'s label.',
+            '- Leave every "mediaUrl" as "" (the SE adds images).',
+            '- Use [[CUSTOMER_FIRST_NAME]] and [[BRAND_NAME]] tokens where natural.',
+            '- Message 4 is the recipient asking a realistic question; message 5 is the brand answering it.',
+            complianceRules(ind),
+            'Make all copy specific to the context and industry. Output must be valid JSON with no extra keys.'
+        }, '\n');
+    }
+
     @TestVisible
     private static String buildSmsPrompt(String industry, String brand, String context, String angle) {
         String ind = String.isBlank(industry) ? 'Financial Services' : industry;
