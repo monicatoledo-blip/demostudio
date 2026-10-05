@@ -383,7 +383,9 @@ public with sharing class StoryEmailPreviewController {
     // more .rcs-row units; the ported runtime adds hidden-msg + plays them.
     private static String buildRcsThread(Map<String, Object> c) {
         String brandColor = str(c, 'primaryColor', '#2A94D6');
-        String brandLogo = str(c, 'logoUrl', messagingHeaderAvatar(c));
+        // Hero card logo placeholder uses the PRIMARY logo (transparent wordmark
+        // reads against the gradient); falls back to the secondary.
+        String brandLogo = str(c, 'logoUrl', str(c, 'marketingAvatarUrl', ''));
         String parts = '';
         Integer msgIdx = 0;
         for (Object o : msgList(c)) {
