@@ -292,7 +292,7 @@ public with sharing class StoryEmailPreviewController {
         out = out.replace('[[BRAND_NAME]]', tok.get('BRAND_NAME') == null ? '' : tok.get('BRAND_NAME'));
         out = out.replace('[[BRAND_DOMAIN]]', tok.get('BRAND_DOMAIN') == null ? '' : tok.get('BRAND_DOMAIN'));
         // Remove broken <img> tags whose src resolved to empty (no logo/hero set).
-        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
         // Scripts are KEPT so the 2-way Reply interactivity works in the preview.
         // The preview is a cross-domain Visualforce iframe, so the sim's JS runs in
         // its own frame. (If a future template's JS misbehaves, re-add a strip here.)
@@ -365,7 +365,7 @@ public with sharing class StoryEmailPreviewController {
         }
         out = resolveSharedTokens(out, c);
         // Remove the header avatar <img> if no avatar is set (grey circle shows).
-        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
         // Scripts KEPT so tap-to-reveal plays the 2-way thread.
         return out;
     }
@@ -432,7 +432,7 @@ public with sharing class StoryEmailPreviewController {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
         out = resolveSharedTokens(out, c);
-        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
         return out;
     }
 
@@ -504,7 +504,7 @@ public with sharing class StoryEmailPreviewController {
             out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
         }
         out = resolveSharedTokens(out, c);
-        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        out = out.replaceAll('(?i)<img[^>]{0,600}src="\\s*"[^>]{0,600}>', '');
         return out;
     }
 
