@@ -359,6 +359,12 @@ export default class DemoStoryStudio extends LightningElement {
     @track config = { ...DEFAULTS };
     @track activeSection = 'branding';
     @track previewVersion = 1;
+    // previewVersion resets to 1 on every component load, so the iframe URL
+    // (?id=&v=) repeats across loads and the browser serves a STALE preview.
+    // A monotonic timestamp nonce bumped alongside previewVersion guarantees a
+    // unique URL per intentional reload, defeating that cache. Bumped only on
+    // save/reset (not every render) so the running sim isn't reloaded mid-play.
+    @track previewNonce = Date.now();
     @track brandKits = [];
     @track showBrandPicker = false;
     @track brandSearch = '';
@@ -461,7 +467,7 @@ export default class DemoStoryStudio extends LightningElement {
     // So the preview loads a Visualforce page that renders the saved config.
     get previewUrl() {
         return this.recordId
-            ? '/apex/StoryEmailPreview?id=' + this.recordId + '&v=' + this.previewVersion
+            ? '/apex/StoryEmailPreview?id=' + this.recordId + '&v=' + this.previewVersion + '&n=' + this.previewNonce
             : 'about:blank';
     }
 
@@ -506,6 +512,7 @@ export default class DemoStoryStudio extends LightningElement {
         const pId = getFieldValue(data, PERSONA_FIELD);
         if (pId && !this.config.personaId) { this.applyPersonaById(pId); }
         this.previewVersion++;
+        this.previewNonce = Date.now();
     }
 
     // Current recipient first name (from persona / customer profile) used to
@@ -848,6 +855,7 @@ export default class DemoStoryStudio extends LightningElement {
             } });
             this.saved = true;
             this.previewVersion++; // reload the VF preview to reflect saved config
+            this.previewNonce = Date.now();
         } catch (e) {
             this.toast('Save failed', (e && e.body && e.body.message) || e.message, 'error');
         }
@@ -861,7 +869,7 @@ export default class DemoStoryStudio extends LightningElement {
         this.loading = false;
     }
     // Reload the preview iframe so the 2-way simulation restarts from the top.
-    handleResetPreview() { this.previewVersion++; }
+    handleResetPreview() { this.previewVersion++; this.previewNonce = Date.now(); }
 
     // ---- draggable divider between editor and preview ----
     @track editorWidth = 440;

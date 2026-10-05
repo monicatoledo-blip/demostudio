@@ -484,13 +484,26 @@ public with sharing class StoryEmailPreviewController {
         String url = str(card, 'mediaUrl', '');
         String size = str(card, 'mediaSize', 'medium');
         if (String.isBlank(url)) {
-            // Transparent logo centered on a brand-color gradient (looks right for
-            // transparent logos; the SE can override by setting card media).
+            // No media set: branded placeholder — the brand-color gradient frames
+            // the card (keeps the branded look), and the logo sits on a clean WHITE
+            // chip inside it so it always reads. Without the chip, a transparent
+            // logo with dark/black elements (e.g. Target's black wordmark) is
+            // swallowed by the dark gradient, AND the stylesheet rule
+            // `.rcs-card-media img { background:#000 }` forces a black background on
+            // the <img> itself — together they render as a BLACK BOX behind the
+            // mark. The white chip + an explicit transparent img background fixes it
+            // for ANY brand logo, independent of host (/sfc shepherd, Cloudinary…).
             String logo = String.isBlank(brandLogo) ? '' :
-                '<img alt="" src="' + escapeSms(brandLogo) + '" style="max-width:60%;max-height:60%;object-fit:contain;" referrerpolicy="no-referrer" />';
+                '<div style="background:#ffffff;border-radius:12px;padding:14px 18px;'
+                + 'box-shadow:0 2px 10px rgba(0,0,0,0.18);display:flex;align-items:center;'
+                + 'justify-content:center;max-width:78%;max-height:72%;box-sizing:border-box;">'
+                + '<img alt="" src="' + escapeSms(brandLogo) + '" referrerpolicy="no-referrer" '
+                + 'style="width:auto;height:auto;max-width:100%;max-height:72px;object-fit:contain;'
+                + 'background:transparent;display:block;" /></div>';
             return '<div class="rcs-card-media rcs-card-media-' + escapeSms(size)
-                + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'
-                + escapeSms(brandColor) + ' 0%, ' + escapeSms(brandAccent) + ' 100%);">' + logo + '</div>';
+                + '" style="min-height:150px;display:flex;align-items:center;justify-content:center;'
+                + 'background:linear-gradient(135deg,' + escapeSms(brandColor) + ' 0%, '
+                + escapeSms(brandAccent) + ' 100%);">' + logo + '</div>';
         }
         Boolean isVideo = str(card, 'mediaType', 'image') == 'video';
         String mediaInner = isVideo
