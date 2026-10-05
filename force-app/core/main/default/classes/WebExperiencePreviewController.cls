@@ -33,23 +33,35 @@ public with sharing class WebExperiencePreviewController {
         Demo_Story__c s;
         for (Demo_Story__c r : [
             SELECT Id, Name, Brand__c, Industry__c, Primary_Color__c, Accent_Color__c,
-                   Logo_URL__c, Brand_Domain__c, Persona__c, Config_JSON__c
+                   Logo_URL__c, Brand_Domain__c, Persona__c, Config_JSON__c,
+                   Brand_Kit__c, Brand_Kit__r.Name, Brand_Kit__r.Primary_Color__c,
+                   Brand_Kit__r.Accent_Color__c, Brand_Kit__r.Logo_URL__c,
+                   Brand_Kit__r.Secondary_Logo_URL__c
             FROM Demo_Story__c WHERE Id = :storyId LIMIT 1
         ]) { s = r; }
         if (s == null) {
             return JSON.serialize(new Map<String, Object>{ 'dom' => dom, 'form' => form });
         }
 
-        // --- drivers from the record's structured fields -------------------------
-        putIf(dom, 'adaptiveBrandName', s.Brand__c);
+        // --- resolve brand: the linked Brand Kit (Demo_Theme__c) is the base; the
+        //     record's own fields override it (lets an SE tweak a single value);
+        //     Config_JSON overrides everything below. Mirrors the 2-way sims, so
+        //     swapping the Brand Kit re-skins the site live.
+        Demo_Theme__c kit = s.Brand_Kit__r;
+        String brandName = coalesce(s.Brand__c, kit == null ? null : kit.Name);
+        String primary   = coalesce(s.Primary_Color__c, kit == null ? null : kit.Primary_Color__c);
+        String accent    = coalesce(s.Accent_Color__c, kit == null ? null : kit.Accent_Color__c);
+        String logo      = coalesce(s.Logo_URL__c, kit == null ? null : kit.Logo_URL__c);
+
+        putIf(dom, 'adaptiveBrandName', brandName);
         putIf(dom, 'adaptiveWebSubIndustry', industryKey(s.Industry__c));
-        putIf(form, 'adaptivePrimaryColor', s.Primary_Color__c);
-        putIf(form, 'adaptiveAccentColor', s.Accent_Color__c);
-        putIf(form, 'adaptiveNavLogoUrl', s.Logo_URL__c);
-        putIf(form, 'adaptiveBrandInitials', initials(s.Brand__c));
+        putIf(form, 'adaptivePrimaryColor', primary);
+        putIf(form, 'adaptiveAccentColor', accent);
+        putIf(form, 'adaptiveNavLogoUrl', logo);
+        putIf(form, 'adaptiveBrandInitials', initials(brandName));
         // Hero gradient defaults to the brand's primary/accent when not overridden.
-        putIf(form, 'heroGradientColor', s.Primary_Color__c);
-        putIf(form, 'heroGradientColor2', s.Accent_Color__c);
+        putIf(form, 'heroGradientColor', primary);
+        putIf(form, 'heroGradientColor2', accent);
 
         // --- persona (lookup) -> adaptivePersona* shim fields --------------------
         if (s.Persona__c != null) {
@@ -89,6 +101,10 @@ public with sharing class WebExperiencePreviewController {
 
     private static void putIf(Map<String, Object> m, String k, String v) {
         if (String.isNotBlank(v)) m.put(k, v);
+    }
+
+    private static String coalesce(String a, String b) {
+        return String.isNotBlank(a) ? a : b;
     }
 
     // Brand initials for the engine's avatar/placeholder (adaptiveBrandInitials).

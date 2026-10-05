@@ -1,0 +1,49 @@
+<template>
+    <div class="new-wrap">
+        <div class="new-card">
+            <header class="new-header">
+                <span class="new-icon"><lightning-icon icon-name="utility:world" variant="inverse" size="small"></lightning-icon></span>
+                <div>
+                    <h1 class="new-title">New Personalized Website</h1>
+                    <p class="new-sub">Pick the basics — we'll open the builder. No naming required.</p>
+                </div>
+            </header>
+            <div class="new-body">
+                <div class="ta">
+                    <lightning-input type="search" label="Brand Kit" placeholder="Type to search brands…"
+                        value={brandQuery} onchange={handleBrandInput} onfocus={handleBrandFocus} onblur={handleBrandBlur}></lightning-input>
+                    <template lwc:if={brandOpen}>
+                        <ul class="ta-list">
+                            <template for:each={brandMatches} for:item="o">
+                                <li key={o.value} class="ta-item" data-value={o.value} data-label={o.label} onmousedown={pickBrand}>{o.label}</li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+                <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
+                <div class="ta">
+                    <lightning-input type="search" label="Persona" placeholder="Type to search personas…"
+                        value={personaQuery} onchange={handlePersonaInput} onfocus={handlePersonaFocus} onblur={handlePersonaBlur}></lightning-input>
+                    <template lwc:if={personaOpen}>
+                        <ul class="ta-list">
+                            <template for:each={personaMatches} for:item="o">
+                                <li key={o.value} class="ta-item" data-value={o.value} data-label={o.label} onmousedown={pickPersona}>{o.label}</li>
+                            </template>
+                        </ul>
+                    </template>
+                </div>
+                <div class="rtom-row">
+                    <lightning-input type="toggle" label="Real Time Offer Management"
+                        message-toggle-active="On" message-toggle-inactive="Off"
+                        checked={rtomEnabled} onchange={handleRtom}
+                        field-level-help="Adds a Real Time Offer Management section to the site. You can also toggle this later in the builder."></lightning-input>
+                </div>
+            </div>
+            <footer class="new-footer">
+                <template lwc:if={creating}><lightning-spinner size="small" alternative-text="Creating…"></lightning-spinner></template>
+                <lightning-button variant="brand" label="Create & open" onclick={handleCreate} disabled={creating}></lightning-button>
+            </footer>
+            <p class="new-credit">Built by Monica Toledo</p>
+        </div>
+    </div>
+</template>

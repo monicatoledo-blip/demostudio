@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Brand_Kit__c</fullName>
+    <label>Brand Kit</label>
+    <description>The Demo_Theme__c brand kit this Personalized Website is skinned with. Resolved at preview time (brand name, colors, logo) so swapping the kit re-skins the site live, matching the 2-way sims.</description>
+    <referenceTo>Demo_Theme__c</referenceTo>
+    <relationshipLabel>Personalized Websites</relationshipLabel>
+    <relationshipName>Personalized_Websites</relationshipName>
+    <required>false</required>
+    <type>Lookup</type>
+</CustomField>

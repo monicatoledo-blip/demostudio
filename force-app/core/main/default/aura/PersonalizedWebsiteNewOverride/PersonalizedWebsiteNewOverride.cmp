@@ -1,0 +1,4 @@
+<aura:component implements="lightning:actionOverride,force:hasSObjectName,force:hasRecordId" access="global"
+    description="Guided-create override for the Personalized Website New action; hosts the personalizedWebsiteNew LWC.">
+    <c:personalizedWebsiteNew/>
+</aura:component>
