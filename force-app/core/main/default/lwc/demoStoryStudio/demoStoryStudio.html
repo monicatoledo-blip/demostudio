@@ -86,6 +86,11 @@
                             options={themeOptions} onchange={handleDetailField}
                             field-level-help="Light or dark mode for the simulated phone screen."></lightning-combobox>
                     </template>
+                    <template lwc:if={isRcs}>
+                        <lightning-combobox label="Device" data-field="device" value={config.device}
+                            options={deviceOptions} onchange={handleDetailField}
+                            field-level-help="Android (Google Messages) or iPhone chrome for the RCS preview."></lightning-combobox>
+                    </template>
                 </template>
 
                 <template lwc:if={isTemplate}>
@@ -157,6 +162,19 @@
                             <template lwc:if={isMessaging}>
                                 <c-demo-story-image label="Attach image (optional)" value={m.imageUrl}
                                     data-i={m.i} onpick={handleMsgImage}></c-demo-story-image>
+                            </template>
+                            <template lwc:if={m.showRcs}>
+                                <lightning-input label="Quick-reply chips (comma-separated)" data-i={m.i}
+                                    value={m.chipsStr} onchange={handleChips}
+                                    placeholder="Show me, Use my points, Talk to someone"></lightning-input>
+                                <div class="rcs-card-fields">
+                                    <p class="sec-subtitle">Rich card (optional) — fill a title to show a card instead of a bubble</p>
+                                    <lightning-input label="Card title" data-i={m.i} data-field="title" value={m.cardTitle} onchange={handleCardText}></lightning-input>
+                                    <lightning-input label="Card description" data-i={m.i} data-field="description" value={m.cardDesc} onchange={handleCardText}></lightning-input>
+                                    <c-demo-story-image label="Card image" value={m.cardMedia} data-i={m.i} onpick={handleCardImage}></c-demo-story-image>
+                                    <lightning-input label="Card buttons (comma-separated)" data-i={m.i} value={m.cardButtonsStr} onchange={handleCardButtons}
+                                        placeholder="View details, Hold it for me"></lightning-input>
+                                </div>
                             </template>
                         </div>
                     </template>

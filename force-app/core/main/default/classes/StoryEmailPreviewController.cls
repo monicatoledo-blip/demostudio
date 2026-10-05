@@ -65,7 +65,7 @@ public with sharing class StoryEmailPreviewController {
 
         if (ch == 'sms') return renderSms(tpl, c);
         else if (ch == 'whatsapp') return renderWhatsapp(tpl, c);
-        // RCS branch is added in its own build phase.
+        else if (ch == 'rcs') return renderRcs(tpl, c);
         return renderEmail(tpl, c);
     }
 
@@ -336,5 +336,116 @@ public with sharing class StoryEmailPreviewController {
             bits += '<img class="msg-attached-image" src="' + escapeSms(img) + '" alt="" loading="lazy" referrerpolicy="no-referrer" />';
         }
         return bits;
+    }
+
+    // ----------------------------------------------------------------------
+    // RCS — verified-brand header + text bubbles + quick-reply chips + rich
+    // cards (ported from renderRcsBubble/renderRcsChipsRow/renderRcsCard,
+    // script.js:7948+). Same compose/typing playback engine as SMS/WhatsApp.
+    // ----------------------------------------------------------------------
+    private static String renderRcs(String tpl, Map<String, Object> c) {
+        String brand = str(c, 'brandName', 'Cumulus Financial');
+        String domain = str(c, 'brandDomain', 'cumulusfinserv.com');
+        Map<String, String> tok = new Map<String, String>{
+            'RCS_THREAD_HTML' => buildRcsThread(c),
+            'RCS_DEVICE' => rcsDevice(c),
+            'RCS_THEME' => smsTheme(c),
+            'RCS_VERIFIED' => 'verified',
+            'RCS_BRAND_COLOR' => str(c, 'primaryColor', '#2A94D6'),
+            'RCS_BRAND_NAME' => brand,
+            'RCS_BRAND_INITIALS' => initials(brand),
+            'RCS_BRAND_LOGO_URL' => str(c, 'logoUrl', messagingHeaderAvatar(c)),
+            'RCS_BRAND_BANNER_URL' => str(c, 'heroImageUrl', ''),
+            'RCS_BRAND_DESC' => str(c, 'rcsBrandDesc', brand + ' on RCS Business Messaging — offers, updates, and help, right in your messages.'),
+            'RCS_BRAND_WEBSITE' => domain,
+            'RCS_BRAND_EMAIL' => 'support@' + domain,
+            'RCS_BRAND_PHONE' => str(c, 'rcsBrandPhone', '+1 (312) 555-0180'),
+            'RCS_BRAND_TERMS_URL' => domain + '/terms'
+        };
+        String out = tpl;
+        for (String k : tok.keySet()) {
+            out = out.replace('[[' + k + ']]', tok.get(k) == null ? '' : tok.get(k));
+        }
+        out = resolveSharedTokens(out, c);
+        out = out.replaceAll('(?i)<img[^>]*src="\\s*"[^>]*>', '');
+        return out;
+    }
+
+    private static String rcsDevice(Map<String, Object> c) {
+        String d = str(c, 'device', 'android');
+        return (d == 'ios') ? 'ios' : 'android';
+    }
+
+    private static String buildRcsThread(Map<String, Object> c) {
+        String parts = '';
+        for (Object o : msgList(c)) {
+            if (!(o instanceof Map<String, Object>)) continue;
+            Map<String, Object> m = (Map<String, Object>) o;
+            String sender = String.valueOf(m.get('sender')) == 'user' ? 'user' : 'bot';
+            String text = m.get('text') == null ? '' : String.valueOf(m.get('text'));
+            Map<String, Object> card = (m.get('card') instanceof Map<String, Object>) ? (Map<String, Object>) m.get('card') : null;
+            List<Object> chips = (m.get('chips') instanceof List<Object>) ? (List<Object>) m.get('chips') : new List<Object>();
+
+            // A rich card (bot only) replaces the bubble; else a text bubble
+            // (if any) followed by a quick-reply chip row (if any).
+            if (sender == 'bot' && card != null && rcsCardHasContent(card)) {
+                parts += rcsCardRow(card);
+            } else {
+                if (String.isNotBlank(text)) parts += rcsBubbleRow(sender, text);
+                if (sender == 'bot' && !chips.isEmpty()) parts += rcsChipsRow(chips);
+            }
+        }
+        return parts;
+    }
+
+    private static String rcsBubbleRow(String sender, String text) {
+        String side = sender == 'user' ? 'rcs-row-user' : 'rcs-row-bot';
+        String skin = sender == 'user' ? 'rcs-bubble-user' : 'rcs-bubble-bot';
+        return '<div class="rcs-row ' + side + ' hidden-msg" data-sender="' + sender + '">'
+            + '<div class="rcs-bubble ' + skin + '"><div class="rcs-copy">' + smsBubble(text) + '</div></div></div>';
+    }
+
+    private static String rcsChipsRow(List<Object> chips) {
+        String items = '';
+        for (Object ch : chips) {
+            String label = (ch == null) ? '' : String.valueOf(ch);
+            if (String.isBlank(label)) continue;
+            items += '<button type="button" class="rcs-chip" data-action="quickReply" data-label="'
+                + escapeSms(label) + '"><span class="rcs-chip-label-text">' + escapeSms(label) + '</span></button>';
+        }
+        if (String.isBlank(items)) return '';
+        return '<div class="rcs-row rcs-row-bot hidden-msg" data-sender="bot">'
+            + '<div class="rcs-chips-row">' + items + '</div></div>';
+    }
+
+    private static Boolean rcsCardHasContent(Map<String, Object> card) {
+        return String.isNotBlank(str(card, 'title', '')) || String.isNotBlank(str(card, 'description', ''))
+            || String.isNotBlank(str(card, 'mediaUrl', ''));
+    }
+
+    private static String rcsCardRow(Map<String, Object> card) {
+        String media = '';
+        String url = str(card, 'mediaUrl', '');
+        if (String.isNotBlank(url)) {
+            media = '<div class="rcs-card-media rcs-card-media-medium"><img alt="" src="' + escapeSms(url)
+                + '" loading="lazy" referrerpolicy="no-referrer" /></div>';
+        }
+        String title = String.isNotBlank(str(card, 'title', '')) ? '<h4 class="rcs-card-title-text">' + smsBubble(str(card, 'title', '')) + '</h4>' : '';
+        String descHtml = String.isNotBlank(str(card, 'description', '')) ? '<p class="rcs-card-desc">' + smsBubble(str(card, 'description', '')) + '</p>' : '';
+        String buttons = '';
+        Object b = card.get('buttons');
+        if (b instanceof List<Object>) {
+            String btns = '';
+            for (Object o : (List<Object>) b) {
+                String label = (o == null) ? '' : String.valueOf(o);
+                if (String.isBlank(label)) continue;
+                btns += '<button type="button" class="rcs-card-btn" data-action="openUrl" data-label="'
+                    + escapeSms(label) + '">' + escapeSms(label) + '</button>';
+            }
+            if (String.isNotBlank(btns)) buttons = '<div class="rcs-card-buttons">' + btns + '</div>';
+        }
+        return '<div class="rcs-row rcs-row-bot hidden-msg" data-sender="bot">'
+            + '<div class="rcs-card rcs-card-vertical">' + media
+            + '<div class="rcs-card-body">' + title + descHtml + buttons + '</div></div></div>';
     }
 }

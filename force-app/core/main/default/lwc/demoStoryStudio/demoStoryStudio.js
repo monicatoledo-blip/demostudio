@@ -22,6 +22,7 @@ const DEFAULTS = {
     // Channel + messaging-channel appearance (shared by SMS/WhatsApp/RCS)
     channel: 'Email',
     theme: 'light',
+    device: 'android',
     messagingAgentHeader: '',
     // Branding
     subjectLine: 'A smarter way to save is here',
@@ -198,6 +199,27 @@ function messagingSeedFor(industry) {
     return pack.map((m) => ({ ...m }));
 }
 
+// RCS seed — showcases the channel's signature pieces: quick-reply chips on
+// the opening message and a rich card as the agent's answer, ending on an
+// agent escalation. Returns fresh (deep) objects each call.
+function rcsSeedFor() {
+    return [
+        { sender: 'bot', text: 'Hi [[CUSTOMER_FIRST_NAME]], it’s [[BRAND_NAME]] ✨ We lined up something just for you.',
+          chips: ['Show me', 'Use my points', 'Talk to someone'] },
+        { sender: 'user', text: 'Show me' },
+        { sender: 'bot', card: {
+            mediaUrl: '', title: 'Members-only offer',
+            description: 'A pick tailored to you from [[BRAND_NAME]] — available for a limited time.',
+            buttons: ['View details', 'Hold it for me'] } },
+        { sender: 'user', text: 'Can my points cover it?' },
+        { sender: 'bot', text: 'Great question — yes, your points can apply here. Want me to connect you with a specialist to finalize?' }
+    ].map((m) => ({ ...m, chips: m.chips ? [...m.chips] : undefined, card: m.card ? { ...m.card, buttons: [...(m.card.buttons || [])] } : undefined }));
+}
+// Seed the right thread for a messaging channel.
+function seedFor(channel, industry) {
+    return channel === 'RCS' ? rcsSeedFor() : messagingSeedFor(industry);
+}
+
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
     { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
@@ -347,12 +369,13 @@ export default class DemoStoryStudio extends LightningElement {
         // record's industry (the email industry packs are recipient-first).
         const prevInd = this._recordIndustry;
         if (!raw && channel !== 'Email') {
-            this.config = { ...this.config, messages: messagingSeedFor(ind) };
-        } else if (raw && channel !== 'Email' && ind && prevInd && ind !== prevInd && this.isPristineThread()) {
+            this.config = { ...this.config, messages: seedFor(channel, ind) };
+        } else if (raw && channel !== 'Email' && channel !== 'RCS' && ind && prevInd && ind !== prevInd && this.isPristineThread()) {
             // Existing messaging record whose Industry changed and whose thread
             // is still an unedited seed — swap in the new industry's thread and
-            // persist it. (Hand-edited threads are left untouched.)
-            this.config = { ...this.config, messages: messagingSeedFor(ind) };
+            // persist it. (Hand-edited threads are left untouched. RCS uses one
+            // showcase thread, so it isn't industry-swapped here.)
+            this.config = { ...this.config, messages: seedFor(channel, ind) };
             this.saved = false;
             this.scheduleAutosave();
         }
@@ -411,6 +434,9 @@ export default class DemoStoryStudio extends LightningElement {
     get previewLabel() { return 'Live Preview · 2-Way ' + this.channelLabel; }
     get themeOptions() {
         return [{ label: 'Light', value: 'light' }, { label: 'Dark', value: 'dark' }];
+    }
+    get deviceOptions() {
+        return [{ label: 'Android', value: 'android' }, { label: 'iPhone', value: 'ios' }];
     }
 
     // ---- sections / nav
@@ -477,11 +503,51 @@ export default class DemoStoryStudio extends LightningElement {
         this.scheduleAutosave();
     }
     get decoratedMessages() {
-        return (this.config.messages || []).map((m, i) => ({
-            i, sender: m.sender || 'user', text: this.resolveTokens(m.text),
-            imageUrl: m.imageUrl || '',
-            rowLabel: 'Message ' + (i + 1)
-        }));
+        return (this.config.messages || []).map((m, i) => {
+            const card = m.card || {};
+            return {
+                i, sender: m.sender || 'user', text: this.resolveTokens(m.text),
+                imageUrl: m.imageUrl || '',
+                rowLabel: 'Message ' + (i + 1),
+                // RCS extras (shown only on RCS, bot messages)
+                isBot: (m.sender || 'user') === 'bot',
+                showRcs: this.isRcs && (m.sender || 'user') === 'bot',
+                chipsStr: Array.isArray(m.chips) ? m.chips.join(', ') : '',
+                cardTitle: this.resolveTokens(card.title),
+                cardDesc: this.resolveTokens(card.description),
+                cardMedia: card.mediaUrl || '',
+                cardButtonsStr: Array.isArray(card.buttons) ? card.buttons.join(', ') : ''
+            };
+        });
+    }
+    _patchMsg(i, patch) {
+        const msgs = this.config.messages.map((m, idx) => idx === i ? { ...m, ...patch } : m);
+        this._commit({ messages: msgs });
+    }
+    _patchCard(i, field, value) {
+        const msgs = this.config.messages.map((m, idx) => {
+            if (idx !== i) return m;
+            return { ...m, card: { ...(m.card || {}), [field]: value } };
+        });
+        this._commit({ messages: msgs });
+    }
+    handleChips(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        const chips = (e.target.value || '').split(',').map((s) => s.trim()).filter((s) => s);
+        this._patchMsg(i, { chips });
+    }
+    handleCardText(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        this._patchCard(i, e.currentTarget.dataset.field, e.target.value);
+    }
+    handleCardButtons(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        const buttons = (e.target.value || '').split(',').map((s) => s.trim()).filter((s) => s);
+        this._patchCard(i, 'buttons', buttons);
+    }
+    handleCardImage(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        this._patchCard(i, 'mediaUrl', e.detail.url);
     }
     // Attach/replace an image on a message (same library picker as the hero).
     handleMsgImage(e) {
@@ -587,7 +653,7 @@ export default class DemoStoryStudio extends LightningElement {
         this.genIndustry = e.detail.value;
         if (this.isMessaging) {
             // Messaging channels only have a thread — swap in that industry's.
-            this._commit({ messages: messagingSeedFor(this.genIndustry) });
+            this._commit({ messages: seedFor(this.channel, this.genIndustry) });
             return;
         }
         const pack = INDUSTRY_PACKS[this.genIndustry];
