@@ -1,0 +1,93 @@
+<template>
+    <div class="studio-frame" style={frameStyle}>
+        <header class="studio-toolbar">
+            <div class="studio-toolbar-left">
+                <span class="studio-logo">
+                    <lightning-icon icon-name="utility:world" variant="inverse" size="small"></lightning-icon>
+                </span>
+                <div class="studio-title-wrap">
+                    <h1 class="studio-title">Website Studio</h1>
+                    <p class="studio-subtitle">{subtitle}</p>
+                </div>
+            </div>
+            <div class="studio-toolbar-right">
+                <span class={saveClass}>{saveLabel}</span>
+                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                    alternative-text="Reload preview" title="Reload preview"
+                    onclick={handleResetPreview} class="slds-m-left_x-small"></lightning-button-icon>
+                <lightning-button label="Deploy to Org" variant="brand" onclick={handleDeploy}
+                    disabled={deploying} class="slds-m-left_x-small"></lightning-button>
+                <template lwc:if={deployed}>
+                    <lightning-button label="Tear Down" variant="destructive-text" onclick={handleTeardown}
+                        disabled={deploying} class="slds-m-left_xx-small"></lightning-button>
+                </template>
+            </div>
+        </header>
+
+        <div class="studio-split">
+            <nav class="studio-rail">
+                <template for:each={sections} for:item="t">
+                    <button key={t.id} class={t.cls} data-id={t.id} onclick={handleTab}>
+                        <lightning-icon icon-name={t.icon} size="x-small" class="rail-icon"></lightning-icon>
+                        <span class="rail-label">{t.label}</span>
+                    </button>
+                </template>
+                <div class="rail-credit">Built by Monica Toledo</div>
+            </nav>
+
+            <section class="studio-editor">
+                <template lwc:if={isBranding}>
+                    <h2 class="sec-title">Branding</h2>
+                    <div class="kit-grid">
+                        <template for:each={brandKits} for:item="k">
+                            <button key={k.value} class={k.cls} data-value={k.value} onclick={pickKit}>
+                                <span class="kit-swatch">
+                                    <template lwc:if={k.logo}><img src={k.logo} alt={k.label} /></template>
+                                </span>
+                                <span class="kit-name">{k.label}</span>
+                            </button>
+                        </template>
+                    </div>
+                    <p class="sec-subtitle">The site re-skins to the selected Brand Kit's colors and logo.</p>
+                </template>
+
+                <template lwc:if={isCustomer}>
+                    <h2 class="sec-title">Customer Profile</h2>
+                    <lightning-combobox label="Persona" value={personaValue} options={personaOptions}
+                        placeholder="Select a persona" onchange={handlePersona}></lightning-combobox>
+                    <p class="sec-subtitle">Drives the personalized ("warm") experience — the returning visitor.</p>
+                </template>
+
+                <template lwc:if={isContent}>
+                    <h2 class="sec-title">Content</h2>
+                    <lightning-combobox label="Industry" value={industry} options={industryOptions}
+                        onchange={handleIndustry}></lightning-combobox>
+                    <p class="sec-subtitle">Leave fields blank to use the per-industry defaults.</p>
+                    <template for:each={contentFields} for:item="f">
+                        <lightning-input key={f.key} label={f.label} value={f.value}
+                            data-key={f.key} onchange={handleContent}></lightning-input>
+                    </template>
+                </template>
+
+                <template lwc:if={isOffers}>
+                    <h2 class="sec-title">Real-Time Offers</h2>
+                    <lightning-input type="toggle" label="Real Time Offer Management"
+                        message-toggle-active="On" message-toggle-inactive="Off"
+                        checked={rtom} onchange={handleRtom}
+                        field-level-help="Adds a Real Time Offer Management section to the site."></lightning-input>
+                    <p class="sec-subtitle">Roadmap: this will provision and render a live RTOM offer section. Today it is the toggle/scaffold.</p>
+                </template>
+            </section>
+
+            <aside class="studio-preview">
+                <header class="preview-header">
+                    <lightning-icon icon-name="utility:preview" size="xx-small"></lightning-icon>
+                    <span>Live preview</span>
+                </header>
+                <div class="preview-canvas">
+                    <iframe class="preview-iframe" title="Personalized Website preview" src={previewUrl}></iframe>
+                </div>
+            </aside>
+        </div>
+    </div>
+</template>

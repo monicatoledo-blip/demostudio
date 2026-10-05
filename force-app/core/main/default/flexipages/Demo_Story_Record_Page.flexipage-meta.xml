@@ -3,20 +3,14 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>force:detailPanel</componentName>
-                <identifier>force_detailPanel_1</identifier>
-            </componentInstance>
-        </itemInstances>
-        <itemInstances>
-            <componentInstance>
-                <componentName>force:relatedListContainer</componentName>
-                <identifier>force_relatedListContainer_1</identifier>
+                <componentName>c:personalizedWebsiteStudio</componentName>
+                <identifier>personalizedWebsiteStudio_1</identifier>
             </componentInstance>
         </itemInstances>
         <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>Demo Story Record Page</masterLabel>
+    <masterLabel>Personalized Website Record Page</masterLabel>
     <sobjectType>Demo_Story__c</sobjectType>
     <template>
         <name>flexipage:recordHomeSingleColNoHeaderTemplateDesktop</name>
