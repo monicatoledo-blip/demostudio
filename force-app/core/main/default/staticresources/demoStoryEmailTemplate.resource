@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unlock Smart Wealth Building - Inbox - Gmail</title>
+    <title>[[SUBJECT_LINE]] - Inbox - Gmail</title>
     <style>
         @font-face {
             font-family: 'Salesforce Sans';
