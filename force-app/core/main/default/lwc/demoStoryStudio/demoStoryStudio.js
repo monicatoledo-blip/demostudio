@@ -306,11 +306,10 @@ function seedFor(channel, industry) {
 
 const SECTIONS = [
     { key: 'branding', label: 'Branding', icon: 'utility:brush' },
-    { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
-    // On messaging channels the agent identity merges into the Messages
-    // section, so the standalone AI Agent tab is email-only.
-    { key: 'agent', label: 'AI Agent', icon: 'utility:einstein', channels: ['Email'] },
     { key: 'template', label: 'Email Template', icon: 'utility:email', channels: ['Email'] },
+    { key: 'customer', label: 'Customer Profile', icon: 'utility:user' },
+    // The AI agent is a single identity, so it lives inside Messages on every
+    // channel (no standalone tab) — matching the messaging channels.
     { key: 'convo', label: 'Messages', icon: 'utility:chat' }
 ];
 
@@ -640,7 +639,6 @@ export default class DemoStoryStudio extends LightningElement {
     get isBranding() { return this.activeSection === 'branding'; }
     get isTemplate() { return this.activeSection === 'template'; }
     get isCustomer() { return this.activeSection === 'customer'; }
-    get isAgent() { return this.activeSection === 'agent'; }
     get isConvo() { return this.activeSection === 'convo'; }
     get subtitle() { return (this.config.brandName || 'New') + ' · 2-Way ' + this.channelLabel; }
     handleTab(e) { this.activeSection = e.currentTarget.dataset.key; }
