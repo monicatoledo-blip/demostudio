@@ -64,14 +64,14 @@
       .a-header .a-back { width: 28px; text-align: center; color: #444; font-size: 20px; cursor: default; user-select: none; }
       .a-header .a-avatar {
         width: 34px; height: 34px; border-radius: 50%;
-        background: var(--rcs-brand, #2A94D6);
-        color: #fff;
+        background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
+        color: var(--rcs-brand, #2A94D6);
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 13px;
         overflow: hidden;
         flex-shrink: 0;
       }
-      .a-header .a-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .a-header .a-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
       .a-header .a-name {
         flex: 1; min-width: 0;
         display: flex; align-items: center; gap: 6px;
@@ -348,8 +348,8 @@
       .rcs-detail-icon {
         width: 74px; height: 74px;
         border-radius: 18px;      /* squircle-like on iOS */
-        background: var(--rcs-brand, #2A94D6);
-        color: #fff;
+        background: #ffffff;
+        color: var(--rcs-brand, #2A94D6);
         display: flex; align-items: center; justify-content: center;
         font-family: "Open Sans", sans-serif;
         font-weight: 700;
@@ -360,7 +360,7 @@
         position: relative;
       }
       .rcs-detail-icon img {
-        width: 100%; height: 100%; object-fit: cover; display: block;
+        width: 100%; height: 100%; object-fit: contain; padding: 10px; display: block;
       }
       .rcs-detail-icon img + .rcs-brand-card-logo-fallback { display: none; }
       .rcs-detail-name {
@@ -565,14 +565,14 @@
         width: 34px; height: 34px;
         /* iOS uses a squircle (rounded square), not a circle, for RBM brand icons */
         border-radius: 9px;
-        background: var(--rcs-brand, #2A94D6);
-        color: #fff;
+        background: #ffffff; border: 1px solid rgba(0,0,0,0.08);
+        color: var(--rcs-brand, #2A94D6);
         display: flex; align-items: center; justify-content: center;
         font-weight: 700; font-size: 13px;
         overflow: hidden;
         margin-bottom: 2px;
       }
-      .i-avatar img { width: 100%; height: 100%; object-fit: cover; }
+      .i-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 3px; }
       .i-brand-name {
         display: flex; align-items: center; gap: 2px;
         font-size: 11px; color: #000;
@@ -756,7 +756,7 @@
       html[data-theme="dark"] .rcs-card-btn.is-selected {
         background: rgba(138, 180, 248, 0.15);
       }
-      html[data-theme="dark"] .rcs-card-media { background: #0a0a0c; }
+      html[data-theme="dark"] .rcs-card-media { background: #ffffff; }
 
       /* Chips in dark mode */
       html[data-theme="dark"][data-device="android"] .rcs-chip {
@@ -879,30 +879,30 @@
       .rcs-detail-a-kebab { font-size: 20px; color: #5f6368; user-select: none; }
       .rcs-detail-a-banner {
         width: 100%; height: 140px;
-        background: linear-gradient(180deg, #7fc0ea 0%, #4a9ed5 100%);
+        background: #ffffff;
         overflow: hidden; position: relative;
         flex-shrink: 0;
       }
       .rcs-detail-a-banner img {
         position: absolute; inset: 0;
-        width: 100%; height: 100%; object-fit: cover;
+        width: 100%; height: 100%; object-fit: contain; padding: 18px;
       }
       .rcs-detail-a-logo {
         width: 96px; height: 96px;
         border-radius: 50%;
-        background: var(--rcs-brand, #2A94D6);
+        background: #ffffff;
         border: 4px solid #fff;
         margin: -48px auto 0;
         overflow: hidden;
         display: flex; align-items: center; justify-content: center;
-        color: #fff;
+        color: var(--rcs-brand, #2A94D6);
         font-family: "Open Sans", sans-serif;
         font-weight: 700; font-size: 22px;
         box-shadow: 0 3px 10px rgba(0,0,0,0.10);
         position: relative; z-index: 1;
         flex-shrink: 0;
       }
-      .rcs-detail-a-logo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+      .rcs-detail-a-logo img { width: 100%; height: 100%; object-fit: contain; padding: 14px; display: block; }
       .rcs-detail-a-logo img + .rcs-brand-card-logo-fallback { display: none; }
       .rcs-detail-a-name {
         text-align: center;

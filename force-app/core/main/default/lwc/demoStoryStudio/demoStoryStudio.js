@@ -288,10 +288,8 @@ function rcsSeedFor(industry) {
             { label: v.chipDial, action: 'dial', target: '+15551234567' }
           ] },
         { sender: 'bot', type: 'richCardVertical', typingDuration: 'medium', triggeredBy: v.chipRich,
-          // Media left blank (brand-neutral placeholder) — the SE drops in a
-          // lifestyle "on the go" photo via Card image. (A hosted generic asset
-          // wasn't available to default here.)
-          card: { mediaType: 'image', mediaUrl: '', mediaSize: 'medium',
+          // Generic (unbranded) "on the go" lifestyle photo.
+          card: { mediaType: 'image', mediaUrl: 'https://res.cloudinary.com/dfx98jgdc/image/upload/v1788281554/experience-generator/bbnai2sruqpxwkiud3xb.png', mediaSize: 'medium',
             title: v.t3, description: v.d3,
             buttons: [{ label: v.cta3, action: 'openUrl', target: 'https://apps.apple.com/' }] } },
         { sender: 'user', type: 'text', text: v.q },
