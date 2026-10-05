@@ -383,7 +383,10 @@
                             </ul>
                         </template>
                     </div>
-                    <p class="gen-hint">Lands in the chosen content workspace (remembers your last pick). The hero comes through as a Dynamic-Content-ready image component.</p>
+                    <template lwc:if={mcaDestinationLabel}>
+                        <p class="gen-hint"><strong>Your email will be built in:</strong> {mcaDestinationLabel}</p>
+                    </template>
+                    <p class="gen-hint">Builds a real MCA email asset in the chosen workspace (remembers your last pick). The hero comes through as a Dynamic-Content-ready image component.</p>
                     <template lwc:if={mcaResultUrl}>
                         <div class="gen-copy-callout">
                             <p class="gen-copy-callout-label">Deployed! Open it in Marketing Cloud:</p>

@@ -20,6 +20,11 @@ public with sharing class StoryMcaExportService {
     @TestVisible private static String spaceId;    // CMS content space id (resolved if null)
     @TestVisible private static String dataGraph = 'Marketing_Content_Personalizat';
     private static final String CMS_PATH = '/services/data/v62.0/connect/cms/contents';
+    // The /connect/cms/spaces list defaults to a page size of 25 and exposes no
+    // paging token, so content-rich orgs silently drop workspaces from the picker
+    // (verified in Cumulus Jr: DEMOS + the second-BU workspace were missing until
+    // pageSize was raised). 200 returns all of them in the orgs we target.
+    private static final String SPACES_PATH = '/services/data/v62.0/connect/cms/spaces?pageSize=200';
 
     public class ExportException extends Exception {}
 
@@ -54,7 +59,7 @@ public with sharing class StoryMcaExportService {
         String def;
         try { def = resolveSpaceId(); } catch (Exception e) { def = null; }
         try {
-            HttpResponse res = send('GET', '/services/data/v62.0/connect/cms/spaces', null);
+            HttpResponse res = send('GET', SPACES_PATH, null);
             // Surface a non-200 instead of silently returning an empty picker —
             // that was hiding the Lightning-session 401 (modal opened, dropdown
             // empty, no toast). Now the SE sees why.
@@ -213,7 +218,7 @@ public with sharing class StoryMcaExportService {
             return String.valueOf(ars[0].get('sid'));
         }
         // Fresh org with no email yet — pick a CMS space by name.
-        HttpResponse res = send('GET', '/services/data/v62.0/connect/cms/spaces', null);
+        HttpResponse res = send('GET', SPACES_PATH, null);
         if (res.getStatusCode() == 200) {
             Map<String, Object> j = (Map<String, Object>) JSON.deserializeUntyped(res.getBody());
             Object sp = j.get('spaces');

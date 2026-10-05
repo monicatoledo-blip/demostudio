@@ -965,6 +965,12 @@ export default class DemoStoryStudio extends LightningElement {
     // click to pick. When the field holds the current selection's label (no new
     // typing), show the FULL list so it's easy to switch.
     @track showMcaWsList = false;
+    // The resolved destination workspace label, so the modal states plainly where
+    // the email will be built (not just the search box text).
+    get mcaDestinationLabel() {
+        const o = (this.mcaWorkspaceOptions || []).find((x) => x.value === this.mcaWorkspaceId);
+        return o ? o.label : '';
+    }
     get filteredMcaWorkspaces() {
         const all = this.mcaWorkspaceOptions || [];
         const sel = all.find((o) => o.value === this.mcaWorkspaceId);
