@@ -492,6 +492,37 @@ export default class DemoStoryStudio extends LightningElement {
     }
     get rcsTypeOptions() { return RCS_TYPES; }
     get rcsTypingOptions() { return RCS_TYPING; }
+    get rcsActionOptions() {
+        return [
+            { label: 'Quick reply', value: 'quickReply' },
+            { label: 'Open URL', value: 'openUrl' },
+            { label: 'Dial phone', value: 'dial' },
+            { label: 'View location', value: 'viewLocation' },
+            { label: 'Add to calendar', value: 'createCalendarEvent' }
+        ];
+    }
+    get rcsResponseOptions() {
+        return [
+            { label: 'No scripted response', value: '' },
+            { label: 'Text bubble', value: 'text' },
+            { label: 'Rich card (auto-appends next in thread)', value: 'richCard' }
+        ];
+    }
+    // Build a display descriptor for one chip/button (action row).
+    _actionRow(x, ci) {
+        const o = (x && typeof x === 'object') ? x : { label: x || '', action: 'quickReply' };
+        const action = o.action || 'quickReply';
+        const showTarget = ['openUrl', 'dial', 'viewLocation', 'createCalendarEvent'].includes(action);
+        const targetLabel = action === 'dial' ? 'Phone' : action === 'viewLocation' ? 'Location'
+            : action === 'createCalendarEvent' ? 'Event' : 'URL';
+        const responseType = o.responseType || '';
+        return {
+            ci, label: o.label || '', action, target: o.target || '',
+            responseType, response: o.response || '',
+            isQuickReply: action === 'quickReply', showTarget, targetLabel,
+            showRespText: responseType === 'text', triggersCard: responseType === 'richCard'
+        };
+    }
     handleRcsType(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
         this._patchMsg(i, { type: e.detail.value });
@@ -616,11 +647,11 @@ export default class DemoStoryStudio extends LightningElement {
                 // non-RCS messaging keeps the simple bubble+image editor
                 showSimple: !this.isRcs,
                 showRcsImage: this.isRcs && (type === 'text' || type === 'quickReplies'),
-                chipsStr: this._labels(m.chips),
+                chipRows: (Array.isArray(m.chips) ? m.chips : []).map((ch, ci) => this._actionRow(ch, ci)),
+                buttonRows: (Array.isArray(card.buttons) ? card.buttons : []).map((b, ci) => this._actionRow(b, ci)),
                 cardTitle: this.resolveTokens(card.title),
                 cardDesc: this.resolveTokens(card.description),
-                cardMedia: card.mediaUrl || '',
-                cardButtonsStr: this._labels(card.buttons)
+                cardMedia: card.mediaUrl || ''
             };
         });
     }
@@ -657,18 +688,78 @@ export default class DemoStoryStudio extends LightningElement {
             return { label, action: 'quickReply' };
         });
     }
-    handleChips(e) {
-        const i = parseInt(e.currentTarget.dataset.i, 10);
-        this._patchMsg(i, { chips: this._mergeLabels(this.config.messages[i].chips, e.target.value) });
-    }
     handleCardText(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
         this._patchCard(i, e.currentTarget.dataset.field, e.target.value);
     }
-    handleCardButtons(e) {
+
+    // ---- structured chip / card-button authoring (EG parity) ----
+    // list = 'chips' (on the message) or 'buttons' (on the message's card).
+    _getList(m, list) {
+        if (list === 'buttons') return Array.isArray(m.card && m.card.buttons) ? m.card.buttons : [];
+        return Array.isArray(m.chips) ? m.chips : [];
+    }
+    _setList(i, list, nextList, extraPairLabel) {
+        let msgs = this.config.messages.map((m, idx) => {
+            if (idx !== i) return m;
+            if (list === 'buttons') return { ...m, card: { ...(m.card || {}), buttons: nextList } };
+            return { ...m, chips: nextList };
+        });
+        if (extraPairLabel) msgs = this._ensurePairedCard(msgs, i, extraPairLabel);
+        this._commit({ messages: msgs });
+    }
+    _asObj(x) { return (x && typeof x === 'object') ? { ...x } : { label: x || '', action: 'quickReply' }; }
+    _rowFieldPatch(i, list, c, patch, pairLabel) {
+        const arr = this._getList(this.config.messages[i], list).map((x, j) => j === c ? { ...this._asObj(x), ...patch } : x);
+        this._setList(i, list, arr, pairLabel);
+    }
+    addChip(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);
-        const existing = (this.config.messages[i].card || {}).buttons;
-        this._patchCard(i, 'buttons', this._mergeLabels(existing, e.target.value));
+        this._setList(i, 'chips', [...this._getList(this.config.messages[i], 'chips'), { label: 'New chip', action: 'quickReply' }]);
+    }
+    removeChip(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10); const c = parseInt(e.currentTarget.dataset.c, 10);
+        this._setList(i, 'chips', this._getList(this.config.messages[i], 'chips').filter((x, j) => j !== c));
+    }
+    addButton(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10);
+        this._setList(i, 'buttons', [...this._getList(this.config.messages[i], 'buttons'), { label: 'New button', action: 'openUrl' }]);
+    }
+    removeButton(e) {
+        const i = parseInt(e.currentTarget.dataset.i, 10); const c = parseInt(e.currentTarget.dataset.c, 10);
+        this._setList(i, 'buttons', this._getList(this.config.messages[i], 'buttons').filter((x, j) => j !== c));
+    }
+    // Field edits — dataset: i (message), c (item), list ('chips'|'buttons'), field.
+    handleActionLabel(e) { this._rowFieldPatch(+e.currentTarget.dataset.i, e.currentTarget.dataset.list, +e.currentTarget.dataset.c, { label: e.target.value }); }
+    handleActionTarget(e) { this._rowFieldPatch(+e.currentTarget.dataset.i, e.currentTarget.dataset.list, +e.currentTarget.dataset.c, { target: e.target.value }); }
+    handleActionText(e) { this._rowFieldPatch(+e.currentTarget.dataset.i, e.currentTarget.dataset.list, +e.currentTarget.dataset.c, { response: e.target.value }); }
+    handleActionType(e) {
+        this._rowFieldPatch(+e.currentTarget.dataset.i, e.currentTarget.dataset.list, +e.currentTarget.dataset.c, { action: e.detail.value });
+    }
+    handleActionResponse(e) {
+        const i = +e.currentTarget.dataset.i, c = +e.currentTarget.dataset.c, list = e.currentTarget.dataset.list;
+        const rt = e.detail.value;
+        const label = this._asObj(this._getList(this.config.messages[i], list)[c]).label;
+        // Setting a rich-card response inserts the paired follow-up card after this message.
+        this._rowFieldPatch(i, list, c, { responseType: rt }, rt === 'richCard' ? label : null);
+    }
+    // Insert a paired rich-card message right after message i (positional
+    // pairing) unless the next message is already a triggered follow-up.
+    _ensurePairedCard(msgs, i, label) {
+        const nxt = msgs[i + 1];
+        if (nxt && nxt.triggeredBy) {
+            return msgs.map((m, idx) => idx === i + 1 ? { ...m, triggeredBy: label } : m);
+        }
+        const paired = {
+            sender: 'bot', type: 'richCardVertical', typingDuration: 'medium', triggeredBy: label,
+            card: { mediaType: 'image', mediaUrl: '', mediaSize: 'medium',
+                title: 'Follow-up card',
+                description: 'Edit this card — it plays after the recipient taps “' + label + '.”',
+                buttons: [] }
+        };
+        const out = msgs.slice();
+        out.splice(i + 1, 0, paired);
+        return out;
     }
     handleCardImage(e) {
         const i = parseInt(e.currentTarget.dataset.i, 10);

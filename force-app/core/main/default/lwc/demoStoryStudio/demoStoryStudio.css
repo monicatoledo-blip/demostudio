@@ -180,3 +180,11 @@
 }
 .rcs-pair-in { margin-top: 0.1rem; }
 .rcs-pair-out { margin-top: 0.5rem; margin-bottom: 0; }
+
+/* Structured chip / card-button editor items. */
+.rcs-list-label { font-size: 0.75rem; font-weight: 700; color: #3b4252; margin: 0.5rem 0 0.35rem; }
+.rcs-chip-edit {
+    border: 1px solid #e6e9ee; border-radius: 8px; background: #fff;
+    padding: 0.6rem; margin-bottom: 0.5rem;
+}
+.rcs-chip-edit lightning-input, .rcs-chip-edit lightning-combobox, .rcs-chip-edit lightning-textarea { display:block; margin-bottom: 0.4rem; }

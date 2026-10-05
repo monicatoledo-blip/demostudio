@@ -174,23 +174,66 @@
                                 </template>
                                 <template lwc:if={m.isQuickReplies}>
                                     <lightning-textarea label="Anchor message" data-i={m.i} value={m.text} onchange={handleMsg}></lightning-textarea>
-                                    <lightning-input label="Quick-reply chips (comma-separated, up to 11)" data-i={m.i}
-                                        value={m.chipsStr} onchange={handleChips}
-                                        placeholder="Show me, Use my points, Talk to someone"></lightning-input>
+                                    <p class="rcs-list-label">Chips (up to 11)</p>
+                                    <template for:each={m.chipRows} for:item="ch">
+                                        <div key={ch.ci} class="rcs-chip-edit">
+                                            <lightning-input label="Chip label" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.label} onchange={handleActionLabel}></lightning-input>
+                                            <lightning-combobox label="On tap, do" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.action} options={rcsActionOptions} onchange={handleActionType}></lightning-combobox>
+                                            <template lwc:if={ch.showTarget}>
+                                                <lightning-input label={ch.targetLabel} data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.target} onchange={handleActionTarget}></lightning-input>
+                                            </template>
+                                            <template lwc:if={ch.isQuickReply}>
+                                                <lightning-combobox label="Brand response when this chip is tapped" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.responseType} options={rcsResponseOptions} onchange={handleActionResponse}></lightning-combobox>
+                                                <template lwc:if={ch.triggersCard}><div class="rcs-pair-banner rcs-pair-out">↗ Triggers a new rich card message inserted right after this one.</div></template>
+                                                <template lwc:if={ch.showRespText}><lightning-textarea label="Reply text" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.response} onchange={handleActionText}></lightning-textarea></template>
+                                            </template>
+                                            <lightning-button variant="base" label="Remove chip" data-i={m.i} data-c={ch.ci} onclick={removeChip}></lightning-button>
+                                        </div>
+                                    </template>
+                                    <lightning-button label="+ Add chip" data-i={m.i} onclick={addChip} class="slds-m-top_x-small"></lightning-button>
                                 </template>
                                 <!-- Suggested actions (chips only) -->
                                 <template lwc:if={m.isSuggested}>
-                                    <lightning-input label="Chips (comma-separated, up to 11)" data-i={m.i}
-                                        value={m.chipsStr} onchange={handleChips}
-                                        placeholder="Continue, Learn more, Talk to an advisor"></lightning-input>
+                                    <p class="rcs-list-label">Chips (up to 11)</p>
+                                    <template for:each={m.chipRows} for:item="ch">
+                                        <div key={ch.ci} class="rcs-chip-edit">
+                                            <lightning-input label="Chip label" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.label} onchange={handleActionLabel}></lightning-input>
+                                            <lightning-combobox label="On tap, do" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.action} options={rcsActionOptions} onchange={handleActionType}></lightning-combobox>
+                                            <template lwc:if={ch.showTarget}>
+                                                <lightning-input label={ch.targetLabel} data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.target} onchange={handleActionTarget}></lightning-input>
+                                            </template>
+                                            <template lwc:if={ch.isQuickReply}>
+                                                <lightning-combobox label="Brand response when this chip is tapped" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.responseType} options={rcsResponseOptions} onchange={handleActionResponse}></lightning-combobox>
+                                                <template lwc:if={ch.triggersCard}><div class="rcs-pair-banner rcs-pair-out">↗ Triggers a new rich card message inserted right after this one.</div></template>
+                                                <template lwc:if={ch.showRespText}><lightning-textarea label="Reply text" data-i={m.i} data-c={ch.ci} data-list="chips" value={ch.response} onchange={handleActionText}></lightning-textarea></template>
+                                            </template>
+                                            <lightning-button variant="base" label="Remove chip" data-i={m.i} data-c={ch.ci} onclick={removeChip}></lightning-button>
+                                        </div>
+                                    </template>
+                                    <lightning-button label="+ Add chip" data-i={m.i} onclick={addChip} class="slds-m-top_x-small"></lightning-button>
                                 </template>
                                 <!-- Rich card (vertical / horizontal) -->
                                 <template lwc:if={m.isCard}>
                                     <c-demo-story-image label="Card image" value={m.cardMedia} data-i={m.i} onpick={handleCardImage}></c-demo-story-image>
                                     <lightning-input label="Card title" data-i={m.i} data-field="title" value={m.cardTitle} onchange={handleCardText}></lightning-input>
                                     <lightning-input label="Card description" data-i={m.i} data-field="description" value={m.cardDesc} onchange={handleCardText}></lightning-input>
-                                    <lightning-input label="Card buttons (comma-separated)" data-i={m.i} value={m.cardButtonsStr} onchange={handleCardButtons}
-                                        placeholder="View details, Hold it for me"></lightning-input>
+                                    <p class="rcs-list-label">Card buttons (up to 4)</p>
+                                    <template for:each={m.buttonRows} for:item="bt">
+                                        <div key={bt.ci} class="rcs-chip-edit">
+                                            <lightning-input label="Button label" data-i={m.i} data-c={bt.ci} data-list="buttons" value={bt.label} onchange={handleActionLabel}></lightning-input>
+                                            <lightning-combobox label="On tap, do" data-i={m.i} data-c={bt.ci} data-list="buttons" value={bt.action} options={rcsActionOptions} onchange={handleActionType}></lightning-combobox>
+                                            <template lwc:if={bt.showTarget}>
+                                                <lightning-input label={bt.targetLabel} data-i={m.i} data-c={bt.ci} data-list="buttons" value={bt.target} onchange={handleActionTarget}></lightning-input>
+                                            </template>
+                                            <template lwc:if={bt.isQuickReply}>
+                                                <lightning-combobox label="Brand response when this button is tapped" data-i={m.i} data-c={bt.ci} data-list="buttons" value={bt.responseType} options={rcsResponseOptions} onchange={handleActionResponse}></lightning-combobox>
+                                                <template lwc:if={bt.triggersCard}><div class="rcs-pair-banner rcs-pair-out">↗ Triggers a new rich card message inserted right after this one.</div></template>
+                                                <template lwc:if={bt.showRespText}><lightning-textarea label="Reply text" data-i={m.i} data-c={bt.ci} data-list="buttons" value={bt.response} onchange={handleActionText}></lightning-textarea></template>
+                                            </template>
+                                            <lightning-button variant="base" label="Remove button" data-i={m.i} data-c={bt.ci} onclick={removeButton}></lightning-button>
+                                        </div>
+                                    </template>
+                                    <lightning-button label="+ Add button" data-i={m.i} onclick={addButton} class="slds-m-top_x-small"></lightning-button>
                                 </template>
                                 <!-- Card carousel -->
                                 <template lwc:if={m.isCarousel}>
