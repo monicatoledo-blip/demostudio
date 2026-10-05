@@ -540,6 +540,13 @@ export default class DemoStoryStudio extends LightningElement {
     // (handleInput writes config directly), so persona/brand swaps re-render and
     // the server preview resolves them; once a field is hand-edited it stores the
     // literal text as typed.
+    // The Agent Avatar field shows the secondary logo (Marketing Sender Avatar)
+    // as its default so the editor matches what the sim renders. Storage stays
+    // blank until the SE picks one explicitly (handleImagePick writes the field).
+    get agentAvatarDisplay() {
+        return (this.config && (this.config.agentAvatarUrl || this.config.marketingAvatarUrl)) || '';
+    }
+
     get emailDisplay() {
         const c = this.config || {};
         const r = (t) => this.resolveTokens(t);

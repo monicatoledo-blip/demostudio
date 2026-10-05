@@ -148,7 +148,7 @@
                     <h2 class="sec-title">Customer &amp; Agent Messages</h2>
                     <p class="sec-subtitle">AI agent identity — the agent's replies are its side of the 2-way conversation below.</p>
                     <lightning-input label="Virtual Agent Name" data-field="agentName" value={config.agentName} onchange={handleInput}></lightning-input>
-                    <c-demo-story-image label="Agent Avatar" kind="avatar" value={config.agentAvatarUrl} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
+                    <c-demo-story-image label="Agent Avatar" kind="avatar" value={agentAvatarDisplay} data-field="agentAvatarUrl" onpick={handleImagePick}></c-demo-story-image>
                     <template lwc:if={isMessaging}>
                         <lightning-input label="Chat Header Title" data-field="messagingAgentHeader" value={config.messagingAgentHeader} onchange={handleInput}
                             placeholder="Penny (Cumulus Financial AI Agent)"
