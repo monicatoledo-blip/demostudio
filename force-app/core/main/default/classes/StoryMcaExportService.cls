@@ -228,13 +228,16 @@ public with sharing class StoryMcaExportService {
         String headColor = str(c, 'headlineTextColor', '#FFFFFF');
         List<String> out = new List<String>();
 
-        // 1) Logo — on WHITE (matches the sim; logo sits above the headline bar)
+        // 1) Logo — on the sim's Logo Background Color (handles transparent-PNG
+        // logos; it's a per-sim branding input, not a fixed white).
+        String logoBg = str(c, 'logoBgColor', '#ffffff');
         String logoW = str(c, 'logoWidth', '180');
         if (!logoW.contains('px') && !logoW.contains('%')) logoW += 'px';
+        String logoTextColor = isDark(logoBg) ? '#ffffff' : esc(primary);
         String logoImg = String.isBlank(logo)
-            ? ('<span style="color:' + esc(primary) + ';font:700 24px Arial">' + esc(brand) + '</span>')
+            ? ('<span style="color:' + logoTextColor + ';font:700 24px Arial">' + esc(brand) + '</span>')
             : ('<img src="' + esc(logo) + '" alt="' + esc(brand) + '" style="width:' + esc(logoW) + ';max-width:70%;height:auto;display:block;margin:0 auto" />');
-        out.add('<div style="background:#ffffff;padding:24px;text-align:center">' + logoImg + '</div>');
+        out.add('<div style="background:' + esc(logoBg) + ';padding:24px;text-align:center">' + logoImg + '</div>');
 
         // 2) Headline in a brand-color bar
         String head = tok(str(c, 'headline', ''), brand, first);
@@ -393,6 +396,21 @@ public with sharing class StoryMcaExportService {
     private static String esc(String s) {
         if (s == null) return '';
         return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;');
+    }
+
+    // Perceived-luminance check so brand-name text is readable on the logo bg.
+    private static Boolean isDark(String hex) {
+        String h = (hex == null ? '' : hex.trim()).replace('#', '').toLowerCase();
+        if (h.length() == 3) h = h.substring(0,1).repeat(2) + h.substring(1,2).repeat(2) + h.substring(2,3).repeat(2);
+        if (h.length() < 6) return false;
+        try {
+            Decimal lum = 0.299 * hex2(h.substring(0,2)) + 0.587 * hex2(h.substring(2,4)) + 0.114 * hex2(h.substring(4,6));
+            return lum < 140;
+        } catch (Exception e) { return false; }
+    }
+    private static Integer hex2(String s) {
+        String d = '0123456789abcdef';
+        return d.indexOf(s.substring(0,1)) * 16 + d.indexOf(s.substring(1,2));
     }
 
     private static String str(Map<String, Object> c, String k, String dflt) {
