@@ -345,3 +345,9 @@
 @keyframes ts-spin { to { transform: rotate(360deg); } }
 .ts-logo-label { font-size: 0.85rem; font-weight: 700; color: #0A1F44; margin: 0 0 0.4rem; }
 .ts-logo-sub { font-weight: 400; color: #6b7280; font-size: 0.78rem; }
+
+/* Builder credit (fine print — not shown in simulated outputs). */
+.builder-credit {
+    margin: 0.5rem 0 0; padding: 0.5rem 1rem; text-align: center;
+    font-size: 0.6875rem; color: #9aa5b1; letter-spacing: 0.02em;
+}

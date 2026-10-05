@@ -253,3 +253,9 @@
     line-height: 1.35;
 }
 .generate-banner-btn { flex: 0 0 auto; }
+
+/* Builder credit (fine print — not shown in simulated outputs). */
+.builder-credit {
+    margin: 0.5rem 0 0; padding: 0.5rem 1rem; text-align: center;
+    font-size: 0.6875rem; color: #9aa5b1; letter-spacing: 0.02em;
+}
