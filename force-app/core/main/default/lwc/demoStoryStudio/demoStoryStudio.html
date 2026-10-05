@@ -107,22 +107,22 @@
 
                 <template lwc:if={isTemplate}>
                     <h2 class="sec-title">Email Template</h2>
-                    <lightning-input label="Email Subject Line" data-field="subjectLine" value={config.subjectLine} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Email Subject Line" data-field="subjectLine" value={emailDisplay.subjectLine} onchange={handleInput}></lightning-input>
                     <c-demo-story-image label="Hero Image" value={config.heroImageUrl} data-field="heroImageUrl" onpick={handleImagePick}></c-demo-story-image>
-                    <lightning-input label="Headline" data-field="headline" value={config.headline} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Sub-headline" data-field="subHeadline" value={config.subHeadline} onchange={handleInput}></lightning-input>
-                    <lightning-textarea label="2-Column Copy: Left" data-field="featureColumn1" value={config.featureColumn1} onchange={handleInput}></lightning-textarea>
-                    <lightning-textarea label="2-Column Copy: Right" data-field="featureColumn2" value={config.featureColumn2} onchange={handleInput}></lightning-textarea>
+                    <lightning-input label="Headline" data-field="headline" value={emailDisplay.headline} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Sub-headline" data-field="subHeadline" value={emailDisplay.subHeadline} onchange={handleInput}></lightning-input>
+                    <lightning-textarea label="2-Column Copy: Left" data-field="featureColumn1" value={emailDisplay.featureColumn1} onchange={handleInput}></lightning-textarea>
+                    <lightning-textarea label="2-Column Copy: Right" data-field="featureColumn2" value={emailDisplay.featureColumn2} onchange={handleInput}></lightning-textarea>
                     <div class="color-field"><label class="color-label">2-Column Text Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="featureColumnTextColor" value={config.featureColumnTextColor} onchange={handleInput}></lightning-input></div></div>
                     <div class="color-field"><label class="color-label">2-Column Section Background Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="featureSectionColor" value={config.featureSectionColor} onchange={handleInput}></lightning-input></div></div>
-                    <lightning-textarea label="Body" data-field="bodyParagraph" value={config.bodyParagraph} onchange={handleInput}></lightning-textarea>
+                    <lightning-textarea label="Body" data-field="bodyParagraph" value={emailDisplay.bodyParagraph} onchange={handleInput}></lightning-textarea>
                     <lightning-input type="checkbox" label="Show bullet points" data-field="showBullets" checked={config.showBullets} onchange={handleToggle}></lightning-input>
-                    <lightning-input label="Bullet Point 1" data-field="bullet1" value={config.bullet1} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Bullet Point 2" data-field="bullet2" value={config.bullet2} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Bullet Point 3" data-field="bullet3" value={config.bullet3} onchange={handleInput}></lightning-input>
-                    <lightning-input label="Reply Prompt Headline" data-field="replyPromptHeadline" value={config.replyPromptHeadline} onchange={handleInput}></lightning-input>
-                    <lightning-textarea label="Reply Prompt Body" data-field="replyPromptBody" value={config.replyPromptBody} onchange={handleInput}></lightning-textarea>
-                    <lightning-input label="CTA Button Text" data-field="ctaButtonText" value={config.ctaButtonText} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Bullet Point 1" data-field="bullet1" value={emailDisplay.bullet1} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Bullet Point 2" data-field="bullet2" value={emailDisplay.bullet2} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Bullet Point 3" data-field="bullet3" value={emailDisplay.bullet3} onchange={handleInput}></lightning-input>
+                    <lightning-input label="Reply Prompt Headline" data-field="replyPromptHeadline" value={emailDisplay.replyPromptHeadline} onchange={handleInput}></lightning-input>
+                    <lightning-textarea label="Reply Prompt Body" data-field="replyPromptBody" value={emailDisplay.replyPromptBody} onchange={handleInput}></lightning-textarea>
+                    <lightning-input label="CTA Button Text" data-field="ctaButtonText" value={emailDisplay.ctaButtonText} onchange={handleInput}></lightning-input>
                     <div class="color-field"><label class="color-label">CTA Button Color</label><div class="color-row"><input type="color" class="color-swatch" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput} /><lightning-input variant="label-hidden" data-field="ctaButtonColor" value={config.ctaButtonColor} onchange={handleInput}></lightning-input></div></div>
                 </template>
 

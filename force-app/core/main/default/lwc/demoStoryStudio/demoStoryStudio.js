@@ -535,6 +535,31 @@ export default class DemoStoryStudio extends LightningElement {
         return (text || '').replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn).replace(/\[\[BRAND_NAME\]\]/g, br);
     }
 
+    // Email editor fields display with tokens resolved to the live persona/brand
+    // (so the SE sees "Hi Rachel," not "Hi [[CUSTOMER_FIRST_NAME]],"), mirroring
+    // decoratedMessages for the messaging channels. Storage keeps the tokens
+    // (handleInput writes config directly), so persona/brand swaps re-render and
+    // the server preview resolves them; once a field is hand-edited it stores the
+    // literal text as typed.
+    get emailDisplay() {
+        const c = this.config || {};
+        const r = (t) => this.resolveTokens(t);
+        return {
+            subjectLine: r(c.subjectLine),
+            headline: r(c.headline),
+            subHeadline: r(c.subHeadline),
+            featureColumn1: r(c.featureColumn1),
+            featureColumn2: r(c.featureColumn2),
+            bodyParagraph: r(c.bodyParagraph),
+            bullet1: r(c.bullet1),
+            bullet2: r(c.bullet2),
+            bullet3: r(c.bullet3),
+            replyPromptHeadline: r(c.replyPromptHeadline),
+            replyPromptBody: r(c.replyPromptBody),
+            ctaButtonText: r(c.ctaButtonText)
+        };
+    }
+
     // True when the current thread still equals one of the industry seed packs
     // (i.e. the SE hasn't hand-edited it), so it's safe to re-seed on an
     // Industry change. Compared on sender+text only.
