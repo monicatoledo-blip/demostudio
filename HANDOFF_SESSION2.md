@@ -22,6 +22,19 @@ Working in `~/DemoStudio` (repo `monicatoledo-blip/demostudio`, branch `main`, d
 5. **Home page** + a guided "ship a default brand (e.g. Cumulus/FINS) across all demoable pieces" walkthrough.
 6. **Cleanup** ~15 throwaway test emails/content (ZZ *, duplicate "2-Way · …") in Default_Content_Workspace + DEMOS — **ask Monica before deleting** (see `feedback-ask-before-delete`); include any emails she created while testing today.
 
+## SESSION 3 (2026-10-05 PM, cont.) — shipped + deployed to meshmesh
+1. **4 testing bugs** (logo width, `.com.com`, RCS divider, brand/persona search) — ✅ fixed+verified (see block below).
+2. **MCA workspace picker truncation** ✅ (83ee830) — `/connect/cms/spaces` defaults to **pageSize 25** with no paging token, silently dropping workspaces (verified in Cumulus Jr: DEMOS + the second-BU workspace were missing → couldn't be targeted). Added `?pageSize=200` (`SPACES_PATH`). Modal now states **"Your email will be built in: &lt;workspace&gt;"** (`mcaDestinationLabel`). THIS was the real cause of "I can't point at a specific workspace."
+3. **DC portability** ✅ (90e89b2) — replaced the hardcoded meshmesh PP/decision with an **optional picker** in the Deploy modal (Personalization Point → Decision comboboxes, default None). Apex `listPersonalizationPoints()` + `listDecisions(point)` (SOQL on `PersonalizationPoint`/`PersonalizationDecision`, dataspace-aware); `pushEmailToMca(storyId, targetSpaceId, dcPoint, dcDecisionName, dcSpace)`; hardcoded `dc*` defaults cleared (blank ⇒ plain hero, DC skipped). Tests 8/8.
+4. **BU findings (validated on Cumulus Jr, 2 BUs)** — native MCA BU = standard `BusinessUnit` (1:1 with a `DataSpace`). **No queryable BU→workspace mapping** exists (Connect payload has no dataspace/BU field; no SObject FK) — confirmed on both a 1-BU and 2-BU org. So a BU-first picker step would be **cosmetic/context-only** (can't filter workspaces); NOT built. The validated topology `BusinessUnit→DataSpace→PersonalizationPoint→PersonalizationDecision` is what the DC picker + a future Heroku-SP lift-and-shift reuse.
+   - **Read-only access to Cumulus Jr:** the salesforce MCP is scoped to meshmesh; use the `sf` CLI with `-o cumulusjr`. **Monica said DO NOT deploy to Cumulus Jr.**
+5. **Reuse note:** the `listPersonalizationPoints/listDecisions` readers + BU/dataspace model are reusable for migrating Monica's Heroku **Salesforce Personalization** app native (authoring/topology layer; the real-time serving layer = P13N Connect REST is separate — see [[reference-p13n-connect-rest]]).
+
+### STILL OPEN after session 3
+- Verify DC picker live (pick a point e.g. "October image efb5" → decision "Hero 2" → push → confirm 2 variations in the MCA builder). Verify workspace list now shows all + destination label.
+- BU-first picker: only if Monica wants the cosmetic grouping/context (feeds dataspace to DC). Low value.
+- Folder cascade still BLOCKED (CONTENT_TYPE_DISABLED_FOR_API); per-industry hero suite; home page + brand walkthrough; throwaway cleanup (ask-before-delete).
+
 ## Testing-found bugs (Monica, 2026-10-05) — ✅ ALL FOUR FIXED + DEPLOYED (commits e95cac5, 80287d8)
 - #1 logo width ✅ `normWidth()` appends `px` to a numeric width in `StoryEmailPreviewController` (template emitted unit-less `width:20;`). Madewell had `logoWidth:"20"` → now `20px` (tiny; bump it up).
 - #4 `.com.com` ✅ dropped the literal `.com` after `[[BRAND_DOMAIN]]` in the two template spots (domain already ends in `.com`).
