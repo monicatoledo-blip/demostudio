@@ -915,20 +915,48 @@ export default class DemoStoryStudio extends LightningElement {
     @track mcaPushing = false;
     @track mcaWorkspaceOptions = [];
     @track mcaWorkspaceId = '';
+    @track mcaWorkspaceSearch = '';
     @track mcaResultUrl = '';
+
+    // Remembers the last workspace the SE deployed into (per browser), so the
+    // next deploy pre-selects it — still swappable before Deploy. Overrides the
+    // org-resolved default when present.
+    LAST_MCA_WS_KEY = 'demoStory.lastMcaWorkspaceId';
+    get lastMcaWorkspaceId() {
+        try { return window.localStorage.getItem(this.LAST_MCA_WS_KEY) || ''; } catch (e) { return ''; }
+    }
+    rememberMcaWorkspace(id) {
+        try { if (id) window.localStorage.setItem(this.LAST_MCA_WS_KEY, id); } catch (e) { /* localStorage blocked */ }
+    }
+
+    // Searchable typeahead over the workspace list (mirrors the Brand/Persona
+    // pickers). The combobox is fed by this filtered getter.
+    get filteredMcaWorkspaces() {
+        const q = (this.mcaWorkspaceSearch || '').toLowerCase();
+        const all = this.mcaWorkspaceOptions || [];
+        return q ? all.filter((o) => (o.label || '').toLowerCase().includes(q)) : all;
+    }
+    handleMcaWorkspaceSearch(e) { this.mcaWorkspaceSearch = e.target.value; }
 
     async openMcaPush() {
         this.showMcaPush = true;
         this.mcaResultUrl = '';
+        this.mcaWorkspaceSearch = '';
         if (!this.mcaWorkspaceOptions.length) {
             try {
                 const spaces = await listMcaWorkspaces();
                 this.mcaWorkspaceOptions = (spaces || []).map((s) => ({ label: s.label, value: s.value }));
-                const def = (spaces || []).find((s) => s.isDefault);
-                this.mcaWorkspaceId = def ? def.value : (spaces && spaces.length ? spaces[0].value : '');
             } catch (e) {
                 this.toast('Marketing Cloud', (e && e.body && e.body.message) || e.message, 'error');
             }
+        }
+        // Pre-select: last-used (if still available) > org default > first.
+        const opts = this.mcaWorkspaceOptions || [];
+        const remembered = this.lastMcaWorkspaceId;
+        if (remembered && opts.some((o) => o.value === remembered)) {
+            this.mcaWorkspaceId = remembered;
+        } else if (!this.mcaWorkspaceId || !opts.some((o) => o.value === this.mcaWorkspaceId)) {
+            this.mcaWorkspaceId = opts.length ? opts[0].value : '';
         }
     }
     closeMcaPush() { this.showMcaPush = false; }
@@ -941,6 +969,7 @@ export default class DemoStoryStudio extends LightningElement {
             await this.doSave(); // export reads the saved Config_JSON
             const r = await pushEmailToMca({ storyId: this.recordId, targetSpaceId: this.mcaWorkspaceId });
             this.mcaResultUrl = r && r.builderUrl ? r.builderUrl : '';
+            this.rememberMcaWorkspace(this.mcaWorkspaceId); // sticky for next time
             this.toast('Deployed to Marketing Cloud', 'Your email was created in Marketing Cloud.', 'success');
         } catch (e) {
             this.toast('Deploy failed', (e && e.body && e.body.message) || e.message, 'error');

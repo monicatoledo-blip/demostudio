@@ -366,9 +366,11 @@
                         class="gen-close" onclick={closeMcaPush}></lightning-button-icon>
                 </header>
                 <div class="gen-body">
-                    <lightning-combobox label="Workspace" options={mcaWorkspaceOptions} value={mcaWorkspaceId}
-                        onchange={handleMcaWorkspace} placeholder="Choose a workspace…"></lightning-combobox>
-                    <p class="gen-hint">Lands in the chosen content workspace. The hero comes through as a Dynamic-Content-ready image component.</p>
+                    <lightning-input type="search" label="Workspace" placeholder="Search workspaces…"
+                        value={mcaWorkspaceSearch} onchange={handleMcaWorkspaceSearch}></lightning-input>
+                    <lightning-combobox variant="label-hidden" options={filteredMcaWorkspaces} value={mcaWorkspaceId}
+                        onchange={handleMcaWorkspace} placeholder="Choose a workspace…" class="slds-m-top_xx-small"></lightning-combobox>
+                    <p class="gen-hint">Lands in the chosen content workspace (remembers your last pick). The hero comes through as a Dynamic-Content-ready image component.</p>
                     <template lwc:if={mcaResultUrl}>
                         <div class="gen-copy-callout">
                             <p class="gen-copy-callout-label">Deployed! Open it in Marketing Cloud:</p>
