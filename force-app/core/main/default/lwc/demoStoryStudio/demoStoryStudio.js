@@ -115,8 +115,8 @@ const INDUSTRY_PACKS = {
         replyPromptHeadline: 'Need help choosing?',
         replyPromptBody: 'Reply to this email and our shopping assistant will help you pick the right size and style.',
         messages: [
-            { sender: 'user', text: 'Do you have this in a medium, and when would it arrive?' },
-            { sender: 'bot', text: 'Yes! Medium is in stock and ships free — it would arrive in 2-3 business days with the offer applied at checkout.' }
+            { sender: 'user', text: 'Is the 15% still good if I check out today, and how fast does it ship?' },
+            { sender: 'bot', text: 'Yes — the 15% is applied automatically at checkout today, and your order ships free, arriving in 2-3 business days.' }
         ]
     },
     'Consumer Business Services': {
@@ -161,8 +161,8 @@ const MESSAGING_PACKS = {
     ],
     'Retail & Consumer Goods': [
         bot('[[CUSTOMER_FIRST_NAME]], the jacket in your cart is almost gone — here’s 15% off to finish checkout today 🛍️'),
-        usr('Do you have it in a medium?'),
-        bot('Yes! Medium’s in stock and ships free. Reply BUY and I’ll apply the 15% and send tracking — or I can loop in a shopping specialist.')
+        usr('Is the 15% still good if I check out today?'),
+        bot('Yes! It’s locked in for today and ships free. Reply BUY and I’ll apply the 15% and send tracking — or I can loop in a shopping specialist.')
     ],
     'Manufacturing': [
         bot('Hi [[CUSTOMER_FIRST_NAME]], [[BRAND_NAME]] here. Your pump’s maintenance window opens next week — reserve a tech slot to avoid downtime?'),
@@ -224,7 +224,7 @@ const RCS_VERTICALS = {
         t1: 'Your cart misses you, [[CUSTOMER_FIRST_NAME]]', d1: 'The items you loved are still here — plus a members-only offer from [[BRAND_NAME]].', cta1: 'Complete my order',
         chipA: 'See the offer', chipRich: 'Get the app', chipDial: 'Call support',
         t3: 'Shop faster in the app', d3: 'Save your cart, track orders, and get early access to drops with the [[BRAND_NAME]] app.', cta3: 'Download the app',
-        q: 'Do you have this in a medium?', a: 'Let me get a shopping specialist to confirm stock and help you check out.'
+        q: 'Is the offer still good if I check out today?', a: 'Let me get a shopping specialist to confirm the offer and help you check out.'
     },
     'Manufacturing': {
         t1: 'Your service window is open, [[CUSTOMER_FIRST_NAME]]', d1: 'Schedule preventive maintenance and avoid downtime with [[BRAND_NAME]].', cta1: 'Book service',
