@@ -222,7 +222,7 @@ public with sharing class StoryMcaExportService {
         String brand = str(c, 'brandName', 'Your Brand');
         String primary = str(c, 'primaryColor', '#0A1F44');
         String accent = str(c, 'featureSectionColor', primary);
-        String logo = str(c, 'logoUrl', '');
+        String logo = resolveImg(str(c, 'logoUrl', ''));
         String first = str(c, 'customerFirstName', 'there');
 
         List<String> out = new List<String>();
@@ -233,7 +233,7 @@ public with sharing class StoryMcaExportService {
         out.add('<div style="background:' + esc(primary) + ';padding:20px;text-align:center">' + logoImg + '</div>');
 
         // Hero image (if any)
-        String hero = str(c, 'heroImageUrl', '');
+        String hero = resolveImg(str(c, 'heroImageUrl', ''));
         if (String.isNotBlank(hero)) {
             out.add('<img src="' + esc(hero) + '" alt="" style="width:100%;display:block" />');
         }
@@ -248,6 +248,16 @@ public with sharing class StoryMcaExportService {
             out.add(h + '</div>');
         }
 
+        // Feature 2-column (comes before the body, matching the Story email)
+        String f1 = tok(str(c, 'featureColumn1', ''), brand, first);
+        String f2 = tok(str(c, 'featureColumn2', ''), brand, first);
+        if (String.isNotBlank(f1) || String.isNotBlank(f2)) {
+            String tc = str(c, 'featureColumnTextColor', '#FFFFFF');
+            String col = '<td width="50%" valign="top" style="padding:16px;color:' + esc(tc) + ';font:14px/1.5 Arial">';
+            out.add('<table width="100%" cellpadding="0" cellspacing="0" style="background:' + esc(accent) + '"><tr>'
+                + col + esc(f1) + '</td>' + col + esc(f2) + '</td></tr></table>');
+        }
+
         // Body paragraphs
         String bodyRaw = tok(str(c, 'bodyParagraph', ''), brand, first);
         if (String.isNotBlank(bodyRaw)) {
@@ -256,16 +266,6 @@ public with sharing class StoryMcaExportService {
                 if (String.isNotBlank(p)) paras += '<p style="margin:0 0 16px;font:14px/1.6 Arial;color:#393939">' + esc(p.trim()) + '</p>';
             }
             out.add('<div style="padding:0 24px">' + paras + '</div>');
-        }
-
-        // Feature 2-column
-        String f1 = tok(str(c, 'featureColumn1', ''), brand, first);
-        String f2 = tok(str(c, 'featureColumn2', ''), brand, first);
-        if (String.isNotBlank(f1) || String.isNotBlank(f2)) {
-            String tc = str(c, 'featureColumnTextColor', '#FFFFFF');
-            String col = '<td width="50%" valign="top" style="padding:16px;color:' + esc(tc) + ';font:14px/1.5 Arial">';
-            out.add('<table width="100%" cellpadding="0" cellspacing="0" style="background:' + esc(accent) + '"><tr>'
-                + col + esc(f1) + '</td>' + col + esc(f2) + '</td></tr></table>');
         }
 
         // Bullets
@@ -307,6 +307,63 @@ public with sharing class StoryMcaExportService {
     private static String tok(String s, String brand, String first) {
         if (s == null) return '';
         return s.replace('[[BRAND_NAME]]', brand).replace('[[CUSTOMER_FIRST_NAME]]', first);
+    }
+
+    // Make an image render inside an MCA email HTML block, which only accepts
+    // ABSOLUTE http(s) URLs (the sanitizer strips data: URIs; relative /sfc/ URLs
+    // can't be served cross-context). Absolute URLs pass through; a /sfc/
+    // ContentVersion is re-hosted to an absolute Cloudinary URL (same unsigned
+    // cloud/preset Story Studio already uses). Anything else returns '' and the
+    // caller falls back gracefully (logo -> brand-name text, hero -> omitted).
+    private static Map<String, String> imgCache = new Map<String, String>();
+    private static String resolveImg(String url) {
+        if (String.isBlank(url)) return '';
+        String u = url.trim();
+        String lower = u.toLowerCase();
+        if (lower.startsWith('http://') || lower.startsWith('https://')) return u;
+        if (imgCache.containsKey(u)) return imgCache.get(u);
+        String resolved = '';
+        Matcher m = Pattern.compile('(?i)/sfc/servlet\\.shepherd/version/download/([a-zA-Z0-9]{15,18})').matcher(u);
+        if (m.find()) {
+            try {
+                Id cvId = (Id) m.group(1);
+                for (ContentVersion cv : [SELECT VersionData, FileType, ContentSize FROM ContentVersion WHERE Id = :cvId LIMIT 1]) {
+                    if (cv.VersionData != null && cv.ContentSize != null && cv.ContentSize <= 10000000) {
+                        String hosted = uploadToCloudinary(cv.VersionData, cv.FileType);
+                        if (String.isNotBlank(hosted)) resolved = hosted;
+                    }
+                }
+            } catch (Exception e) { /* fall back to '' */ }
+        }
+        imgCache.put(u, resolved);
+        return resolved;
+    }
+
+    // Cloudinary unsigned upload (cloud dfx98jgdc / preset salesforcepersonalization,
+    // the same one Story Studio uses). Returns the absolute secure_url, or '' on
+    // failure. Requires the Cloudinary Remote Site Setting.
+    @TestVisible private static String cloudinaryCloud  = 'dfx98jgdc';
+    @TestVisible private static String cloudinaryPreset = 'salesforcepersonalization';
+    private static String uploadToCloudinary(Blob data, String fileType) {
+        String ft = (fileType == null ? 'PNG' : fileType).toLowerCase();
+        String mime = ft == 'jpg' || ft == 'jpeg' ? 'image/jpeg' : ft == 'gif' ? 'image/gif' : ft == 'svg' ? 'image/svg+xml' : ft == 'webp' ? 'image/webp' : 'image/png';
+        String dataUri = 'data:' + mime + ';base64,' + EncodingUtil.base64Encode(data);
+        HttpRequest req = new HttpRequest();
+        req.setEndpoint('https://api.cloudinary.com/v1_1/' + cloudinaryCloud + '/image/upload');
+        req.setMethod('POST');
+        req.setHeader('Content-Type', 'application/x-www-form-urlencoded');
+        req.setTimeout(120000);
+        req.setBody('upload_preset=' + EncodingUtil.urlEncode(cloudinaryPreset, 'UTF-8')
+            + '&file=' + EncodingUtil.urlEncode(dataUri, 'UTF-8'));
+        HttpResponse res = new Http().send(req);
+        if (res.getStatusCode() == 200) {
+            Object parsed = JSON.deserializeUntyped(res.getBody());
+            if (parsed instanceof Map<String, Object>) {
+                Object su = ((Map<String, Object>) parsed).get('secure_url');
+                if (su != null) return String.valueOf(su);
+            }
+        }
+        return '';
     }
 
     private static String esc(String s) {
