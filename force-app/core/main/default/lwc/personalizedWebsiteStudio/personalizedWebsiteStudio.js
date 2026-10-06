@@ -22,6 +22,14 @@ const SECTION_ICONS = {
     'offer-cards': 'utility:cart', 'handoff-form': 'utility:form', 'return-hero': 'utility:image',
     'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings'
 };
+// Each editor section maps to the sim "page" it edits, so switching sections
+// navigates the preview straight there (and edits reload onto it, not the intro).
+const SECTION_VIEW = {
+    setup: 'cold', 'business-line-scenario': 'cold', 'home-page-content': 'cold',
+    'market-insights': 'cold', 'category-page': 'category', 'ai-chat': 'agent',
+    'offer-overlay-frame': 'overlay', 'offer-cards': 'overlay', 'handoff-form': 'landing',
+    'return-hero': 'adapted', 'return-content-tiles': 'adapted', 'advanced': 'cold'
+};
 
 /**
  * Website Studio — the full lift-and-shift builder for a Personalized Website.
@@ -157,7 +165,13 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             .map((v) => ({ ...v, cls: 'view-tab' + (v.id === this.view ? ' view-tab--active' : '') }));
     }
 
-    handleTab(e) { this.active = e.currentTarget.dataset.id; }
+    handleTab(e) {
+        this.active = e.currentTarget.dataset.id;
+        // Navigate the preview to the page this section edits — instantly via the
+        // postMessage harness (no iframe reload, so no intro replay).
+        const v = SECTION_VIEW[this.active];
+        if (v && v !== this.view) { this.view = v; this.driveSim(v); }
+    }
 
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
     handleIndustry(e) { this.industry = e.detail.value; this.queueSave(); }

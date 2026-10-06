@@ -56,9 +56,12 @@
                 // the agent being visible, and relay 'web-sim-drive' from the Studio
                 // (Cold / Agent / Adapted controls) up top.
                 var VIEWS = {
-                    cold:    { lastReportedState: 0 },
-                    agent:   { lastReportedState: 1, chatOpen: true, categoryChatGreetingSent: true },
-                    adapted: { lastReportedState: 5, chatOpen: true, adaptationComplete: true }
+                    cold:     { lastReportedState: 0 },
+                    category: { lastReportedState: 1 },
+                    agent:    { lastReportedState: 1, chatOpen: true, categoryChatGreetingSent: true },
+                    overlay:  { lastReportedState: 1, overlayOpen: true, adaptationComplete: true },
+                    landing:  { lastReportedState: 4 },
+                    adapted:  { lastReportedState: 5, chatOpen: true, adaptationComplete: true }
                 };
                 var DEFAULT_VIEW = '{!JSENCODE($CurrentPage.parameters.view)}' || 'agent';
                 var booted = false;
