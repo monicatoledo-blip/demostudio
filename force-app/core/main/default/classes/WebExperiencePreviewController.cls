@@ -96,6 +96,18 @@ public with sharing class WebExperiencePreviewController {
             } catch (Exception e) { /* malformed config -> ignore, use field-derived drivers */ }
         }
 
+        // The engine resolves [[BRAND_NAME]]/${brandName} (and persona/agent tokens)
+        // from the formData arg, NOT the DOM shim (brandPlain = formData.adaptiveBrandName,
+        // getAdaptivePersona checks formData first). So mirror the brand/agent/persona
+        // values into `form` too — otherwise ${brandName} resolves to empty.
+        for (String k : new List<String>{
+            'adaptiveBrandName', 'adaptiveAgentName', 'adaptivePersonaFirstName',
+            'adaptivePersonaLastName', 'adaptivePersonaEmail', 'adaptivePersonaPhone',
+            'adaptivePersonaCompany', 'adaptivePersonaZip'
+        }) {
+            if (dom.containsKey(k) && !form.containsKey(k)) form.put(k, dom.get(k));
+        }
+
         return JSON.serialize(new Map<String, Object>{ 'dom' => dom, 'form' => form });
     }
 
