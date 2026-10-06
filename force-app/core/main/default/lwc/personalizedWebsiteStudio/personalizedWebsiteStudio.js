@@ -54,7 +54,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     industry = 'Financial Services';
     rtom = false;
     nonce = Date.now();
-    view = 'agent';
+    view = 'cold';   // studio opens on Branding (setup) -> show the home page
     saveState = 'saved';
     deploying = false;
     _loaded = false;

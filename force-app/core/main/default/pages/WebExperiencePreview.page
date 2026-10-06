@@ -63,7 +63,7 @@
                     landing:  { lastReportedState: 4 },
                     adapted:  { lastReportedState: 5, chatOpen: true, adaptationComplete: true }
                 };
-                var DEFAULT_VIEW = '{!JSENCODE($CurrentPage.parameters.view)}' || 'agent';
+                var DEFAULT_VIEW = '{!JSENCODE($CurrentPage.parameters.view)}' || 'cold';
                 var booted = false;
                 function drive(view) {
                     try { f.contentWindow.postMessage(
