@@ -167,10 +167,13 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
 
     handleTab(e) {
         this.active = e.currentTarget.dataset.id;
-        // Navigate the preview to the page this section edits — instantly via the
-        // postMessage harness (no iframe reload, so no intro replay).
-        const v = SECTION_VIEW[this.active];
-        if (v && v !== this.view) { this.view = v; this.driveSim(v); }
+        // Always navigate the preview to the page this section edits — instantly via
+        // the postMessage harness (no iframe reload). Drive unconditionally (not only
+        // on a view change) so e.g. opening AI Chat always re-opens the chat panel
+        // even if the sim's state has drifted from `view` since the last drive.
+        const v = SECTION_VIEW[this.active] || this.view;
+        this.view = v;
+        this.driveSim(v);
     }
 
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
