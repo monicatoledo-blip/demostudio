@@ -12,8 +12,11 @@
             </div>
             <div class="studio-toolbar-right">
                 <span class={saveClass}>{saveLabel}</span>
+                <lightning-button label="Download HTML" icon-name="utility:download" variant="neutral"
+                    onclick={handleDownload} title="Download a self-contained HTML file of this experience"
+                    class="slds-m-left_small"></lightning-button>
                 <lightning-button label="Deploy to Org" variant="brand" onclick={handleDeploy}
-                    disabled={deploying} class="slds-m-left_small"></lightning-button>
+                    disabled={deploying} class="slds-m-left_x-small"></lightning-button>
                 <template lwc:if={deployed}>
                     <lightning-button label="Tear Down" variant="destructive-text" onclick={handleTeardown}
                         disabled={deploying} class="slds-m-left_xx-small"></lightning-button>

@@ -226,6 +226,12 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         }
     }
 
+    handleDownload() {
+        // Opens the preview page in download mode; it builds the resolved, self-
+        // contained HTML (agent icon inlined) and the browser saves it as a file.
+        window.open('/apex/WebExperiencePreview?id=' + this.recordId + '&download=1', '_blank');
+    }
+
     async handleDeploy() { await this.runBackend(deployStory, 'Deployed to this org'); }
     async handleTeardown() { await this.runBackend(teardownStory, 'Torn down'); }
     async runBackend(fn, verb) {

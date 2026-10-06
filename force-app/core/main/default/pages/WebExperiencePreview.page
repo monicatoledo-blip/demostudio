@@ -73,6 +73,27 @@
                         html = html.replace(/src="[^"]*agentforce-astro-agent\.png"/g, 'src="' + icon + '"');
                     } catch (e) { /* leave the original src if anything fails */ }
                 }
+
+                // ?download=1 -> hand back a self-contained .html file (the resolved
+                // sim, agent icon inlined as a data URI) instead of rendering. Mirrors
+                // the 2-way "Download Simulator File". Blob download works here (VF
+                // page, not LWS).
+                var qs = new URLSearchParams(window.location.search);
+                if (qs.get('download') === '1') {
+                    try {
+                        var brand = (CFG.dom && CFG.dom.adaptiveBrandName) || 'personalized-website';
+                        var fname = brand.toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') + '-website.html';
+                        var blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+                        var durl = URL.createObjectURL(blob);
+                        var a = document.createElement('a');
+                        a.href = durl; a.download = fname;
+                        document.body.appendChild(a); a.click();
+                        setTimeout(function () { URL.revokeObjectURL(durl); }, 2000);
+                        document.body.innerHTML = '<div style="font-family:Arial;padding:24px;color:#444">Downloaded <b>' + fname + '</b>. You can close this tab.</div>';
+                    } catch (e) { fail('Download failed: ' + (e && e.message ? e.message : e)); }
+                    return;
+                }
+
                 var f = document.getElementById('sim');
                 f.setAttribute('srcdoc', html);
 
