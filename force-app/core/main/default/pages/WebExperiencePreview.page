@@ -26,10 +26,13 @@
         // (no Cloudinary / Salesforce-domain dependency). Replaces the engine's
         // broken relative agentforce-astro-agent.png reference.
         function buildAgentIcon(svgText) {
+            // Astro inherits the demo's brand primary color (falls back to Agentforce
+            // blue). White circle stays, matching the official callout.
+            var color = (CFG && CFG.form && CFG.form.adaptivePrimaryColor) || AGENT_BLUE;
             var inner = svgText.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
             var wrapped = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>"
                 + "<circle cx='20' cy='20' r='20' fill='#ffffff'/>"
-                + "<g transform='translate(6,6) scale(0.875)' fill='" + AGENT_BLUE + "'>" + inner + "</g></svg>";
+                + "<g transform='translate(6,6) scale(0.875)' fill='" + color + "'>" + inner + "</g></svg>";
             return 'data:image/svg+xml;base64,' + btoa(wrapped);
         }
 
