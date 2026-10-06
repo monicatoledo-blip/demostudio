@@ -1,0 +1,7 @@
+:host { display: block; margin-bottom: 0.75rem; }
+.field-thumb { max-height: 60px; max-width: 100%; margin-top: 0.4rem; border: 1px solid #e6e9ee; border-radius: 6px; object-fit: contain; }
+.color-field { margin-bottom: 0; }
+.color-label { display: block; font-size: 0.8rem; font-weight: 600; color: #444; margin-bottom: 0.25rem; }
+.color-row { display: flex; align-items: center; gap: 0.5rem; }
+.color-swatch { width: 44px; height: 36px; border: 1px solid #c9ced6; border-radius: 6px; padding: 0; cursor: pointer; background: none; flex: 0 0 44px; }
+.color-row lightning-input { flex: 1 1 auto; }

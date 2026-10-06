@@ -1,0 +1,35 @@
+<template>
+    <template lwc:if={isText}>
+        <lightning-input type={inputType} label={field.label} value={value}
+            placeholder={field.placeholder} onchange={handleInput}></lightning-input>
+    </template>
+    <template lwc:if={isTextarea}>
+        <lightning-textarea label={field.label} value={value}
+            placeholder={field.placeholder} onchange={handleInput}></lightning-textarea>
+    </template>
+    <template lwc:if={isImage}>
+        <lightning-input type="url" label={field.label} value={value}
+            placeholder="Image URL" onchange={handleInput}></lightning-input>
+        <template lwc:if={value}>
+            <img src={value} alt="" class="field-thumb" />
+        </template>
+    </template>
+    <template lwc:if={isPicklist}>
+        <lightning-combobox label={field.label} value={value} options={options}
+            onchange={handleInput}></lightning-combobox>
+    </template>
+    <template lwc:if={isToggle}>
+        <lightning-input type="toggle" label={field.label} checked={checked}
+            message-toggle-active="On" message-toggle-inactive="Off" onchange={handleToggle}></lightning-input>
+    </template>
+    <template lwc:if={isColor}>
+        <div class="color-field">
+            <span class="color-label">{field.label}</span>
+            <div class="color-row">
+                <input type="color" class="color-swatch" value={colorValue} onchange={handleColor} />
+                <lightning-input type="text" variant="label-hidden" value={value}
+                    placeholder="#000000" onchange={handleInput}></lightning-input>
+            </div>
+        </div>
+    </template>
+</template>
