@@ -710,17 +710,6 @@
           "type": "textarea"
         }
       ]
-    },
-    {
-      "id": "advanced",
-      "label": "Advanced",
-      "fields": [
-        {
-          "id": "adaptiveBrandInitials",
-          "label": "Brand Initials (derived)",
-          "type": "text"
-        }
-      ]
     }
   ]
 }
