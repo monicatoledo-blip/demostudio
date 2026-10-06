@@ -15,7 +15,23 @@
 <script>
     (function () {
         var CFG, TPL_URL = '{!URLFOR($Resource.demoWebTemplate)}';
+        var ICON_URL = '{!URLFOR($Resource.demoWebAgentIcon)}';
+        var AGENT_BLUE = '#0b5cab';
         try { CFG = JSON.parse('{!JSENCODE(configJson)}'); } catch (e) { CFG = { dom: {}, form: {} }; }
+
+        // Build a self-contained agent-icon data URI from the demoWebAgentIcon SVG:
+        // the monochrome Agentforce astro recolored blue on a white circle (matching
+        // the official Agentforce callout). Baked as a data: URI so it renders in the
+        // cross-domain preview iframe AND survives export to a standalone HTML file
+        // (no Cloudinary / Salesforce-domain dependency). Replaces the engine's
+        // broken relative agentforce-astro-agent.png reference.
+        function buildAgentIcon(svgText) {
+            var inner = svgText.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '');
+            var wrapped = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'>"
+                + "<circle cx='20' cy='20' r='20' fill='#ffffff'/>"
+                + "<g transform='translate(6,6) scale(0.875)' fill='" + AGENT_BLUE + "'>" + inner + "</g></svg>";
+            return 'data:image/svg+xml;base64,' + btoa(wrapped);
+        }
 
         // Build the hidden shim inputs the engine reads via getElementById. Only the
         // ids present in CFG.dom are created; everything else is absent, so the
@@ -35,9 +51,12 @@
             f.setAttribute('srcdoc', '<div id="err">' + msg + '</div>');
         }
 
-        fetch(TPL_URL)
-            .then(function (r) { return r.text(); })
-            .then(function (tpl) {
+        Promise.all([
+            fetch(TPL_URL).then(function (r) { return r.text(); }),
+            fetch(ICON_URL).then(function (r) { return r.text(); }).catch(function () { return ''; })
+        ])
+            .then(function (parts) {
+                var tpl = parts[0], iconSvg = parts[1];
                 var html;
                 try {
                     // The engine prefers live DOM .value (the shim) and takes
@@ -46,6 +65,13 @@
                 } catch (e) {
                     fail('Engine error: ' + (e && e.message ? e.message : e));
                     return;
+                }
+                // Inline the recolored agent icon in place of the broken PNG ref.
+                if (iconSvg) {
+                    try {
+                        var icon = buildAgentIcon(iconSvg);
+                        html = html.replace(/src="[^"]*agentforce-astro-agent\.png"/g, 'src="' + icon + '"');
+                    } catch (e) { /* leave the original src if anything fails */ }
                 }
                 var f = document.getElementById('sim');
                 f.setAttribute('srcdoc', html);
