@@ -39,6 +39,8 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     @track brandKits = [];
     @track personaOptions = [];
     @track cfg = {};
+    @track showBrandPicker = false;
+    @track brandSearch = '';
     brandKitId;
     personaId;
     industry = 'Financial Services';
@@ -70,9 +72,36 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         if (!this._loaded) { this._loaded = true; this.nonce = Date.now(); }
     }
     @wire(listBrandKits) wiredKits({ data }) {
-        if (data) this.brandKits = data.map((k) => ({
-            ...k, cls: 'kit-tile' + (k.value === this.brandKitId ? ' kit-tile--active' : '')
-        }));
+        if (data) { this._kits = data; this.brandKits = data.map((k) => this.kitTile(k)); }
+    }
+    kitTile(k) {
+        return {
+            id: k.value, label: k.label, logo: k.logo, hasLogo: !!k.logo,
+            swatch: 'background:' + (k.primary || '#0A1F44') + ';',
+            cls: 'kit-tile' + (k.value === this.brandKitId ? ' kit-tile--active' : '')
+        };
+    }
+
+    // Collapsed brand picker (mirrors the 2-way Story Studio): show the selected
+    // kit + a Change button that expands a searchable tile grid.
+    get selectedKit() {
+        const k = (this._kits || []).find((x) => x.value === this.brandKitId);
+        if (!k) return null;
+        return { label: k.label, logo: k.logo, hasLogo: !!k.logo, swatch: 'background:' + (k.primary || '#0A1F44') + ';' };
+    }
+    get brandChangeLabel() { return this.selectedKit ? 'Change brand' : 'Choose a brand kit'; }
+    get filteredBrandTiles() {
+        const q = (this.brandSearch || '').toLowerCase();
+        return this.brandKits.filter((k) => !q || (k.label || '').toLowerCase().includes(q)).slice(0, 60);
+    }
+    toggleBrandPicker() { this.showBrandPicker = !this.showBrandPicker; }
+    handleBrandSearch(e) { this.brandSearch = e.target.value; }
+    handlePickKit(e) {
+        this.brandKitId = e.currentTarget.dataset.kitid;
+        this.brandKits = (this._kits || []).map((k) => this.kitTile(k));
+        this.showBrandPicker = false;
+        this.brandSearch = '';
+        this.queueSave();
     }
     @wire(listPersonas) wiredPersonas({ data }) {
         if (data) this.personaOptions = data.map((p) => ({ label: p.label, value: p.value }));
@@ -80,7 +109,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
 
     // --- rail: fixed Setup + the schema sections ---------------------------------
     get tabs() {
-        const setup = { id: 'setup', label: 'Brand & Setup', icon: 'utility:settings' };
+        const setup = { id: 'setup', label: 'Branding', icon: 'utility:palette' };
         const rest = this.schemaSections.map((s) => ({
             id: s.id, label: s.label, icon: SECTION_ICONS[s.id] || 'utility:record'
         }));
@@ -92,7 +121,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     get activeSection() { return this.schemaSections.find((s) => s.id === this.active); }
     get activeTitle() {
         const s = this.activeSection;
-        return this.isSetup ? 'Brand & Setup' : (s ? s.label : '');
+        return this.isSetup ? 'Branding' : (s ? s.label : '');
     }
     // active section's fields with current values bound in
     get activeFields() {
@@ -130,13 +159,6 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
 
     handleTab(e) { this.active = e.currentTarget.dataset.id; }
 
-    pickKit(e) {
-        this.brandKitId = e.currentTarget.dataset.value;
-        this.brandKits = this.brandKits.map((k) => ({
-            ...k, cls: 'kit-tile' + (k.value === this.brandKitId ? ' kit-tile--active' : '')
-        }));
-        this.queueSave();
-    }
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
     handleIndustry(e) { this.industry = e.detail.value; this.queueSave(); }
     handleRtom(e) { this.rtom = e.target.checked; this.queueSave(); }

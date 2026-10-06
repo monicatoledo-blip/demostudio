@@ -36,17 +36,30 @@
                 <h2 class="sec-title">{activeTitle}</h2>
 
                 <template lwc:if={isSetup}>
-                    <p class="sec-subtitle">Brand Kit</p>
-                    <div class="kit-grid">
-                        <template for:each={brandKits} for:item="k">
-                            <button key={k.value} class={k.cls} data-value={k.value} onclick={pickKit}>
-                                <span class="kit-swatch">
-                                    <template lwc:if={k.logo}><img src={k.logo} alt={k.label} /></template>
-                                </span>
-                                <span class="kit-name">{k.label}</span>
-                            </button>
+                    <p class="sec-subtitle">Brand Kit — re-skins the site (colors &amp; logo)</p>
+                    <div class="brand-current">
+                        <template lwc:if={selectedKit}>
+                            <span class="kit-swatch kit-swatch--sm" style={selectedKit.swatch}>
+                                <template lwc:if={selectedKit.hasLogo}><img src={selectedKit.logo} alt={selectedKit.label} /></template>
+                            </span>
+                            <span class="brand-current-name">{selectedKit.label}</span>
                         </template>
+                        <lightning-button variant="base" label={brandChangeLabel} onclick={toggleBrandPicker}></lightning-button>
                     </div>
+                    <template lwc:if={showBrandPicker}>
+                        <lightning-input type="search" variant="label-hidden" placeholder="Search brands…"
+                            value={brandSearch} onchange={handleBrandSearch} class="slds-m-vertical_x-small"></lightning-input>
+                        <div class="kit-grid">
+                            <template for:each={filteredBrandTiles} for:item="k">
+                                <button key={k.id} class={k.cls} data-kitid={k.id} onclick={handlePickKit} title={k.label}>
+                                    <span class="kit-swatch" style={k.swatch}>
+                                        <template lwc:if={k.hasLogo}><img src={k.logo} alt={k.label} /></template>
+                                    </span>
+                                    <span class="kit-name">{k.label}</span>
+                                </button>
+                            </template>
+                        </div>
+                    </template>
                     <lightning-combobox label="Persona" value={personaValue} options={personaOptions}
                         placeholder="Select a persona" onchange={handlePersona}></lightning-combobox>
                     <lightning-combobox label="Industry" value={industry} options={industryOptions}
@@ -55,7 +68,6 @@
                         message-toggle-active="On" message-toggle-inactive="Off"
                         checked={rtom} onchange={handleRtom}
                         field-level-help="Adds a Real Time Offer Management section to the site."></lightning-input>
-                    <p class="sec-subtitle">The site re-skins to the Brand Kit; every other input lives in the sections at left.</p>
                 </template>
 
                 <template lwc:if={activeSection}>
