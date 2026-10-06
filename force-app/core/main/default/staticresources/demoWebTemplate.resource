@@ -2091,15 +2091,25 @@
             }
 
             if (snap.chatOpen && chatWindow) {
-              chatWindow.classList.add("show");
-              chatWindow.classList.remove("fade-out");
-              if (chatToggleBtn) chatToggleBtn.style.display = "none";
-              var badgeRestore = document.querySelector(".notification-badge");
-              if (badgeRestore) badgeRestore.style.display = "none";
-              if (composerInput) {
-                composerInput.value = "";
-                composerInput.disabled = adaptationComplete ? false : !!snap.chatComposerFlowStarted;
-              }
+              // DemoStudio embedded-preview fix: showState() above calls closeChat(),
+              // which schedules a 260ms removal of the "show" class. Opening the chat
+              // synchronously here loses that race (chat flickers open then closes).
+              // Defer the open past the closeChat timeout so it sticks.
+              setTimeout(function () {
+                chatWindow.classList.add("show");
+                chatWindow.classList.remove("fade-out");
+                if (chatToggleBtn) chatToggleBtn.style.display = "none";
+                var badgeRestore = document.querySelector(".notification-badge");
+                if (badgeRestore) badgeRestore.style.display = "none";
+                if (composerInput) {
+                  composerInput.value = "";
+                  composerInput.disabled = adaptationComplete ? false : !!snap.chatComposerFlowStarted;
+                }
+                if (chatWidgetEl) {
+                  chatWidgetEl.classList.remove("is-offstage");
+                  chatWidgetEl.classList.add("is-onstage");
+                }
+              }, 320);
             }
 
             if (snap.overlayOpen) {
