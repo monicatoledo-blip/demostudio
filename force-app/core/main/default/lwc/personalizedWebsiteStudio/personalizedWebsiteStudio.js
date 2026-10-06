@@ -2,6 +2,7 @@ import { LightningElement, api, wire, track } from 'lwc';
 import { getRecord, getFieldValue, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import SCHEMA_URL from '@salesforce/resourceUrl/webFieldSchema';
+import DEFAULTS_URL from '@salesforce/resourceUrl/webDefaults';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import deployStory from '@salesforce/apex/DemoStudioDeployService.deployStory';
@@ -44,6 +45,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     @api recordId;
     @track active = 'setup';
     @track schemaSections = [];
+    @track defaults = {};   // webDefaults: subIndustryKey -> { label, useCases[], defaults{} }
     @track brandKits = [];
     @track personaOptions = [];
     @track cfg = {};
@@ -65,6 +67,18 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             .then((r) => r.json())
             .then((d) => { this.schemaSections = (d && d.sections) || []; })
             .catch(() => { this.schemaSections = []; });
+        fetch(DEFAULTS_URL)
+            .then((r) => r.json())
+            .then((d) => { this.defaults = d || {}; })
+            .catch(() => { this.defaults = {}; });
+    }
+
+    // The selected Category (sub-industry) and its scenario (use-case) drive the
+    // cascading dropdown + the per-scenario default content.
+    get currentCategory() { return this.cfg.adaptiveWebSubIndustry || ''; }
+    get useCaseOptions() {
+        const cat = this.defaults[this.currentCategory];
+        return (cat && cat.useCases ? cat.useCases : []).map((u) => ({ label: u.label, value: u.key }));
     }
 
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
@@ -135,7 +149,14 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     get activeFields() {
         const s = this.activeSection;
         if (!s) return [];
-        return s.fields.map((f) => ({ field: f, value: this.cfg[f.id] === undefined ? '' : this.cfg[f.id] }));
+        return s.fields.map((f) => {
+            let field = f;
+            // Scenario is a cascading picklist driven by the selected Category.
+            if (f.id === 'adaptiveWebSubUseCase' && this.useCaseOptions.length) {
+                field = { ...f, type: 'picklist', options: this.useCaseOptions };
+            }
+            return { field, value: this.cfg[f.id] === undefined ? '' : this.cfg[f.id] };
+        });
     }
 
     get subtitle() {
@@ -183,7 +204,22 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     // data-driven field edit -> Config_JSON
     handleFieldChange(e) {
         const { id, value } = e.detail;
+        // Changing Category or Scenario repopulates the content fields with that
+        // scenario's default values (so the SE sees what they're overriding).
+        if (id === 'adaptiveWebSubIndustry') { this.applyCategory(value); return; }
+        if (id === 'adaptiveWebSubUseCase') { this.applyScenario(this.currentCategory, value); return; }
         this.cfg = { ...this.cfg, [id]: value };
+        this.queueSave();
+    }
+    applyCategory(cat) {
+        const data = this.defaults[cat];
+        const firstUc = data && data.useCases && data.useCases[0] ? data.useCases[0].key : '';
+        this.applyScenario(cat, firstUc);
+    }
+    applyScenario(cat, uc) {
+        const data = this.defaults[cat];
+        const d = (data && data.defaults && data.defaults[uc]) || {};
+        this.cfg = { ...this.cfg, ...d, adaptiveWebSubIndustry: cat, adaptiveWebSubUseCase: uc };
         this.queueSave();
     }
 
