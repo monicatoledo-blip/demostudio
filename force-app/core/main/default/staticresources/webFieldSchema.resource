@@ -1,77 +1,6 @@
 {
   "sections": [
     {
-      "id": "brand-customer",
-      "label": "Brand & Customer",
-      "fields": [
-        {
-          "id": "adaptiveBrandName",
-          "label": "Brand Name",
-          "type": "text"
-        },
-        {
-          "id": "adaptiveAgentName",
-          "label": "AI Agent Name",
-          "type": "text"
-        },
-        {
-          "id": "adaptiveNavLogoUrl",
-          "label": "Logo URL",
-          "type": "image"
-        },
-        {
-          "id": "adaptivePrimaryColor",
-          "label": "Primary Color",
-          "type": "color"
-        },
-        {
-          "id": "adaptiveAccentColor",
-          "label": "Accent Color",
-          "type": "color"
-        },
-        {
-          "id": "adaptivePersonaFirstName",
-          "label": "First name",
-          "type": "text"
-        },
-        {
-          "id": "adaptivePersonaLastName",
-          "label": "Last name",
-          "type": "text"
-        },
-        {
-          "id": "adaptivePersonaEmail",
-          "label": "Email",
-          "type": "text"
-        },
-        {
-          "id": "adaptivePersonaPhone",
-          "label": "Phone",
-          "type": "text"
-        },
-        {
-          "id": "adaptivePersonaCompany",
-          "label": "Company",
-          "type": "text"
-        },
-        {
-          "id": "adaptivePersonaZip",
-          "label": "ZIP Code",
-          "type": "text"
-        },
-        {
-          "id": "heroGradientColor",
-          "label": "Hero Banner Gradient \u2014 Start",
-          "type": "color"
-        },
-        {
-          "id": "heroGradientColor2",
-          "label": "Hero Banner Gradient \u2014 End",
-          "type": "color"
-        }
-      ]
-    },
-    {
       "id": "business-line-scenario",
       "label": "Business Line & Scenario",
       "fields": [
@@ -361,6 +290,11 @@
       "id": "ai-chat",
       "label": "AI Chat Conversation",
       "fields": [
+        {
+          "id": "adaptiveAgentName",
+          "label": "AI Agent Name",
+          "type": "text"
+        },
         {
           "id": "chatWidgetTitle",
           "label": "Chat Header Title",
