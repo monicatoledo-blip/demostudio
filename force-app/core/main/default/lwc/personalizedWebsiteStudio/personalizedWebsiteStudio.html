@@ -12,11 +12,8 @@
             </div>
             <div class="studio-toolbar-right">
                 <span class={saveClass}>{saveLabel}</span>
-                <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
-                    alternative-text="Reload preview" title="Reload preview"
-                    onclick={handleResetPreview} class="slds-m-left_x-small"></lightning-button-icon>
                 <lightning-button label="Deploy to Org" variant="brand" onclick={handleDeploy}
-                    disabled={deploying} class="slds-m-left_x-small"></lightning-button>
+                    disabled={deploying} class="slds-m-left_small"></lightning-button>
                 <template lwc:if={deployed}>
                     <lightning-button label="Tear Down" variant="destructive-text" onclick={handleTeardown}
                         disabled={deploying} class="slds-m-left_xx-small"></lightning-button>
@@ -26,7 +23,7 @@
 
         <div class="studio-split">
             <nav class="studio-rail">
-                <template for:each={sections} for:item="t">
+                <template for:each={tabs} for:item="t">
                     <button key={t.id} class={t.cls} data-id={t.id} onclick={handleTab}>
                         <lightning-icon icon-name={t.icon} size="x-small" class="rail-icon"></lightning-icon>
                         <span class="rail-label">{t.label}</span>
@@ -36,8 +33,10 @@
             </nav>
 
             <section class="studio-editor">
-                <template lwc:if={isBranding}>
-                    <h2 class="sec-title">Branding</h2>
+                <h2 class="sec-title">{activeTitle}</h2>
+
+                <template lwc:if={isSetup}>
+                    <p class="sec-subtitle">Brand Kit</p>
                     <div class="kit-grid">
                         <template for:each={brandKits} for:item="k">
                             <button key={k.value} class={k.cls} data-value={k.value} onclick={pickKit}>
@@ -48,34 +47,22 @@
                             </button>
                         </template>
                     </div>
-                    <p class="sec-subtitle">The site re-skins to the selected Brand Kit's colors and logo.</p>
-                </template>
-
-                <template lwc:if={isCustomer}>
-                    <h2 class="sec-title">Customer Profile</h2>
                     <lightning-combobox label="Persona" value={personaValue} options={personaOptions}
                         placeholder="Select a persona" onchange={handlePersona}></lightning-combobox>
-                    <p class="sec-subtitle">Drives the personalized ("warm") experience — the returning visitor.</p>
-                </template>
-
-                <template lwc:if={isContent}>
-                    <h2 class="sec-title">Content</h2>
                     <lightning-combobox label="Industry" value={industry} options={industryOptions}
                         onchange={handleIndustry}></lightning-combobox>
-                    <p class="sec-subtitle">Leave fields blank to use the per-industry defaults.</p>
-                    <template for:each={contentFields} for:item="f">
-                        <lightning-input key={f.key} label={f.label} value={f.value}
-                            data-key={f.key} onchange={handleContent}></lightning-input>
-                    </template>
-                </template>
-
-                <template lwc:if={isOffers}>
-                    <h2 class="sec-title">Real-Time Offers</h2>
                     <lightning-input type="toggle" label="Real Time Offer Management"
                         message-toggle-active="On" message-toggle-inactive="Off"
                         checked={rtom} onchange={handleRtom}
                         field-level-help="Adds a Real Time Offer Management section to the site."></lightning-input>
-                    <p class="sec-subtitle">Roadmap: this will provision and render a live RTOM offer section. Today it is the toggle/scaffold.</p>
+                    <p class="sec-subtitle">The site re-skins to the Brand Kit; every other input lives in the sections at left.</p>
+                </template>
+
+                <template lwc:if={activeSection}>
+                    <template for:each={activeFields} for:item="row">
+                        <c-web-field key={row.field.id} field={row.field} value={row.value}
+                            onfieldchange={handleFieldChange}></c-web-field>
+                    </template>
                 </template>
             </section>
 
@@ -88,6 +75,9 @@
                             <button key={v.id} class={v.cls} data-view={v.id} onclick={handleView}>{v.label}</button>
                         </template>
                     </div>
+                    <lightning-button-icon icon-name="utility:refresh" variant="border-filled"
+                        alternative-text="Restart demo" title="Restart demo"
+                        onclick={handleRestart} class="slds-m-left_x-small"></lightning-button-icon>
                 </header>
                 <div class="preview-canvas">
                     <iframe class="preview-iframe" title="Personalized Website preview" src={previewUrl}></iframe>

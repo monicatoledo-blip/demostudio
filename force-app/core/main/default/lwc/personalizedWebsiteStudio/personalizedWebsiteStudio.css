@@ -214,3 +214,7 @@
 .view-tab { border: none; background: transparent; cursor: pointer; font-family: inherit;
     font-size: 0.72rem; font-weight: 600; color: #5a6b7b; padding: 0.25rem 0.7rem; border-radius: 999px; text-transform: none; letter-spacing: 0; }
 .view-tab--active { background: #fff; color: #0176d3; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }
+
+/* Rail scrolls now that it holds all 12 EG sections + Setup. */
+.studio-rail { overflow-y: auto; }
+.studio-editor c-web-field { display: block; }

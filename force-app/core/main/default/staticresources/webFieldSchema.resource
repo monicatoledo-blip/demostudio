@@ -61,12 +61,12 @@
         },
         {
           "id": "heroGradientColor",
-          "label": "Hero Banner Gradient — Start",
+          "label": "Hero Banner Gradient \u2014 Start",
           "type": "color"
         },
         {
           "id": "heroGradientColor2",
-          "label": "Hero Banner Gradient — End",
+          "label": "Hero Banner Gradient \u2014 End",
           "type": "color"
         }
       ]
@@ -80,21 +80,37 @@
           "label": "Category",
           "type": "picklist",
           "options": [
-            "Retail Banking",
-            "Commercial Banking",
-            "Wealth Management",
-            "Asset Management",
-            "Insurance",
-            "Custom (no industry defaults)"
+            {
+              "label": "Retail Banking",
+              "value": "retailBanking"
+            },
+            {
+              "label": "Commercial Banking",
+              "value": "commercialBanking"
+            },
+            {
+              "label": "Wealth Management",
+              "value": "wealthManagement"
+            },
+            {
+              "label": "Asset Management",
+              "value": "assetManagement"
+            },
+            {
+              "label": "Insurance",
+              "value": "insurance"
+            },
+            {
+              "label": "Custom (no industry defaults)",
+              "value": "custom"
+            }
           ]
         },
         {
           "id": "adaptiveWebSubUseCase",
           "label": "Which scenario should we tell?",
-          "type": "picklist",
-          "options": [
-            "(dynamic — populated per Category; e.g. Retail Banking: Auto Loan Pre-Approval, First-Time Homebuyer, Credit Card Match, Mortgage Refinance, Home Equity (HELOC), Deposit Capture / High-Yield, Student Loan Refinance)"
-          ]
+          "type": "text",
+          "placeholder": "e.g. Auto Loan Pre-Approval, First-Time Homebuyer, Credit Card Match"
         },
         {
           "id": "navLabel1",
@@ -175,62 +191,62 @@
         },
         {
           "id": "adaptiveInsightImg1",
-          "label": "Insight 1 — Image",
+          "label": "Insight 1 \u2014 Image",
           "type": "image"
         },
         {
           "id": "homeInsight1Eyebrow",
-          "label": "Insight 1 — Eyebrow",
+          "label": "Insight 1 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "homeInsight1Title",
-          "label": "Insight 1 — Title",
+          "label": "Insight 1 \u2014 Title",
           "type": "text"
         },
         {
           "id": "homeInsight1Body",
-          "label": "Insight 1 — Body",
+          "label": "Insight 1 \u2014 Body",
           "type": "textarea"
         },
         {
           "id": "adaptiveInsightImg2",
-          "label": "Insight 2 — Image",
+          "label": "Insight 2 \u2014 Image",
           "type": "image"
         },
         {
           "id": "homeInsight2Eyebrow",
-          "label": "Insight 2 — Eyebrow",
+          "label": "Insight 2 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "homeInsight2Title",
-          "label": "Insight 2 — Title",
+          "label": "Insight 2 \u2014 Title",
           "type": "text"
         },
         {
           "id": "homeInsight2Body",
-          "label": "Insight 2 — Body",
+          "label": "Insight 2 \u2014 Body",
           "type": "textarea"
         },
         {
           "id": "adaptiveInsightImg3",
-          "label": "Insight 3 — Image",
+          "label": "Insight 3 \u2014 Image",
           "type": "image"
         },
         {
           "id": "homeInsight3Eyebrow",
-          "label": "Insight 3 — Eyebrow",
+          "label": "Insight 3 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "homeInsight3Title",
-          "label": "Insight 3 — Title",
+          "label": "Insight 3 \u2014 Title",
           "type": "text"
         },
         {
           "id": "homeInsight3Body",
-          "label": "Insight 3 — Body",
+          "label": "Insight 3 \u2014 Body",
           "type": "textarea"
         }
       ]
@@ -394,257 +410,257 @@
       "fields": [
         {
           "id": "card1_bestMatch",
-          "label": "Card 1 — This is the recommended pick",
+          "label": "Card 1 \u2014 This is the recommended pick",
           "type": "toggle"
         },
         {
           "id": "card1_badgeText",
-          "label": "Card 1 — What should the ribbon say when this one is recommended?",
+          "label": "Card 1 \u2014 What should the ribbon say when this one is recommended?",
           "type": "text"
         },
         {
           "id": "card1_icon",
-          "label": "Card 1 — Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
+          "label": "Card 1 \u2014 Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
           "type": "text"
         },
         {
           "id": "card1_tag",
-          "label": "Card 1 — Short tag above the title",
+          "label": "Card 1 \u2014 Short tag above the title",
           "type": "text"
         },
         {
           "id": "card1_title",
-          "label": "Card 1 — Main title for this option",
+          "label": "Card 1 \u2014 Main title for this option",
           "type": "text"
         },
         {
           "id": "card1_m1_label",
-          "label": "Card 1 — First metric label",
+          "label": "Card 1 \u2014 First metric label",
           "type": "text"
         },
         {
           "id": "card1_m1_value",
-          "label": "Card 1 — First metric value",
+          "label": "Card 1 \u2014 First metric value",
           "type": "text"
         },
         {
           "id": "card1_m2_label",
-          "label": "Card 1 — Second metric label",
+          "label": "Card 1 \u2014 Second metric label",
           "type": "text"
         },
         {
           "id": "card1_m2_value",
-          "label": "Card 1 — Second metric value",
+          "label": "Card 1 \u2014 Second metric value",
           "type": "text"
         },
         {
           "id": "card1_m3_label",
-          "label": "Card 1 — Third metric label (optional)",
+          "label": "Card 1 \u2014 Third metric label (optional)",
           "type": "text"
         },
         {
           "id": "card1_m3_value",
-          "label": "Card 1 — Third metric value (optional)",
+          "label": "Card 1 \u2014 Third metric value (optional)",
           "type": "text"
         },
         {
           "id": "card1_f1",
-          "label": "Card 1 — First bullet—what should stand out?",
+          "label": "Card 1 \u2014 First bullet\u2014what should stand out?",
           "type": "text"
         },
         {
           "id": "card1_f2",
-          "label": "Card 1 — Second bullet",
+          "label": "Card 1 \u2014 Second bullet",
           "type": "text"
         },
         {
           "id": "card1_f3",
-          "label": "Card 1 — Third bullet",
+          "label": "Card 1 \u2014 Third bullet",
           "type": "text"
         },
         {
           "id": "card1_f4",
-          "label": "Card 1 — Fourth bullet",
+          "label": "Card 1 \u2014 Fourth bullet",
           "type": "text"
         },
         {
           "id": "card1_bundle",
-          "label": "Card 1 — Any bundle or extra callout? (optional)",
+          "label": "Card 1 \u2014 Any bundle or extra callout? (optional)",
           "type": "text"
         },
         {
           "id": "card1_cta",
-          "label": "Card 1 — Button text on this card",
+          "label": "Card 1 \u2014 Button text on this card",
           "type": "text"
         },
         {
           "id": "card2_bestMatch",
-          "label": "Card 2 — This is the recommended pick",
+          "label": "Card 2 \u2014 This is the recommended pick",
           "type": "toggle"
         },
         {
           "id": "card2_badgeText",
-          "label": "Card 2 — What should the ribbon say when this one is recommended?",
+          "label": "Card 2 \u2014 What should the ribbon say when this one is recommended?",
           "type": "text"
         },
         {
           "id": "card2_icon",
-          "label": "Card 2 — Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
+          "label": "Card 2 \u2014 Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
           "type": "text"
         },
         {
           "id": "card2_tag",
-          "label": "Card 2 — Short tag above the title",
+          "label": "Card 2 \u2014 Short tag above the title",
           "type": "text"
         },
         {
           "id": "card2_title",
-          "label": "Card 2 — Main title for this option",
+          "label": "Card 2 \u2014 Main title for this option",
           "type": "text"
         },
         {
           "id": "card2_m1_label",
-          "label": "Card 2 — First metric label",
+          "label": "Card 2 \u2014 First metric label",
           "type": "text"
         },
         {
           "id": "card2_m1_value",
-          "label": "Card 2 — First metric value",
+          "label": "Card 2 \u2014 First metric value",
           "type": "text"
         },
         {
           "id": "card2_m2_label",
-          "label": "Card 2 — Second metric label",
+          "label": "Card 2 \u2014 Second metric label",
           "type": "text"
         },
         {
           "id": "card2_m2_value",
-          "label": "Card 2 — Second metric value",
+          "label": "Card 2 \u2014 Second metric value",
           "type": "text"
         },
         {
           "id": "card2_m3_label",
-          "label": "Card 2 — Third metric label (optional)",
+          "label": "Card 2 \u2014 Third metric label (optional)",
           "type": "text"
         },
         {
           "id": "card2_m3_value",
-          "label": "Card 2 — Third metric value (optional)",
+          "label": "Card 2 \u2014 Third metric value (optional)",
           "type": "text"
         },
         {
           "id": "card2_f1",
-          "label": "Card 2 — First bullet—what should stand out?",
+          "label": "Card 2 \u2014 First bullet\u2014what should stand out?",
           "type": "text"
         },
         {
           "id": "card2_f2",
-          "label": "Card 2 — Second bullet",
+          "label": "Card 2 \u2014 Second bullet",
           "type": "text"
         },
         {
           "id": "card2_f3",
-          "label": "Card 2 — Third bullet",
+          "label": "Card 2 \u2014 Third bullet",
           "type": "text"
         },
         {
           "id": "card2_f4",
-          "label": "Card 2 — Fourth bullet",
+          "label": "Card 2 \u2014 Fourth bullet",
           "type": "text"
         },
         {
           "id": "card2_bundle",
-          "label": "Card 2 — Any bundle or extra callout? (optional)",
+          "label": "Card 2 \u2014 Any bundle or extra callout? (optional)",
           "type": "text"
         },
         {
           "id": "card2_cta",
-          "label": "Card 2 — Button text on this card",
+          "label": "Card 2 \u2014 Button text on this card",
           "type": "text"
         },
         {
           "id": "card3_bestMatch",
-          "label": "Card 3 — This is the recommended pick",
+          "label": "Card 3 \u2014 This is the recommended pick",
           "type": "toggle"
         },
         {
           "id": "card3_badgeText",
-          "label": "Card 3 — What should the ribbon say when this one is recommended?",
+          "label": "Card 3 \u2014 What should the ribbon say when this one is recommended?",
           "type": "text"
         },
         {
           "id": "card3_icon",
-          "label": "Card 3 — Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
+          "label": "Card 3 \u2014 Which icon fits this offer? (Font Awesome class, e.g. fa-car)",
           "type": "text"
         },
         {
           "id": "card3_tag",
-          "label": "Card 3 — Short tag above the title",
+          "label": "Card 3 \u2014 Short tag above the title",
           "type": "text"
         },
         {
           "id": "card3_title",
-          "label": "Card 3 — Main title for this option",
+          "label": "Card 3 \u2014 Main title for this option",
           "type": "text"
         },
         {
           "id": "card3_m1_label",
-          "label": "Card 3 — First metric label",
+          "label": "Card 3 \u2014 First metric label",
           "type": "text"
         },
         {
           "id": "card3_m1_value",
-          "label": "Card 3 — First metric value",
+          "label": "Card 3 \u2014 First metric value",
           "type": "text"
         },
         {
           "id": "card3_m2_label",
-          "label": "Card 3 — Second metric label",
+          "label": "Card 3 \u2014 Second metric label",
           "type": "text"
         },
         {
           "id": "card3_m2_value",
-          "label": "Card 3 — Second metric value",
+          "label": "Card 3 \u2014 Second metric value",
           "type": "text"
         },
         {
           "id": "card3_m3_label",
-          "label": "Card 3 — Third metric label (optional)",
+          "label": "Card 3 \u2014 Third metric label (optional)",
           "type": "text"
         },
         {
           "id": "card3_m3_value",
-          "label": "Card 3 — Third metric value (optional)",
+          "label": "Card 3 \u2014 Third metric value (optional)",
           "type": "text"
         },
         {
           "id": "card3_f1",
-          "label": "Card 3 — First bullet—what should stand out?",
+          "label": "Card 3 \u2014 First bullet\u2014what should stand out?",
           "type": "text"
         },
         {
           "id": "card3_f2",
-          "label": "Card 3 — Second bullet",
+          "label": "Card 3 \u2014 Second bullet",
           "type": "text"
         },
         {
           "id": "card3_f3",
-          "label": "Card 3 — Third bullet",
+          "label": "Card 3 \u2014 Third bullet",
           "type": "text"
         },
         {
           "id": "card3_f4",
-          "label": "Card 3 — Fourth bullet",
+          "label": "Card 3 \u2014 Fourth bullet",
           "type": "text"
         },
         {
           "id": "card3_bundle",
-          "label": "Card 3 — Any bundle or extra callout? (optional)",
+          "label": "Card 3 \u2014 Any bundle or extra callout? (optional)",
           "type": "text"
         },
         {
           "id": "card3_cta",
-          "label": "Card 3 — Button text on this card",
+          "label": "Card 3 \u2014 Button text on this card",
           "type": "text"
         }
       ]
@@ -706,17 +722,17 @@
         },
         {
           "id": "warmInsight1Eyebrow",
-          "label": "Tile 1 — Eyebrow",
+          "label": "Tile 1 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "warmInsight1Title",
-          "label": "Tile 1 — Title",
+          "label": "Tile 1 \u2014 Title",
           "type": "text"
         },
         {
           "id": "warmInsight1Body",
-          "label": "Tile 1 — Body",
+          "label": "Tile 1 \u2014 Body",
           "type": "textarea"
         },
         {
@@ -726,17 +742,17 @@
         },
         {
           "id": "warmInsight2Eyebrow",
-          "label": "Tile 2 — Eyebrow",
+          "label": "Tile 2 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "warmInsight2Title",
-          "label": "Tile 2 — Title",
+          "label": "Tile 2 \u2014 Title",
           "type": "text"
         },
         {
           "id": "warmInsight2Body",
-          "label": "Tile 2 — Body",
+          "label": "Tile 2 \u2014 Body",
           "type": "textarea"
         },
         {
@@ -746,17 +762,17 @@
         },
         {
           "id": "warmInsight3Eyebrow",
-          "label": "Tile 3 — Eyebrow",
+          "label": "Tile 3 \u2014 Eyebrow",
           "type": "text"
         },
         {
           "id": "warmInsight3Title",
-          "label": "Tile 3 — Title",
+          "label": "Tile 3 \u2014 Title",
           "type": "text"
         },
         {
           "id": "warmInsight3Body",
-          "label": "Tile 3 — Body",
+          "label": "Tile 3 \u2014 Body",
           "type": "textarea"
         }
       ]

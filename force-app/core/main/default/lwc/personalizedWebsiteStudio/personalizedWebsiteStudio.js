@@ -1,12 +1,12 @@
 import { LightningElement, api, wire, track } from 'lwc';
 import { getRecord, getFieldValue, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import SCHEMA_URL from '@salesforce/resourceUrl/webFieldSchema';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import deployStory from '@salesforce/apex/DemoStudioDeployService.deployStory';
 import teardownStory from '@salesforce/apex/DemoStudioDeployService.teardownStory';
 
-import NAME from '@salesforce/schema/Demo_Story__c.Name';
 import BRANDKIT from '@salesforce/schema/Demo_Story__c.Brand_Kit__c';
 import PERSONA from '@salesforce/schema/Demo_Story__c.Persona__c';
 import INDUSTRY from '@salesforce/schema/Demo_Story__c.Industry__c';
@@ -14,29 +14,31 @@ import RTOM from '@salesforce/schema/Demo_Story__c.Rtom_Enabled__c';
 import CONFIG from '@salesforce/schema/Demo_Story__c.Config_JSON__c';
 import STATUS from '@salesforce/schema/Demo_Story__c.Status__c';
 
-const FIELDS = [NAME, BRANDKIT, PERSONA, INDUSTRY, RTOM, CONFIG, STATUS];
-
-const SECTIONS = [
-    { id: 'branding', label: 'Branding', icon: 'utility:palette' },
-    { id: 'customer', label: 'Customer Profile', icon: 'utility:user' },
-    { id: 'content', label: 'Content', icon: 'utility:page' },
-    { id: 'offers', label: 'Real-Time Offers', icon: 'utility:offer' }
-];
+const FIELDS = [BRANDKIT, PERSONA, INDUSTRY, RTOM, CONFIG, STATUS];
+const SECTION_ICONS = {
+    'brand-customer': 'utility:palette', 'business-line-scenario': 'utility:merge',
+    'home-page-content': 'utility:home', 'market-insights': 'utility:knowledge_base',
+    'category-page': 'utility:page', 'ai-chat': 'utility:chat', 'offer-overlay-frame': 'utility:resource_capacity',
+    'offer-cards': 'utility:cart', 'handoff-form': 'utility:form', 'return-hero': 'utility:image',
+    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings'
+};
 
 /**
- * Website Studio — the builder for a Personalized Website (Demo_Story__c). Mirrors
- * demoStoryStudio's chrome (toolbar + rail + editor + resizer + live preview) for
- * cohesion, with a leaner editor. The preview iframe loads the WebExperiencePreview
- * VF page (same relative /apex/ pattern the 2-way uses under LWS). Autosaves field
- * edits + a content-override Config_JSON, then bumps a nonce to reload the preview.
- * Separate component from demoStoryStudio — the 2-way path is untouched.
+ * Website Studio — the full lift-and-shift builder for a Personalized Website.
+ * Mirrors demoStoryStudio chrome. The editor is DATA-DRIVEN from the webFieldSchema
+ * static resource (the Experience Generator adaptive-web form: 12 sections / 137
+ * fields) rendered via <c-web-field>; plus a fixed Setup section for the DemoStudio
+ * associations (Brand Kit / Persona / Industry / RTOM). Every field edit writes to
+ * Config_JSON__c, autosaves, and reloads the live preview. The preview drives the
+ * ported adaptive runtime (Cold / Agent / Adapted + Restart). 2-way path untouched.
  */
 export default class PersonalizedWebsiteStudio extends LightningElement {
     @api recordId;
-    @track active = 'branding';
+    @track active = 'setup';
+    @track schemaSections = [];
     @track brandKits = [];
     @track personaOptions = [];
-    @track cfg = {};            // content overrides (Config_JSON__c)
+    @track cfg = {};
     brandKitId;
     personaId;
     industry = 'Financial Services';
@@ -47,6 +49,13 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     deploying = false;
     _loaded = false;
     _t;
+
+    connectedCallback() {
+        fetch(SCHEMA_URL)
+            .then((r) => r.json())
+            .then((d) => { this.schemaSections = (d && d.sections) || []; })
+            .catch(() => { this.schemaSections = []; });
+    }
 
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
     wiredRecord({ data }) {
@@ -69,13 +78,28 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         if (data) this.personaOptions = data.map((p) => ({ label: p.label, value: p.value }));
     }
 
-    get sections() {
-        return SECTIONS.map((s) => ({ ...s, cls: 'studio-tab' + (s.id === this.active ? ' studio-tab--active' : '') }));
+    // --- rail: fixed Setup + the schema sections ---------------------------------
+    get tabs() {
+        const setup = { id: 'setup', label: 'Brand & Setup', icon: 'utility:settings' };
+        const rest = this.schemaSections.map((s) => ({
+            id: s.id, label: s.label, icon: SECTION_ICONS[s.id] || 'utility:record'
+        }));
+        return [setup, ...rest].map((t) => ({
+            ...t, cls: 'studio-tab' + (t.id === this.active ? ' studio-tab--active' : '')
+        }));
     }
-    get isBranding() { return this.active === 'branding'; }
-    get isCustomer() { return this.active === 'customer'; }
-    get isContent() { return this.active === 'content'; }
-    get isOffers() { return this.active === 'offers'; }
+    get isSetup() { return this.active === 'setup'; }
+    get activeSection() { return this.schemaSections.find((s) => s.id === this.active); }
+    get activeTitle() {
+        const s = this.activeSection;
+        return this.isSetup ? 'Brand & Setup' : (s ? s.label : '');
+    }
+    // active section's fields with current values bound in
+    get activeFields() {
+        const s = this.activeSection;
+        if (!s) return [];
+        return s.fields.map((f) => ({ field: f, value: this.cfg[f.id] === undefined ? '' : this.cfg[f.id] }));
+    }
 
     get subtitle() {
         const kit = this.brandKits.find((k) => k.value === this.brandKitId);
@@ -90,29 +114,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     get previewUrl() {
         return '/apex/WebExperiencePreview?id=' + this.recordId + '&n=' + this.nonce + '&view=' + this.view;
     }
-
-    // Cold (first-time visitor) / Agent (chat open + greeting) / Adapted (warm,
-    // personalized). These drive the sim's postMessage harness via the VF relay so
-    // the agentic adaptive flow is actually visible in the preview.
-    get viewTabs() {
-        return [
-            { id: 'cold', label: 'Cold' },
-            { id: 'agent', label: 'Agent' },
-            { id: 'adapted', label: 'Adapted' }
-        ].map((v) => ({ ...v, cls: 'view-tab' + (v.id === this.view ? ' view-tab--active' : '') }));
-    }
-    handleView(e) {
-        this.view = e.currentTarget.dataset.view;
-        const frame = this.template.querySelector('iframe.preview-iframe');
-        // Relay to the VF page, which relays to the sim. If the frame hasn't loaded
-        // the new view yet, the &view= param on previewUrl covers a cold reload.
-        if (frame && frame.contentWindow) {
-            frame.contentWindow.postMessage({ type: 'web-sim-drive', view: this.view }, '*');
-        }
-    }
-    get saveClass() {
-        return 'save-status save-status--' + (this.saveState === 'saved' ? 'saved' : 'pending');
-    }
+    get saveClass() { return 'save-status save-status--' + (this.saveState === 'saved' ? 'saved' : 'pending'); }
     get saveLabel() { return this.saveState === 'saved' ? 'All changes saved' : 'Saving…'; }
     get industryOptions() {
         return ['Financial Services', 'Health & Life Sciences', 'Retail & Consumer Goods',
@@ -121,16 +123,9 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     }
     get personaValue() { return this.personaId; }
     get deployed() { return this._status === 'Deployed'; }
-
-    // content-override fields surfaced in the Content section (write Config_JSON keys)
-    get contentFields() {
-        return [
-            { key: 'coldHeroHeading', label: 'Hero headline' },
-            { key: 'coldHeroParagraph1', label: 'Hero paragraph' },
-            { key: 'warmInsight1Title', label: 'Personalized insight 1 — title' },
-            { key: 'warmInsight2Title', label: 'Personalized insight 2 — title' },
-            { key: 'warmInsight3Title', label: 'Personalized insight 3 — title' }
-        ].map((f) => ({ ...f, value: this.cfg[f.key] || '' }));
+    get viewTabs() {
+        return [{ id: 'cold', label: 'Cold' }, { id: 'agent', label: 'Agent' }, { id: 'adapted', label: 'Adapted' }]
+            .map((v) => ({ ...v, cls: 'view-tab' + (v.id === this.view ? ' view-tab--active' : '') }));
     }
 
     handleTab(e) { this.active = e.currentTarget.dataset.id; }
@@ -145,9 +140,11 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
     handleIndustry(e) { this.industry = e.detail.value; this.queueSave(); }
     handleRtom(e) { this.rtom = e.target.checked; this.queueSave(); }
-    handleContent(e) {
-        const k = e.currentTarget.dataset.key;
-        this.cfg = { ...this.cfg, [k]: e.target.value };
+
+    // data-driven field edit -> Config_JSON
+    handleFieldChange(e) {
+        const { id, value } = e.detail;
+        this.cfg = { ...this.cfg, [id]: value };
         this.queueSave();
     }
 
@@ -156,7 +153,6 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         window.clearTimeout(this._t);
         this._t = window.setTimeout(() => this.save(), 900);
     }
-
     async save() {
         const fields = { Id: this.recordId };
         fields[BRANDKIT.fieldApiName] = this.brandKitId || null;
@@ -167,14 +163,29 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         try {
             await updateRecord({ fields });
             this.saveState = 'saved';
-            this.nonce = Date.now();            // reload the preview with saved state
+            this.nonce = Date.now();
         } catch (e) {
             this.saveState = 'pending';
             this.toast('Save failed', (e && e.body && e.body.message) || e.message, 'error');
         }
     }
 
-    handleResetPreview() { this.nonce = Date.now(); }
+    // --- preview controls --------------------------------------------------------
+    handleView(e) {
+        this.view = e.currentTarget.dataset.view;
+        this.driveSim(this.view);
+    }
+    handleRestart() {
+        // Re-drive the current view; the sim resets its flow from there.
+        this.driveSim(this.view);
+        this.nonce = Date.now();
+    }
+    driveSim(view) {
+        const frame = this.template.querySelector('iframe.preview-iframe');
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ type: 'web-sim-drive', view }, '*');
+        }
+    }
 
     async handleDeploy() { await this.runBackend(deployStory, 'Deployed to this org'); }
     async handleTeardown() { await this.runBackend(teardownStory, 'Torn down'); }
@@ -189,7 +200,6 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             this.deploying = false;
         }
     }
-
     toast(title, message, variant) {
         this.dispatchEvent(new ShowToastEvent({ title, message, variant }));
     }
