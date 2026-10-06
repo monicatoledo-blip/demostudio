@@ -90,6 +90,32 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         return list.map((u) => ({ label: u.label, value: u.key }));
     }
 
+    // Editor display: fields are STORED with tokens (${brandName} etc.) so they swap,
+    // but shown RESOLVED so the SE sees "Ally", not the raw token. Mirrors the 2-way
+    // email editor's emailDisplay. A hand-edited field just stores the literal text.
+    get brandNameResolved() {
+        const k = this.selectedKit;
+        return (k && k.label) || this.cfg.adaptiveBrandName || '';
+    }
+    get personaFirstName() {
+        const p = this.personaOptions.find((o) => o.value === this.personaId);
+        if (p && p.label) return p.label.split(' ')[0];
+        return this.cfg.adaptivePersonaFirstName || '';
+    }
+    get agentNameResolved() {
+        const a = this.cfg.adaptiveAgentName;
+        return a && a.indexOf('${') === -1 ? a : 'Penny';
+    }
+    resolveTokens(str) {
+        if (str == null) return '';
+        let out = String(str);
+        const b = this.brandNameResolved, fn = this.personaFirstName, an = this.agentNameResolved;
+        if (b) out = out.replace(/\$\{brandName\}/g, b).replace(/\[\[BRAND_NAME\]\]/g, b);
+        if (fn) out = out.replace(/\$\{firstName\}/g, fn).replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn);
+        out = out.replace(/\$\{agentName\}/g, an).replace(/\bPenny\b/g, an);
+        return out;
+    }
+
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
     wiredRecord({ data }) {
         if (!data) return;
@@ -166,7 +192,10 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             } else if (f.id === 'adaptiveWebSubUseCase') {
                 field = { ...f, type: 'picklist', options: this.useCaseOptions };
             }
-            return { field, value: this.cfg[f.id] === undefined ? '' : this.cfg[f.id] };
+            const raw = this.cfg[f.id] === undefined ? '' : this.cfg[f.id];
+            // Picklists keep raw keys; text/content fields show resolved tokens.
+            const value = field.type === 'picklist' ? raw : this.resolveTokens(raw);
+            return { field, value };
         });
     }
 
