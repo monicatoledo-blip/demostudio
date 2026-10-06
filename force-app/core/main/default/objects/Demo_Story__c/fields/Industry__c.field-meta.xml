@@ -9,8 +9,14 @@
         <valueSetDefinition>
             <sorted>false</sorted>
             <value><fullName>Financial Services</fullName><default>true</default><label>Financial Services</label></value>
-            <value><fullName>Retail</fullName><default>false</default><label>Retail</label></value>
-            <value><fullName>Hospitality &amp; Travel</fullName><default>false</default><label>Hospitality &amp; Travel</label></value>
+            <value><fullName>Health &amp; Life Sciences</fullName><default>false</default><label>Health &amp; Life Sciences</label></value>
+            <value><fullName>Retail &amp; Consumer Goods</fullName><default>false</default><label>Retail &amp; Consumer Goods</label></value>
+            <value><fullName>Manufacturing</fullName><default>false</default><label>Manufacturing</label></value>
+            <value><fullName>Communications, Media &amp; Technology</fullName><default>false</default><label>Communications, Media &amp; Technology</label></value>
+            <value><fullName>Public Sector</fullName><default>false</default><label>Public Sector</label></value>
+            <value><fullName>Consumer Business Services</fullName><default>false</default><label>Consumer Business Services</label></value>
+            <value><fullName>Travel &amp; Hospitality</fullName><default>false</default><label>Travel &amp; Hospitality</label></value>
+            <value><fullName>Energy &amp; Utilities</fullName><default>false</default><label>Energy &amp; Utilities</label></value>
         </valueSetDefinition>
     </valueSet>
 </CustomField>

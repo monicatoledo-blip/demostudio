@@ -208,3 +208,9 @@
 .mca-ta-item:hover { background: #f3f6ff; }
 .mca-ta-item-sel { font-weight: 700; background: #eef3ff; }
 .mca-ta-empty { padding: 8px 12px; font-size: 13px; color: #706e6b; }
+
+/* Preview view switch — Cold / Agent / Adapted (drives the adaptive sim). */
+.view-switch { margin-left: auto; display: inline-flex; gap: 2px; background: #eef1f4; border-radius: 999px; padding: 2px; }
+.view-tab { border: none; background: transparent; cursor: pointer; font-family: inherit;
+    font-size: 0.72rem; font-weight: 600; color: #5a6b7b; padding: 0.25rem 0.7rem; border-radius: 999px; text-transform: none; letter-spacing: 0; }
+.view-tab--active { background: #fff; color: #0176d3; box-shadow: 0 1px 2px rgba(0,0,0,0.12); }

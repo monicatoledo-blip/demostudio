@@ -83,6 +83,11 @@
                 <header class="preview-header">
                     <lightning-icon icon-name="utility:preview" size="xx-small"></lightning-icon>
                     <span>Live preview</span>
+                    <div class="view-switch">
+                        <template for:each={viewTabs} for:item="v">
+                            <button key={v.id} class={v.cls} data-view={v.id} onclick={handleView}>{v.label}</button>
+                        </template>
+                    </div>
                 </header>
                 <div class="preview-canvas">
                     <iframe class="preview-iframe" title="Personalized Website preview" src={previewUrl}></iframe>

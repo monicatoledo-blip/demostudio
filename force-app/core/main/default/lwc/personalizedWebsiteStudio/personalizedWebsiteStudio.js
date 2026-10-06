@@ -42,6 +42,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     industry = 'Financial Services';
     rtom = false;
     nonce = Date.now();
+    view = 'agent';
     saveState = 'saved';
     deploying = false;
     _loaded = false;
@@ -87,7 +88,27 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         return `--demo-bg-gradient: linear-gradient(135deg, ${a} 0%, ${b} 100%);`;
     }
     get previewUrl() {
-        return '/apex/WebExperiencePreview?id=' + this.recordId + '&n=' + this.nonce;
+        return '/apex/WebExperiencePreview?id=' + this.recordId + '&n=' + this.nonce + '&view=' + this.view;
+    }
+
+    // Cold (first-time visitor) / Agent (chat open + greeting) / Adapted (warm,
+    // personalized). These drive the sim's postMessage harness via the VF relay so
+    // the agentic adaptive flow is actually visible in the preview.
+    get viewTabs() {
+        return [
+            { id: 'cold', label: 'Cold' },
+            { id: 'agent', label: 'Agent' },
+            { id: 'adapted', label: 'Adapted' }
+        ].map((v) => ({ ...v, cls: 'view-tab' + (v.id === this.view ? ' view-tab--active' : '') }));
+    }
+    handleView(e) {
+        this.view = e.currentTarget.dataset.view;
+        const frame = this.template.querySelector('iframe.preview-iframe');
+        // Relay to the VF page, which relays to the sim. If the frame hasn't loaded
+        // the new view yet, the &view= param on previewUrl covers a cold reload.
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ type: 'web-sim-drive', view: this.view }, '*');
+        }
     }
     get saveClass() {
         return 'save-status save-status--' + (this.saveState === 'saved' ? 'saved' : 'pending');

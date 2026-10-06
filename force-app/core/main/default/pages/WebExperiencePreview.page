@@ -47,7 +47,33 @@
                     fail('Engine error: ' + (e && e.message ? e.message : e));
                     return;
                 }
-                document.getElementById('sim').setAttribute('srcdoc', html);
+                var f = document.getElementById('sim');
+                f.setAttribute('srcdoc', html);
+
+                // The adaptive sim is driven by a parent-window postMessage harness
+                // (adaptive-restore-state in / adaptive-sim-state out). With no parent
+                // it boots to state 0 (cold home, agent hidden). Drive it: default to
+                // the agent being visible, and relay 'web-sim-drive' from the Studio
+                // (Cold / Agent / Adapted controls) up top.
+                var VIEWS = {
+                    cold:    { lastReportedState: 0 },
+                    agent:   { lastReportedState: 1, chatOpen: true, categoryChatGreetingSent: true },
+                    adapted: { lastReportedState: 5, chatOpen: true, adaptationComplete: true }
+                };
+                var DEFAULT_VIEW = '{!JSENCODE($CurrentPage.parameters.view)}' || 'agent';
+                var booted = false;
+                function drive(view) {
+                    try { f.contentWindow.postMessage(
+                        { type: 'adaptive-restore-state', snapshot: VIEWS[view] || VIEWS.cold }, '*'); } catch (e) {}
+                }
+                window.addEventListener('message', function (ev) {
+                    if (!ev.data) return;
+                    if (ev.data.type === 'adaptive-sim-state') {
+                        if (!booted) { booted = true; drive(DEFAULT_VIEW); }
+                    } else if (ev.data.type === 'web-sim-drive') {
+                        drive(ev.data.view);
+                    }
+                });
             })
             .catch(function (e) { fail('Template load failed: ' + (e && e.message ? e.message : e)); });
     })();
