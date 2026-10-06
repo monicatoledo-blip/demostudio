@@ -73,12 +73,21 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             .catch(() => { this.defaults = {}; });
     }
 
-    // The selected Category (sub-industry) and its scenario (use-case) drive the
-    // cascading dropdown + the per-scenario default content.
+    // Cascade: Industry (record field) -> Category (sub-industry) -> Scenario.
+    // webDefaults is keyed by INDUSTRY label; each has categories[] + scenarios{cat:[]}
+    // + defaults{cat:{scenario:{fieldId:value}}}. Only industries that have authored
+    // content appear; others fall back to a single "Custom" category.
+    get industryData() { return this.defaults[this.industry] || null; }
     get currentCategory() { return this.cfg.adaptiveWebSubIndustry || ''; }
+    get categoryOptions() {
+        const d = this.industryData;
+        const base = (d && d.categories ? d.categories : []).map((c) => ({ label: c.label, value: c.key }));
+        return base.length ? base : [{ label: 'Custom (no industry defaults)', value: 'custom' }];
+    }
     get useCaseOptions() {
-        const cat = this.defaults[this.currentCategory];
-        return (cat && cat.useCases ? cat.useCases : []).map((u) => ({ label: u.label, value: u.key }));
+        const d = this.industryData;
+        const list = (d && d.scenarios && d.scenarios[this.currentCategory]) || [];
+        return list.map((u) => ({ label: u.label, value: u.key }));
     }
 
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
@@ -151,8 +160,10 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         if (!s) return [];
         return s.fields.map((f) => {
             let field = f;
-            // Scenario is a cascading picklist driven by the selected Category.
-            if (f.id === 'adaptiveWebSubUseCase' && this.useCaseOptions.length) {
+            // Category cascades from Industry; Scenario cascades from Category.
+            if (f.id === 'adaptiveWebSubIndustry') {
+                field = { ...f, type: 'picklist', options: this.categoryOptions };
+            } else if (f.id === 'adaptiveWebSubUseCase') {
                 field = { ...f, type: 'picklist', options: this.useCaseOptions };
             }
             return { field, value: this.cfg[f.id] === undefined ? '' : this.cfg[f.id] };
@@ -198,7 +209,13 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     }
 
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
-    handleIndustry(e) { this.industry = e.detail.value; this.queueSave(); }
+    handleIndustry(e) {
+        this.industry = e.detail.value;
+        // Reset the cascade to the new industry's first Category + Scenario defaults.
+        const cats = this.categoryOptions;
+        const firstCat = cats[0] ? cats[0].value : 'custom';
+        this.applyCategory(firstCat);   // applyCategory -> applyScenario -> queueSave
+    }
     handleRtom(e) { this.rtom = e.target.checked; this.queueSave(); }
 
     // data-driven field edit -> Config_JSON
@@ -211,15 +228,16 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         this.cfg = { ...this.cfg, [id]: value };
         this.queueSave();
     }
-    applyCategory(cat) {
-        const data = this.defaults[cat];
-        const firstUc = data && data.useCases && data.useCases[0] ? data.useCases[0].key : '';
-        this.applyScenario(cat, firstUc);
+    firstScenarioKey(cat) {
+        const d = this.industryData;
+        const list = (d && d.scenarios && d.scenarios[cat]) || [];
+        return list[0] ? list[0].key : '';
     }
+    applyCategory(cat) { this.applyScenario(cat, this.firstScenarioKey(cat)); }
     applyScenario(cat, uc) {
-        const data = this.defaults[cat];
-        const d = (data && data.defaults && data.defaults[uc]) || {};
-        this.cfg = { ...this.cfg, ...d, adaptiveWebSubIndustry: cat, adaptiveWebSubUseCase: uc };
+        const d = this.industryData;
+        const dd = (d && d.defaults && d.defaults[cat] && d.defaults[cat][uc]) || {};
+        this.cfg = { ...this.cfg, ...dd, adaptiveWebSubIndustry: cat, adaptiveWebSubUseCase: uc };
         this.queueSave();
     }
 
