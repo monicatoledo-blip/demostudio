@@ -281,9 +281,12 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     }
 
     handleDownload() {
-        // Opens the preview page in download mode; it builds the resolved, self-
-        // contained HTML (agent icon inlined) and the browser saves it as a file.
-        window.open('/apex/WebExperiencePreview?id=' + this.recordId + '&download=1', '_blank');
+        // Ask the (already-rendered) preview iframe to save its resolved HTML — same
+        // tab, no in-between page. The VF page builds the self-contained file.
+        const frame = this.template.querySelector('iframe.preview-iframe');
+        if (frame && frame.contentWindow) {
+            frame.contentWindow.postMessage({ type: 'web-download' }, '*');
+        }
     }
 
     async handleDeploy() { await this.runBackend(deployStory, 'Deployed to this org'); }
