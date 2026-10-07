@@ -1055,7 +1055,7 @@
             <a class="site-nav-link transition-colors" href="#">Help</a>
             <button type="button" class="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100" aria-label="Cart">
               <i class="fas fa-shopping-bag text-base" aria-hidden="true"></i>
-              <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style="background-color: var(--brand)">[[CART_COUNT]]</span>
+              <span id="cartCountBadge" data-cart-count class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style="background-color: var(--brand); transition: transform .2s ease;">[[CART_COUNT]]</span>
             </button>
             <a
               class="rounded-full px-4 py-1.5 text-white transition-opacity hover:opacity-95"
@@ -1090,7 +1090,7 @@
             </div>
             <a class="mobile-nav-link" href="#">[[NAV_LABEL_4]]</a>
             <a class="mobile-nav-link" href="#">[[NAV_LABEL_5]]</a>
-            <a class="mobile-nav-link" href="#"><i class="fas fa-shopping-bag mr-2" aria-hidden="true"></i>Cart ([[CART_COUNT]])</a>
+            <a class="mobile-nav-link" href="#"><i class="fas fa-shopping-bag mr-2" aria-hidden="true"></i>Cart (<span data-cart-count>[[CART_COUNT]]</span>)</a>
             <a class="mobile-nav-link" href="#">Help</a>
             <a
               class="mobile-nav-link rounded-lg text-center text-white"
@@ -1306,7 +1306,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_1_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_1_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_1_BODY]]</p>
-                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
+                    <button type="button" data-cart-add class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
                 <article id="warm-insight-2" class="home-insight-card group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-md">
@@ -1317,7 +1317,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_2_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_2_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_2_BODY]]</p>
-                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
+                    <button type="button" data-cart-add class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
                 <article id="warm-insight-3" class="home-insight-card group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-md">
@@ -1328,7 +1328,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_3_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_3_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_3_BODY]]</p>
-                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
+                    <button type="button" data-cart-add class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
               </div>
@@ -2192,6 +2192,29 @@
         });
 
         reportSimulationState(0);
+      })();
+    </script>
+    <script>
+      // Cart ticker: clicking a product "+" / "Add to bag" ([data-cart-add]) bumps the
+      // nav cart count ([data-cart-count], desktop badge + mobile link).
+      (function () {
+        var badge = document.getElementById('cartCountBadge');
+        var count = badge ? (parseInt(badge.textContent, 10) || 0) : 0;
+        function render() {
+          var els = document.querySelectorAll('[data-cart-count]');
+          for (var i = 0; i < els.length; i++) els[i].textContent = count;
+          if (badge) {
+            badge.style.transform = 'scale(1.4)';
+            setTimeout(function () { badge.style.transform = ''; }, 200);
+          }
+        }
+        document.addEventListener('click', function (e) {
+          var btn = e.target.closest && e.target.closest('[data-cart-add]');
+          if (!btn) return;
+          e.preventDefault();
+          count += 1;
+          render();
+        });
       })();
     </script>
   </body>
