@@ -109,6 +109,22 @@
           "id": "intentTriggerText",
           "label": "Main CTA Button Text",
           "type": "text"
+        },
+        {
+          "id": "catalogHeading",
+          "label": "Product catalog — section heading",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalogSubtitle",
+          "label": "Product catalog — section subtitle",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
         }
       ]
     },

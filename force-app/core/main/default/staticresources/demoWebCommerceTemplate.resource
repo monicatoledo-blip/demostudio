@@ -1139,6 +1139,19 @@
             </div>
           </section>
 
+          <section id="catalog" class="scroll-mt-[72px] border-t border-slate-200 bg-slate-50 px-5 py-16 md:px-8 md:py-20">
+            <div class="mx-auto max-w-6xl">
+              <div class="flex items-end justify-between gap-4">
+                <div>
+                  <h2 class="text-2xl font-bold md:text-3xl" style="color: var(--nav-ink)">[[CATALOG_HEADING]]</h2>
+                  <p class="mt-2 text-slate-600">[[CATALOG_SUBTITLE]]</p>
+                </div>
+                <a href="#" class="hidden shrink-0 text-sm font-semibold md:inline-flex" style="color: var(--brand)">View all&nbsp;&rarr;</a>
+              </div>
+              [[PRODUCT_CATALOG_HTML]]
+            </div>
+          </section>
+
           <section class="bg-white px-5 py-16 md:px-8 md:py-24">
             <div class="mx-auto max-w-6xl">
               <div class="text-center">
