@@ -41,6 +41,37 @@
             return 'data:image/svg+xml;base64,' + btoa(wrapped);
         }
 
+        // --- commerce flavor: storefront-only token resolution -------------------
+        // These tokens live ONLY in demoWebCommerceTemplate and are NOT in the shared
+        // engine's fixed token set, so they are filled here from the record's Config
+        // (routed to CFG.dom by the controller) with sensible defaults. Each maps to a
+        // field the Website Studio exposes for commerce records (editable like the rest).
+        function escCommerce(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+        function cfgVal(key) {
+            var d = (CFG && CFG.dom) || {}, f = (CFG && CFG.form) || {};
+            var v = (d[key] != null && String(d[key]).trim()) ? d[key] : f[key];
+            return (v != null && String(v).trim()) ? String(v) : null;
+        }
+        function commerceFill(html) {
+            var MAP = [
+                ['CART_COUNT', 'commerceCartCount', '2'],
+                ['CART_BANNER_TITLE', 'commerceCartBannerTitle', 'You left items in your bag'],
+                ['CART_BANNER_SUBTITLE', 'commerceCartBannerSubtitle', 'Complete checkout before they sell out — your picks are still waiting.'],
+                ['CART_CTA', 'commerceCartCta', 'Resume checkout'],
+                ['ADD_TO_BAG_LABEL', 'commerceAddToBag', 'Add to bag']
+            ];
+            MAP.forEach(function (row) {
+                var val = cfgVal(row[1]);
+                if (val == null) val = row[2];
+                html = html.split('[[' + row[0] + ']]').join(escCommerce(val));
+            });
+            return html;
+        }
+
         // Build the hidden shim inputs the engine reads via getElementById. Only the
         // ids present in CFG.dom are created; everything else is absent, so the
         // engine falls back to its per-industry defaults.
@@ -104,6 +135,15 @@
                         var icon = buildAgentIcon(iconSvg);
                         html = html.replace(/src="[^"]*agentforce-astro-agent\.png"/g, 'src="' + icon + '"');
                     } catch (e) { /* leave the original src if anything fails */ }
+                }
+
+                // Commerce flavor adds storefront-only tokens the SHARED engine does
+                // not know (its [[TOKEN]] set is fixed). Resolve them here in a thin
+                // post-pass from the record's Config (CFG.dom / CFG.form) with
+                // defaults, so every storefront element stays editable in the config
+                // pane exactly like the rest of the tool. The engine is untouched.
+                if (FLAVOR === 'commerce') {
+                    try { html = commerceFill(html); } catch (e) {}
                 }
 
                 // Self-contained .html export (resolved sim, agent icon inlined as a

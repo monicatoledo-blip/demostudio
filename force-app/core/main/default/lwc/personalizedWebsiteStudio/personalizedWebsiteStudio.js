@@ -22,7 +22,8 @@ const SECTION_ICONS = {
     'home-page-content': 'utility:home', 'market-insights': 'utility:knowledge_base',
     'category-page': 'utility:page', 'ai-chat': 'utility:chat', 'offer-overlay-frame': 'utility:resource_capacity',
     'offer-cards': 'utility:cart', 'handoff-form': 'utility:form', 'return-hero': 'utility:image',
-    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings'
+    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings',
+    'storefront': 'utility:cart'
 };
 // Each editor section maps to the sim "page" it edits, so switching sections
 // navigates the preview straight there (and edits reload onto it, not the intro).
@@ -173,10 +174,28 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         if (data) this.personaOptions = data.map((p) => ({ label: p.label, value: p.value }));
     }
 
+    // Template flavor (mirrors WebExperiencePreviewController.getFlavor): commerce
+    // storefront for Retail & Consumer Goods (or a Config templateFlavor override),
+    // else the default services layout. Drives which editor sections are shown.
+    get flavor() {
+        if (this.cfg && this.cfg.templateFlavor) {
+            return String(this.cfg.templateFlavor).toLowerCase() === 'commerce' ? 'commerce' : 'services';
+        }
+        const i = (this.industry || '').toLowerCase();
+        return (i.includes('retail') || i.includes('consumer goods') || i.includes('commerce'))
+            ? 'commerce' : 'services';
+    }
+    // Schema sections may carry a `flavors` array (e.g. ['commerce']); untagged
+    // sections show for every flavor.
+    get visibleSections() {
+        const fl = this.flavor;
+        return this.schemaSections.filter((s) => !s.flavors || s.flavors.indexOf(fl) !== -1);
+    }
+
     // --- rail: fixed Setup + the schema sections ---------------------------------
     get tabs() {
         const setup = { id: 'setup', label: 'Branding', icon: 'utility:palette' };
-        const rest = this.schemaSections.map((s) => ({
+        const rest = this.visibleSections.map((s) => ({
             id: s.id, label: s.label, icon: SECTION_ICONS[s.id] || 'utility:record'
         }));
         return [setup, ...rest].map((t) => ({
@@ -184,7 +203,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         }));
     }
     get isSetup() { return this.active === 'setup'; }
-    get activeSection() { return this.schemaSections.find((s) => s.id === this.active); }
+    get activeSection() { return this.visibleSections.find((s) => s.id === this.active); }
     get activeTitle() {
         const s = this.activeSection;
         return this.isSetup ? 'Branding' : (s ? s.label : '');

@@ -1045,19 +1045,23 @@
                 role="menu"
                 aria-labelledby="navBankingBtn"
               >
-                <a class="nav-dropdown-link" role="menuitem" href="#cat-core-services" data-cat-scroll>Core services</a>
-                <a class="nav-dropdown-link" role="menuitem" href="#cat-why-us" data-cat-scroll>Why choose us</a>
-                <a class="nav-dropdown-link" role="menuitem" href="#cat-insights" data-cat-scroll>Market insights &amp; resources</a>
+                <a class="nav-dropdown-link" role="menuitem" href="#cat-core-services" data-cat-scroll>Shop all</a>
+                <a class="nav-dropdown-link" role="menuitem" href="#cat-why-us" data-cat-scroll>Why [[BRAND_NAME]]</a>
+                <a class="nav-dropdown-link" role="menuitem" href="#cat-insights" data-cat-scroll>Collections &amp; guides</a>
               </div>
             </div>
             <a class="site-nav-link transition-colors" href="#">[[NAV_LABEL_4]]</a>
             <a class="site-nav-link transition-colors" href="#">[[NAV_LABEL_5]]</a>
-            <a class="site-nav-link transition-colors" href="#">Contact</a>
+            <a class="site-nav-link transition-colors" href="#">Help</a>
+            <button type="button" class="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-slate-700 transition hover:bg-slate-100" aria-label="Cart">
+              <i class="fas fa-shopping-bag text-base" aria-hidden="true"></i>
+              <span class="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white" style="background-color: var(--brand)">[[CART_COUNT]]</span>
+            </button>
             <a
               class="rounded-full px-4 py-1.5 text-white transition-opacity hover:opacity-95"
               style="background-color: var(--accent-green)"
               href="#"
-              >Login</a
+              >Sign in</a
             >
           </nav>
         </div>
@@ -1080,18 +1084,19 @@
               <i class="fas fa-chevron-down text-xs opacity-60 transition-transform" id="mobileBankingChevron" aria-hidden="true"></i>
             </button>
             <div id="mobileBankingSub" class="mobile-banking-sub hidden">
-              <a href="#cat-core-services" data-cat-scroll>Core services</a>
-              <a href="#cat-why-us" data-cat-scroll>Why choose us</a>
-              <a href="#cat-insights" data-cat-scroll>Market insights &amp; resources</a>
+              <a href="#cat-core-services" data-cat-scroll>Shop all</a>
+              <a href="#cat-why-us" data-cat-scroll>Why [[BRAND_NAME]]</a>
+              <a href="#cat-insights" data-cat-scroll>Collections &amp; guides</a>
             </div>
             <a class="mobile-nav-link" href="#">[[NAV_LABEL_4]]</a>
             <a class="mobile-nav-link" href="#">[[NAV_LABEL_5]]</a>
-            <a class="mobile-nav-link" href="#">Contact</a>
+            <a class="mobile-nav-link" href="#"><i class="fas fa-shopping-bag mr-2" aria-hidden="true"></i>Cart ([[CART_COUNT]])</a>
+            <a class="mobile-nav-link" href="#">Help</a>
             <a
               class="mobile-nav-link rounded-lg text-center text-white"
               style="background-color: var(--accent-green); border: none; margin-top: 8px"
               href="#"
-              >Login</a
+              >Sign in</a
             >
           </div>
         </div>
@@ -1215,11 +1220,30 @@
 
           <footer class="border-t border-slate-200 bg-slate-50 py-8 text-center text-xs text-slate-500">
             <p>This is a demo site for Salesforce demo purposes only.</p>
-            <p class="mt-1">[[BRAND_NAME]] · Research, borrowing, and investing in one relationship</p>
+            <p class="mt-1">[[BRAND_NAME]] · Free shipping &amp; easy returns · Members get more</p>
           </footer>
         </div>
 
         <div id="warm-homepage-section" class="hidden" aria-hidden="true">
+          <div class="border-b border-amber-200 bg-amber-50">
+            <div class="mx-auto flex max-w-6xl flex-col items-start gap-3 px-5 py-4 md:flex-row md:items-center md:justify-between md:px-8">
+              <div class="flex items-start gap-3">
+                <span class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-sm" aria-hidden="true"></i></span>
+                <div>
+                  <p class="text-sm font-bold text-slate-900">[[CART_BANNER_TITLE]]</p>
+                  <p class="mt-0.5 text-sm text-slate-600">[[CART_BANNER_SUBTITLE]]</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                class="shrink-0 rounded-full px-5 py-2 text-sm font-semibold text-white shadow-sm transition hover:opacity-95"
+                style="background-color: var(--brand)"
+                onclick="document.getElementById('resumeAdaptiveOptionsBtn').click()"
+              >
+                [[CART_CTA]]
+              </button>
+            </div>
+          </div>
           <section class="border-b border-slate-200 bg-gradient-to-b from-slate-50 to-white">
             <div class="mx-auto grid max-w-6xl items-center gap-10 px-5 py-14 md:grid-cols-2 md:gap-14 md:px-8 md:py-20">
               <div>
@@ -1236,7 +1260,7 @@
                   onclick="document.getElementById('resumeAdaptiveOptionsBtn').click()"
                 >
                   <i class="fas fa-wand-magic-sparkles"></i>
-                  View your personalized options
+                  [[CART_CTA]]
                 </button>
               </div>
               <div class="overflow-hidden rounded-2xl shadow-xl ring-1 ring-slate-200/80">
@@ -1269,6 +1293,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_1_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_1_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_1_BODY]]</p>
+                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
                 <article id="warm-insight-2" class="home-insight-card group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-md">
@@ -1279,6 +1304,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_2_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_2_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_2_BODY]]</p>
+                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
                 <article id="warm-insight-3" class="home-insight-card group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm ring-1 ring-slate-100 transition-shadow duration-300 hover:shadow-md">
@@ -1289,6 +1315,7 @@
                     <div class="mb-2 text-xs font-bold uppercase tracking-wide" style="color: var(--brand)">[[WARM_INSIGHT_3_EYEBROW]]</div>
                     <h3 class="text-lg font-semibold" style="color: var(--nav-ink)">[[WARM_INSIGHT_3_TITLE]]</h3>
                     <p class="mt-3 text-sm leading-relaxed text-slate-600">[[WARM_INSIGHT_3_BODY]]</p>
+                    <button type="button" class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-95" style="background-color: var(--brand)"><i class="fas fa-shopping-bag text-xs" aria-hidden="true"></i>[[ADD_TO_BAG_LABEL]]</button>
                   </div>
                 </article>
               </div>
@@ -1297,7 +1324,7 @@
 
           <footer class="border-t border-slate-200 bg-slate-50 py-8 text-center text-xs text-slate-500">
             <p>This is a demo site for Salesforce demo purposes only.</p>
-            <p class="mt-1">[[BRAND_NAME]] · Research, borrowing, and investing in one relationship</p>
+            <p class="mt-1">[[BRAND_NAME]] · Free shipping &amp; easy returns · Members get more</p>
           </footer>
         </div>
 
