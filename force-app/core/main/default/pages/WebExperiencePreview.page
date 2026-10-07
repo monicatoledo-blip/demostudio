@@ -14,7 +14,12 @@
 <script src="{!URLFOR($Resource.demoWebEngine)}"></script>
 <script>
     (function () {
-        var CFG, TPL_URL = '{!URLFOR($Resource.demoWebTemplate)}';
+        // Flavor picks the template; the engine (demoWebEngine) drives both. 'commerce'
+        // = storefront (demoWebCommerceTemplate), else the default services layout.
+        var FLAVOR = '{!flavor}';
+        var SERVICES_TPL_URL = '{!URLFOR($Resource.demoWebTemplate)}';
+        var COMMERCE_TPL_URL = '{!URLFOR($Resource.demoWebCommerceTemplate)}';
+        var CFG, TPL_URL = (FLAVOR === 'commerce') ? COMMERCE_TPL_URL : SERVICES_TPL_URL;
         var ICON_URL = '{!URLFOR($Resource.demoWebAgentIcon)}';
         var AGENT_BLUE = '#0b5cab';
         try { CFG = JSON.parse('{!JSENCODE(configJson)}'); } catch (e) { CFG = { dom: {}, form: {} }; }

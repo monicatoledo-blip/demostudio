@@ -21,6 +21,35 @@ public with sharing class WebExperiencePreviewController {
         'adaptiveInsightImg1', 'adaptiveInsightImg2', 'adaptiveInsightImg3'
     };
 
+    // Template flavor for the preview: 'commerce' (storefront) vs 'services' (the
+    // default FINS/services adaptive-web layout). Derived from the record's Industry
+    // ("Retail & Consumer Goods" -> commerce), with a Config_JSON 'templateFlavor'
+    // override so an SE can force a storefront on any brand. The VF page uses this to
+    // pick demoWebCommerceTemplate vs demoWebTemplate; the shared engine drives both.
+    public String getFlavor() {
+        String storyId = ApexPages.currentPage().getParameters().get('id');
+        if (String.isBlank(storyId)) return 'services';
+        for (Demo_Story__c r : [
+            SELECT Industry__c, Config_JSON__c FROM Demo_Story__c WHERE Id = :storyId LIMIT 1
+        ]) {
+            // Explicit override wins.
+            if (String.isNotBlank(r.Config_JSON__c)) {
+                try {
+                    Map<String, Object> cfg = (Map<String, Object>) JSON.deserializeUntyped(r.Config_JSON__c);
+                    Object f = cfg.get('templateFlavor');
+                    if (f != null && String.isNotBlank(String.valueOf(f))) {
+                        return 'commerce'.equalsIgnoreCase(String.valueOf(f)) ? 'commerce' : 'services';
+                    }
+                } catch (Exception e) { /* malformed -> fall through to industry */ }
+            }
+            String ind = r.Industry__c == null ? '' : r.Industry__c.toLowerCase();
+            if (ind.contains('retail') || ind.contains('consumer goods') || ind.contains('commerce')) {
+                return 'commerce';
+            }
+        }
+        return 'services';
+    }
+
     // Returned to the page as JSON: { dom: {...}, form: {...} }.
     public String getConfigJson() {
         String storyId = ApexPages.currentPage().getParameters().get('id');
