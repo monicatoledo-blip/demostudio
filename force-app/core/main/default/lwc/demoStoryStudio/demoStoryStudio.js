@@ -7,6 +7,7 @@ import BRAND_KIT from '@salesforce/schema/Two_Way_Simulator__c.Brand_Kit__c';
 import PERSONA_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Persona__c';
 import INDUSTRY_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Industry__c';
 import CHANNEL_FIELD from '@salesforce/schema/Two_Way_Simulator__c.Channel__c';
+import IMGLIB_URL from '@salesforce/resourceUrl/webImageLibrary';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import getBrandKit from '@salesforce/apex/DemoBrandKitService.getBrandKit';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
@@ -358,6 +359,8 @@ const RCS_TYPING = [
 export default class DemoStoryStudio extends LightningElement {
     @api recordId;
     @track config = { ...DEFAULTS };
+    @track imageLibrary = {};   // shared webImageLibrary: industry -> [image urls]
+    webIndustry;
     @track activeSection = 'branding';
     @track previewVersion = 1;
     // previewVersion resets to 1 on every component load, so the iframe URL
@@ -472,11 +475,25 @@ export default class DemoStoryStudio extends LightningElement {
             : 'about:blank';
     }
 
+    connectedCallback() {
+        // Load the shared per-industry image library so the Hero picker's Browse
+        // grid shows images relevant to this record's industry (same source the
+        // Website Studio uses; new industry collections auto-appear here).
+        fetch(IMGLIB_URL)
+            .then((r) => r.json())
+            .then((d) => { this.imageLibrary = d || {}; })
+            .catch(() => { this.imageLibrary = {}; });
+    }
+
+    // The current record's industry image pool — fed to the Hero image picker only.
+    get industryImages() { return this.imageLibrary[this.webIndustry] || []; }
+
     @wire(getRecord, { recordId: '$recordId', fields: FIELDS })
     wiredStory({ data }) {
         if (!data) return;
         const raw = getFieldValue(data, CFG);
         const ind = getFieldValue(data, INDUSTRY_FIELD);
+        this.webIndustry = ind;   // drives the shared per-industry hero image library
         const channel = getFieldValue(data, CHANNEL_FIELD) || 'Email';
         if (raw) {
             try { this.config = { ...DEFAULTS, ...JSON.parse(raw) }; } catch (e) {}
