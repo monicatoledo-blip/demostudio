@@ -65,6 +65,14 @@
           "id": "navLabel5",
           "label": "Top Navigation Labels (5)",
           "type": "text"
+        },
+        {
+          "id": "commerceCartCount",
+          "label": "Cart badge count (number shown on the bag icon)",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
         }
       ]
     },
@@ -642,6 +650,30 @@
           "id": "vanillaHeroSubtext",
           "label": "Welcome Back Subtext",
           "type": "textarea"
+        },
+        {
+          "id": "commerceCartBannerTitle",
+          "label": "Returning visitor — abandoned-cart banner headline",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "commerceCartBannerSubtitle",
+          "label": "Abandoned-cart banner — supporting line (your return-visit nudge)",
+          "type": "textarea",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "commerceCartCta",
+          "label": "Cart call-to-action button label (e.g. Resume checkout)",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
         }
       ]
     },
@@ -708,40 +740,14 @@
           "id": "warmInsight3Body",
           "label": "Tile 3 — Body",
           "type": "textarea"
-        }
-      ]
-    },
-    {
-      "id": "storefront",
-      "label": "Storefront",
-      "flavors": [
-        "commerce"
-      ],
-      "fields": [
-        {
-          "id": "commerceCartBannerTitle",
-          "label": "Returning visitor — abandoned-cart banner headline",
-          "type": "text"
-        },
-        {
-          "id": "commerceCartBannerSubtitle",
-          "label": "Abandoned-cart banner — supporting line (your Data Cloud / return-visit nudge)",
-          "type": "textarea"
-        },
-        {
-          "id": "commerceCartCta",
-          "label": "Cart call-to-action button label (e.g. Resume checkout)",
-          "type": "text"
-        },
-        {
-          "id": "commerceCartCount",
-          "label": "Number shown on the cart badge",
-          "type": "text"
         },
         {
           "id": "commerceAddToBag",
           "label": "Add-to-bag button label on the picked-for-you tiles",
-          "type": "text"
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
         }
       ]
     }

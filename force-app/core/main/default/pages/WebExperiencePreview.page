@@ -56,18 +56,36 @@
             var v = (d[key] != null && String(d[key]).trim()) ? d[key] : f[key];
             return (v != null && String(v).trim()) ? String(v) : null;
         }
+        // Resolve persona/brand/agent tokens in commerce copy. The shared engine's own
+        // token pass already ran before commerceFill, so tokens inside a commerce FIELD
+        // value (e.g. an authored "Still thinking it over, [[CUSTOMER_FIRST_NAME]]?")
+        // would otherwise survive unresolved. Mirror the engine's interpolation here,
+        // sourcing from CFG.form (where the controller mirrors brand/persona/agent).
+        function resolveCommerceTokens(s) {
+            var f = (CFG && CFG.form) || {};
+            var fn = f.adaptivePersonaFirstName || '', bn = f.adaptiveBrandName || '',
+                an = f.adaptiveAgentName || '';
+            return String(s == null ? '' : s)
+                .replace(/\[\[CUSTOMER_FIRST_NAME\]\]/g, fn)
+                .replace(/\$\{firstName\}/g, fn)
+                .replace(/\$\{brandName\}/g, bn)
+                .replace(/\$\{agentName\}/g, an)
+                .replace(/\s{2,}/g, ' ').trim();
+        }
         function commerceFill(html) {
+            // Retail, lightly personalized fallbacks; per-scenario webDefaults override
+            // these with copy tailored to the product (apparel vs electronics, etc.).
             var MAP = [
                 ['CART_COUNT', 'commerceCartCount', '2'],
-                ['CART_BANNER_TITLE', 'commerceCartBannerTitle', 'You left items in your bag'],
-                ['CART_BANNER_SUBTITLE', 'commerceCartBannerSubtitle', 'Complete checkout before they sell out — your picks are still waiting.'],
-                ['CART_CTA', 'commerceCartCta', 'Resume checkout'],
+                ['CART_BANNER_TITLE', 'commerceCartBannerTitle', 'Looks like you forgot something 👀'],
+                ['CART_BANNER_SUBTITLE', 'commerceCartBannerSubtitle', 'Your picks are still in your bag — come back and make them yours before they sell out.'],
+                ['CART_CTA', 'commerceCartCta', 'Take me back to my bag'],
                 ['ADD_TO_BAG_LABEL', 'commerceAddToBag', 'Add to bag']
             ];
             MAP.forEach(function (row) {
                 var val = cfgVal(row[1]);
                 if (val == null) val = row[2];
-                html = html.split('[[' + row[0] + ']]').join(escCommerce(val));
+                html = html.split('[[' + row[0] + ']]').join(escCommerce(resolveCommerceTokens(val)));
             });
             return html;
         }

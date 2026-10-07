@@ -22,8 +22,7 @@ const SECTION_ICONS = {
     'home-page-content': 'utility:home', 'market-insights': 'utility:knowledge_base',
     'category-page': 'utility:page', 'ai-chat': 'utility:chat', 'offer-overlay-frame': 'utility:resource_capacity',
     'offer-cards': 'utility:cart', 'handoff-form': 'utility:form', 'return-hero': 'utility:image',
-    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings',
-    'storefront': 'utility:cart'
+    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings'
 };
 // Each editor section maps to the sim "page" it edits, so switching sections
 // navigates the preview straight there (and edits reload onto it, not the intro).
@@ -212,7 +211,10 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     get activeFields() {
         const s = this.activeSection;
         if (!s) return [];
-        return s.fields.map((f) => {
+        const fl = this.flavor;
+        // Fields may carry a `flavors` array (e.g. commerce-only cart fields); they
+        // appear in their home section only for the matching flavor (RCG = commerce).
+        return s.fields.filter((f) => !f.flavors || f.flavors.indexOf(fl) !== -1).map((f) => {
             let field = f;
             // Category cascades from Industry; Scenario cascades from Category.
             if (f.id === 'adaptiveWebSubIndustry') {
