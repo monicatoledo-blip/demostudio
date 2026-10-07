@@ -50,6 +50,17 @@ public with sharing class WebExperiencePreviewController {
         return 'services';
     }
 
+    // Whether Real-Time Offer Management is on for this story. When true, the preview
+    // reframes the warm "picked for you" tiles as offers (badge + offer eyebrow).
+    public String getRtom() {
+        String storyId = ApexPages.currentPage().getParameters().get('id');
+        if (String.isBlank(storyId)) return 'false';
+        for (Demo_Story__c r : [SELECT Rtom_Enabled__c FROM Demo_Story__c WHERE Id = :storyId LIMIT 1]) {
+            return r.Rtom_Enabled__c ? 'true' : 'false';
+        }
+        return 'false';
+    }
+
     // Returned to the page as JSON: { dom: {...}, form: {...} }.
     public String getConfigJson() {
         String storyId = ApexPages.currentPage().getParameters().get('id');

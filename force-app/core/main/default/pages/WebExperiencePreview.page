@@ -17,6 +17,7 @@
         // Flavor picks the template; the engine (demoWebEngine) drives both. 'commerce'
         // = storefront (demoWebCommerceTemplate), else the default services layout.
         var FLAVOR = '{!flavor}';
+        var RTOM = '{!rtom}' === 'true';
         var SERVICES_TPL_URL = '{!URLFOR($Resource.demoWebTemplate)}';
         var COMMERCE_TPL_URL = '{!URLFOR($Resource.demoWebCommerceTemplate)}';
         var CFG, TPL_URL = (FLAVOR === 'commerce') ? COMMERCE_TPL_URL : SERVICES_TPL_URL;
@@ -260,6 +261,20 @@
                 // pane exactly like the rest of the tool. The engine is untouched.
                 if (FLAVOR === 'commerce') {
                     try { html = commerceFill(html); } catch (e) {}
+                }
+
+                // RTOM: reframe the warm "picked for you" tiles as real-time offers
+                // (offer eyebrow + badge). Injected for ANY flavor; targets the warm
+                // tiles by id so no engine/template fork is needed.
+                if (RTOM) {
+                    html += '<script>(function(){var L="\\u26A1 Real-Time Offer";'
+                        + 'for(var i=1;i<=3;i++){var c=document.getElementById("warm-insight-"+i);if(!c)continue;'
+                        + 'var e=c.querySelector(".uppercase");if(e){e.textContent=L;}'
+                        + 'var card=c.querySelector(".relative")||c;'
+                        + 'if(card&&!c.querySelector(".rtom-badge")){var b=document.createElement("span");'
+                        + 'b.className="rtom-badge";b.textContent="Recommended for you";'
+                        + 'b.style.cssText="position:absolute;top:10px;left:10px;z-index:5;background:var(--brand,#0b5cab);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:9999px;box-shadow:0 2px 8px rgba(0,0,0,.25)";'
+                        + 'card.style.position="relative";card.appendChild(b);}}})();<\/script>';
                 }
 
                 // Self-contained .html export (resolved sim, agent icon inlined as a
