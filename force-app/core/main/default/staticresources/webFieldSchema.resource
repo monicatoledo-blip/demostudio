@@ -130,7 +130,7 @@
     },
     {
       "id": "market-insights",
-      "label": "Market Insights Section",
+      "label": "Insights",
       "fields": [
         {
           "id": "homeInsightsHeading",
