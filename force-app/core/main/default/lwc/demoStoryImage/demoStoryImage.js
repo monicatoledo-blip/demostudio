@@ -32,6 +32,7 @@ export default class DemoStoryImage extends LightningElement {
     @api label;
     @api value;
     @api kind = 'hero'; // 'hero' | 'avatar' | 'logo'
+    @api libraryImages; // optional: override the browse grid (e.g. per-industry pool)
     showGrid = false;
     uploading = false;
 
@@ -63,6 +64,12 @@ export default class DemoStoryImage extends LightningElement {
     get toggleLabel() { return this.showGrid ? 'Hide library' : 'Browse library'; }
     get hasLibrary() { return this.images.length > 0; }
     get images() {
+        // A caller-supplied pool (e.g. the record's industry library) overrides the
+        // built-in kind-based collections. Falls back to the shared libraries so the
+        // 2-way sims are unaffected.
+        if (this.libraryImages && this.libraryImages.length) {
+            return this.libraryImages.map((u, i) => ({ id: 'lib-' + i, url: u, description: '' }));
+        }
         let src = NBA_IMAGE_LIBRARY;
         if (this.kind === 'avatar') src = AVATAR_LIBRARY;
         else if (this.kind === 'logo') src = LOGO_LIBRARY;

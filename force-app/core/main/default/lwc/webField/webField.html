@@ -2,6 +2,11 @@
     <template lwc:if={isText}>
         <lightning-input type={inputType} label={field.label} value={value}
             placeholder={field.placeholder} onchange={handleInput}></lightning-input>
+        <template lwc:if={isIcon}>
+            <a href="https://fontawesome.com/search?o=r&m=free" target="_blank" rel="noopener" class="icon-help">
+                Browse Font Awesome icons &#8599; — copy the class (e.g. fa-heart)
+            </a>
+        </template>
     </template>
     <template lwc:if={isTextarea}>
         <lightning-textarea label={field.label} value={value}
@@ -9,7 +14,7 @@
     </template>
     <template lwc:if={isImage}>
         <c-demo-story-image label={field.label} value={value} kind={imageKind}
-            onpick={handlePick}></c-demo-story-image>
+            library-images={heroLibrary} onpick={handlePick}></c-demo-story-image>
     </template>
     <template lwc:if={isPicklist}>
         <lightning-combobox label={field.label} value={value} options={options}

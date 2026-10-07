@@ -5,3 +5,6 @@
 .color-row { display: flex; align-items: center; gap: 0.5rem; }
 .color-swatch { width: 44px; height: 36px; border: 1px solid #c9ced6; border-radius: 6px; padding: 0; cursor: pointer; background: none; flex: 0 0 44px; }
 .color-row lightning-input { flex: 1 1 auto; }
+
+.icon-help { display:inline-block; margin-top:0.25rem; font-size:0.72rem; color:#0176d3; text-decoration:none; }
+.icon-help:hover { text-decoration:underline; }

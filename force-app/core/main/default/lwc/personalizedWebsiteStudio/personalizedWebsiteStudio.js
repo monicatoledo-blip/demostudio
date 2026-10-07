@@ -3,6 +3,7 @@ import { getRecord, getFieldValue, updateRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import SCHEMA_URL from '@salesforce/resourceUrl/webFieldSchema';
 import DEFAULTS_URL from '@salesforce/resourceUrl/webDefaults';
+import IMGLIB_URL from '@salesforce/resourceUrl/webImageLibrary';
 import listBrandKits from '@salesforce/apex/DemoBrandKitService.listBrandKits';
 import listPersonas from '@salesforce/apex/DemoBrandKitService.listPersonas';
 import deployStory from '@salesforce/apex/DemoStudioDeployService.deployStory';
@@ -46,6 +47,7 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     @track active = 'setup';
     @track schemaSections = [];
     @track defaults = {};   // webDefaults: subIndustryKey -> { label, useCases[], defaults{} }
+    @track imageLibrary = {}; // webImageLibrary: industry -> [image urls]
     @track brandKits = [];
     @track personaOptions = [];
     @track cfg = {};
@@ -71,7 +73,14 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             .then((r) => r.json())
             .then((d) => { this.defaults = d || {}; })
             .catch(() => { this.defaults = {}; });
+        fetch(IMGLIB_URL)
+            .then((r) => r.json())
+            .then((d) => { this.imageLibrary = d || {}; })
+            .catch(() => { this.imageLibrary = {}; });
     }
+
+    // The current industry's image pool, fed to each field's picker as the browse grid.
+    get industryImages() { return this.imageLibrary[this.industry] || []; }
 
     // Cascade: Industry (record field) -> Category (sub-industry) -> Scenario.
     // webDefaults is keyed by INDUSTRY label; each has categories[] + scenarios{cat:[]}

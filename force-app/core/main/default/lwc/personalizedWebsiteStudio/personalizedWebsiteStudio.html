@@ -76,7 +76,7 @@
                 <template lwc:if={activeSection}>
                     <template for:each={activeFields} for:item="row">
                         <c-web-field key={row.field.id} field={row.field} value={row.value}
-                            onfieldchange={handleFieldChange}></c-web-field>
+                            library-images={industryImages} onfieldchange={handleFieldChange}></c-web-field>
                     </template>
                 </template>
             </section>

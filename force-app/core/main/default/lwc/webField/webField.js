@@ -9,6 +9,7 @@ import { LightningElement, api } from 'lwc';
 export default class WebField extends LightningElement {
     @api field;            // { id, label, type, options?, placeholder? }
     @api value;
+    @api libraryImages;    // optional per-industry image pool for the picker grid
 
     get type() { return (this.field && this.field.type) || 'text'; }
     get isText() { return this.type === 'text' || this.type === 'url' || this.type === 'number'; }
@@ -38,6 +39,10 @@ export default class WebField extends LightningElement {
         return 'hero';
     }
     handlePick(e) { this.emit(e.detail.url); }
+    // Only hero/scene fields use the industry pool; avatar/logo keep their defaults.
+    get heroLibrary() { return this.imageKind === 'hero' ? this.libraryImages : undefined; }
+    // Font Awesome icon fields (fa-class) get a link to the icon gallery.
+    get isIcon() { return (this.field && this.field.id ? this.field.id : '').toLowerCase().indexOf('icon') !== -1; }
 
     emit(value) {
         this.dispatchEvent(new CustomEvent('fieldchange', {
