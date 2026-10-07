@@ -481,6 +481,8 @@
         color: #1e293b;
         line-height: 1.55;
         font-size: 14px;
+        overflow-wrap: anywhere;
+        word-break: break-word;
       }
       .message-bubble.user-row .message-text {
         color: #fff;
@@ -535,6 +537,13 @@
         font-size: 14px;
         font-family: inherit;
         margin-bottom: 10px;
+        resize: none;
+        line-height: 1.45;
+        min-height: 42px;
+        max-height: 120px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
       }
       .chat-composer-input:focus {
         outline: none;
@@ -1411,14 +1420,13 @@
         <div id="chatMessages" class="chat-messages"></div>
 
         <div class="chat-footer">
-          <input
-            type="text"
+          <textarea
             id="chatComposerInput"
             class="chat-composer-input"
+            rows="2"
             placeholder="Type your question…"
-            autocomplete="off"
             aria-label="Message composer"
-          />
+          ></textarea>
           <div class="chat-footer-note">
             <i class="fas fa-clock"></i>
             <span>Typical response within a few minutes during business hours.</span>
