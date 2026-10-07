@@ -21,6 +21,10 @@
                     </template>
                 </div>
                 <lightning-combobox label="Industry" options={industryOptions} value={industry} onchange={handleIndustry}></lightning-combobox>
+                <template lwc:if={hasCategories}>
+                    <lightning-combobox label="Category" options={categoryOptions} value={category} onchange={handleCategory}></lightning-combobox>
+                    <lightning-combobox label="Scenario" options={useCaseOptions} value={useCase} onchange={handleUseCase}></lightning-combobox>
+                </template>
                 <div class="ta">
                     <lightning-input type="search" label="Persona" placeholder="Type to search personas…"
                         value={personaQuery} onchange={handlePersonaInput} onfocus={handlePersonaFocus} onblur={handlePersonaBlur}></lightning-input>

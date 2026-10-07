@@ -8,11 +8,8 @@
             placeholder={field.placeholder} onchange={handleInput}></lightning-textarea>
     </template>
     <template lwc:if={isImage}>
-        <lightning-input type="url" label={field.label} value={value}
-            placeholder="Image URL" onchange={handleInput}></lightning-input>
-        <template lwc:if={value}>
-            <img src={value} alt="" class="field-thumb" />
-        </template>
+        <c-demo-story-image label={field.label} value={value} kind={imageKind}
+            onpick={handlePick}></c-demo-story-image>
     </template>
     <template lwc:if={isPicklist}>
         <lightning-combobox label={field.label} value={value} options={options}

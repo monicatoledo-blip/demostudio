@@ -30,6 +30,14 @@ export default class WebField extends LightningElement {
     }
     get checked() { return this.value === true || this.value === 'true'; }
     get colorValue() { return this.value || '#000000'; }
+    // Pick the curated library for the demoStoryImage picker from the field id.
+    get imageKind() {
+        const id = (this.field && this.field.id ? this.field.id : '').toLowerCase();
+        if (id.indexOf('logo') !== -1) return 'logo';
+        if (id.indexOf('avatar') !== -1 || id.indexOf('agent') !== -1) return 'avatar';
+        return 'hero';
+    }
+    handlePick(e) { this.emit(e.detail.url); }
 
     emit(value) {
         this.dispatchEvent(new CustomEvent('fieldchange', {

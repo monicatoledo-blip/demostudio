@@ -260,6 +260,16 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         // scenario's default values (so the SE sees what they're overriding).
         if (id === 'adaptiveWebSubIndustry') { this.applyCategory(value); return; }
         if (id === 'adaptiveWebSubUseCase') { this.applyScenario(this.currentCategory, value); return; }
+        // "Recommended pick" is mutually exclusive across the 3 offer cards — turning
+        // one on turns the others off (radio behavior, not 3 independent toggles).
+        const bm = id.match(/^card(\d)_bestMatch$/);
+        if (bm && (value === true || value === 'true')) {
+            const next = { ...this.cfg };
+            ['card1_bestMatch', 'card2_bestMatch', 'card3_bestMatch'].forEach((k) => { next[k] = (k === id); });
+            this.cfg = next;
+            this.queueSave();
+            return;
+        }
         this.cfg = { ...this.cfg, [id]: value };
         this.queueSave();
     }
