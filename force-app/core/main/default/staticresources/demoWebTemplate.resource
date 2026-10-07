@@ -1255,9 +1255,9 @@
           <section class="bg-white px-5 py-16 md:px-8 md:py-24">
             <div class="mx-auto max-w-6xl">
               <div class="text-center">
-                <h2 class="text-2xl font-bold md:text-3xl" style="color: var(--nav-ink)">[[HOME_INSIGHTS_HEADING]]</h2>
+                <h2 class="text-2xl font-bold md:text-3xl" style="color: var(--nav-ink)">[[WARM_INSIGHTS_HEADING]]</h2>
                 <p class="mx-auto mt-3 max-w-2xl text-slate-600">
-                  [[HOME_INSIGHTS_SUBTITLE]]
+                  [[WARM_INSIGHTS_SUBTITLE]]
                 </p>
               </div>
               <div id="warm-insights-grid" class="mt-12 grid gap-8 md:grid-cols-3">

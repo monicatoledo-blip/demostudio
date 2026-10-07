@@ -722,6 +722,16 @@
       "label": "Content Tiles",
       "fields": [
         {
+          "id": "warmInsightsHeading",
+          "label": "Returning-visitor section heading",
+          "type": "text"
+        },
+        {
+          "id": "warmInsightsSubtitle",
+          "label": "Returning-visitor section subtitle",
+          "type": "text"
+        },
+        {
           "id": "warmInsight1Img",
           "label": "Tile 1 Image",
           "type": "image"
