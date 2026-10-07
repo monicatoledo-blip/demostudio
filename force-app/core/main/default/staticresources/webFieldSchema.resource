@@ -665,7 +665,7 @@
     },
     {
       "id": "return-hero",
-      "label": "Hero Section",
+      "label": "Personalized Hero",
       "fields": [
         {
           "id": "adaptiveHeroState",
@@ -719,8 +719,13 @@
     },
     {
       "id": "return-content-tiles",
-      "label": "Content Tiles",
+      "label": "Personalized Insights",
       "fields": [
+        {
+          "id": "rtomEnabled",
+          "label": "Real-Time Offers (RTOM) — turn these tiles into live offers",
+          "type": "toggle"
+        },
         {
           "id": "warmInsightsHeading",
           "label": "Returning-visitor section heading",

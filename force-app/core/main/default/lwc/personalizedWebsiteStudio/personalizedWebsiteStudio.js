@@ -223,6 +223,9 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
             } else if (f.id === 'adaptiveWebSubUseCase') {
                 field = { ...f, type: 'picklist', options: this.useCaseOptions };
             }
+            // RTOM toggle in the Personalized Insights section mirrors the Branding
+            // master toggle — both read/write the record's Rtom_Enabled__c (this.rtom).
+            if (f.id === 'rtomEnabled') return { field, value: this.rtom };
             const raw = this.cfg[f.id] === undefined ? '' : this.cfg[f.id];
             // Picklists keep raw keys; text/content fields show resolved tokens.
             const value = field.type === 'picklist' ? raw : this.resolveTokens(raw);
@@ -293,6 +296,8 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         if (id === 'adaptiveWebSubUseCase') { this.applyScenario(this.currentCategory, value); return; }
         // Catalog preset: load another category's 12-product catalog into this record.
         if (id === 'catalogPreset') { this.applyCatalogPreset(value); return; }
+        // RTOM toggle (same record field as the Branding master toggle).
+        if (id === 'rtomEnabled') { this.rtom = (value === true || value === 'true'); this.queueSave(); return; }
         // "Recommended pick" is mutually exclusive across the 3 offer cards — turning
         // one on turns the others off (radio behavior, not 3 independent toggles).
         const bm = id.match(/^card(\d)_bestMatch$/);
