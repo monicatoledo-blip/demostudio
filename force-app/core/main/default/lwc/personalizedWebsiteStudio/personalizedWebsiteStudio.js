@@ -240,10 +240,16 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
     handlePersona(e) { this.personaId = e.detail.value; this.queueSave(); }
     handleIndustry(e) {
         this.industry = e.detail.value;
-        // Reset the cascade to the new industry's first Category + Scenario defaults.
-        const cats = this.categoryOptions;
-        const firstCat = cats[0] ? cats[0].value : 'custom';
-        this.applyCategory(firstCat);   // applyCategory -> applyScenario -> queueSave
+        // Only auto-apply the first Category/Scenario if this industry actually has
+        // authored content loaded. Otherwise just persist the industry (don't save a
+        // bogus 'custom' — that happens if webDefaults hasn't fetched yet, and it
+        // strands the record so the cascade can't recover).
+        const d = this.industryData;
+        if (d && d.categories && d.categories.length) {
+            this.applyCategory(d.categories[0].key);
+        } else {
+            this.queueSave();
+        }
     }
     handleRtom(e) { this.rtom = e.target.checked; this.queueSave(); }
 
