@@ -42,10 +42,19 @@
         var shim = document.getElementById('shim');
         var dom = CFG.dom || {};
         Object.keys(dom).forEach(function (id) {
+            var v = dom[id];
             var el = document.createElement('input');
-            el.type = 'hidden';
+            // Boolean fields (e.g. card*_bestMatch) must be checkboxes — the engine
+            // reads them via .checked, so a hidden text input never registers.
+            if (v === true || v === false || v === 'true' || v === 'false') {
+                el.type = 'checkbox';
+                el.checked = (v === true || v === 'true');
+                el.style.display = 'none';
+            } else {
+                el.type = 'hidden';
+                el.value = v == null ? '' : String(v);
+            }
             el.id = id;
-            el.value = dom[id] == null ? '' : String(dom[id]);
             shim.appendChild(el);
         });
 
