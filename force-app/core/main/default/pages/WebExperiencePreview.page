@@ -72,6 +72,66 @@
                 .replace(/\$\{agentName\}/g, an)
                 .replace(/\s{2,}/g, ' ').trim();
         }
+        // Read a field from CFG (dom first, then form). Card fields live in CFG.dom.
+        function gvCommerce(id) {
+            var d = (CFG && CFG.dom) || {}, f = (CFG && CFG.form) || {};
+            var v = (d[id] != null && String(d[id]).trim()) ? d[id] : f[id];
+            return (v != null) ? String(v) : '';
+        }
+        // Build the 3-product recommendation grid for the overlay. Mirrors the engine's
+        // card markup/classes (so the template CSS applies) but leads with a PRODUCT
+        // IMAGE (card{n}_image), falling back to the icon circle when no image is set.
+        function buildCommerceCards() {
+            var esc = function (s) { return escCommerce(resolveCommerceTokens(s)); };
+            var addLabel = cfgVal('commerceAddToBag') || 'Add to bag';
+            var html = '<div class="floating-cards-container items-stretch">';
+            for (var n = 1; n <= 3; n++) {
+                var p = 'card' + n + '_';
+                var title = gvCommerce(p + 'title');
+                if (!title) continue;
+                var b = gvCommerce(p + 'bestMatch');
+                var rec = (b === 'true' || b === '1');
+                var img = gvCommerce(p + 'image');
+                var icon = gvCommerce(p + 'icon') || 'fa-bag-shopping';
+                var badge = esc(gvCommerce(p + 'badgeText') || 'Best match');
+                var tag = esc(gvCommerce(p + 'tag'));
+                var bundle = esc(gvCommerce(p + 'bundle'));
+                var cta = esc(gvCommerce(p + 'cta') || addLabel);
+                html += '<div class="solution-card flex flex-col h-full' + (rec ? ' solution-card-recommended' : '') + '"' + (rec ? ' style="border-width:2px;border-color:var(--brand);box-shadow:0 20px 60px rgba(0,0,0,0.18);"' : '') + '>';
+                if (rec) html += '<div class="recommended-badge"><i class="fas fa-star" aria-hidden="true"></i><span>' + badge + '</span></div>';
+                if (img) {
+                    html += '<div class="w-full overflow-hidden rounded-t-2xl" style="aspect-ratio:16/10;background:#f1f5f9;">'
+                        + '<img src="' + escCommerce(img) + '" alt="" class="h-full w-full object-cover" loading="lazy"/></div>';
+                }
+                html += '<div class="flex flex-col flex-grow min-h-0"><div class="card-header shrink-0' + (rec ? ' pr-24 sm:pr-28' : '') + '">';
+                html += '<div class="flex items-start justify-between gap-3 mb-1"><div class="flex items-center min-w-0">';
+                if (!img) {
+                    html += '<div class="solution-icon shrink-0" style="background-color: color-mix(in srgb, var(--brand) 15%, transparent); color: var(--brand);"><i class="fas ' + escCommerce(icon) + '" aria-hidden="true"></i></div>';
+                }
+                html += '<div class="' + (img ? '' : 'ml-3 ') + 'min-w-0">';
+                if (tag) html += '<p class="text-xs uppercase tracking-wide font-semibold ' + (rec ? 'text-brand' : 'text-gray-500') + ' mb-1">' + tag + '</p>';
+                html += '<h3 class="text-xl font-bold text-gray-900 leading-snug">' + esc(title) + '</h3>';
+                html += '</div></div></div></div>';
+                html += '<div class="card-body flex flex-col flex-grow pt-0 min-h-0"><div class="flex flex-col flex-grow min-h-0"><div class="metrics-grid">';
+                for (var m = 1; m <= 3; m++) {
+                    var lab = gvCommerce(p + 'm' + m + '_label'), val = gvCommerce(p + 'm' + m + '_value');
+                    if (!lab && !val) continue;
+                    html += '<div class="metric-item"><div class="metric-label">' + esc(lab) + '</div><div class="metric-value-row ' + (rec ? 'text-brand' : 'text-gray-900') + '"><span class="metric-value-core">' + esc(val) + '</span></div></div>';
+                }
+                html += '</div><div class="divider"></div><div class="features-section"><h4 class="features-title">Highlights</h4><ul class="features-list">';
+                for (var fi = 1; fi <= 4; fi++) {
+                    var ft = gvCommerce(p + 'f' + fi);
+                    if (!ft) continue;
+                    html += '<li class="feature-item"><i class="fas fa-check-circle ' + (rec ? 'text-brand' : 'text-gray-400') + '" aria-hidden="true"></i><span>' + esc(ft) + '</span></li>';
+                }
+                html += '</ul></div>';
+                if (bundle) html += '<div class="bundle-highlight"><i class="fas fa-lightbulb text-brand" aria-hidden="true"></i><span>' + bundle + '</span></div>';
+                html += '</div><div class="mt-auto pt-4 w-full shrink-0"><button type="button" class="card-cta-btn mt-0"><i class="fas fa-bag-shopping" style="margin-right:8px" aria-hidden="true"></i>' + cta + '</button></div>';
+                html += '</div></div>';
+            }
+            html += '</div>';
+            return html;
+        }
         function commerceFill(html) {
             // Retail, lightly personalized fallbacks; per-scenario webDefaults override
             // these with copy tailored to the product (apparel vs electronics, etc.).
@@ -79,7 +139,7 @@
                 ['CART_COUNT', 'commerceCartCount', '2'],
                 ['CART_BANNER_TITLE', 'commerceCartBannerTitle', 'Looks like you forgot something 👀'],
                 ['CART_BANNER_SUBTITLE', 'commerceCartBannerSubtitle', 'Your picks are still in your bag — come back and make them yours before they sell out.'],
-                ['CART_CTA', 'commerceCartCta', 'Take me back to my bag'],
+                ['CART_CTA', 'commerceCartCta', 'Complete checkout'],
                 ['ADD_TO_BAG_LABEL', 'commerceAddToBag', 'Add to bag']
             ];
             MAP.forEach(function (row) {
@@ -87,6 +147,7 @@
                 if (val == null) val = row[2];
                 html = html.split('[[' + row[0] + ']]').join(escCommerce(resolveCommerceTokens(val)));
             });
+            html = html.split('[[COMMERCE_CARDS_GRID_HTML]]').join(buildCommerceCards());
             return html;
         }
 

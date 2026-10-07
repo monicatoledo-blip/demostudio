@@ -356,6 +356,14 @@
           "type": "toggle"
         },
         {
+          "id": "card1_image",
+          "label": "Card 1 — Product image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
           "id": "card1_badgeText",
           "label": "Card 1 — What should the ribbon say when this one is recommended?",
           "type": "text"
@@ -441,6 +449,14 @@
           "type": "toggle"
         },
         {
+          "id": "card2_image",
+          "label": "Card 2 — Product image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
           "id": "card2_badgeText",
           "label": "Card 2 — What should the ribbon say when this one is recommended?",
           "type": "text"
@@ -524,6 +540,14 @@
           "id": "card3_bestMatch",
           "label": "Card 3 — This is the recommended pick",
           "type": "toggle"
+        },
+        {
+          "id": "card3_image",
+          "label": "Card 3 — Product image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
         },
         {
           "id": "card3_badgeText",

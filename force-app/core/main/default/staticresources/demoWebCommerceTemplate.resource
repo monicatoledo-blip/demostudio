@@ -1483,7 +1483,7 @@
             </button>
           </div>
         </div>
-        [[ADAPTIVE_CARDS_GRID_HTML]]
+        [[COMMERCE_CARDS_GRID_HTML]]
         <div class="adaptive-footer">
           <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i>
           <span>[[ADAPTIVE_FOOTER_NOTE]]</span>
