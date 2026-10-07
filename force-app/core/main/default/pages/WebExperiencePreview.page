@@ -268,13 +268,20 @@
                 // tiles by id so no engine/template fork is needed.
                 if (RTOM) {
                     html += '<script>(function(){var L="\\u26A1 Real-Time Offer";'
+                        + 'var warm=document.getElementById("warm-homepage-section");'
+                        + 'if(warm){var h=warm.querySelector("h2");if(h){h.textContent="Insights";'
+                        + 'var sub=h.parentNode&&h.parentNode.querySelector("p");if(sub)sub.textContent="Curated Offers Hand-Selected for You";}}'
                         + 'for(var i=1;i<=3;i++){var c=document.getElementById("warm-insight-"+i);if(!c)continue;'
                         + 'var e=c.querySelector(".uppercase");if(e){e.textContent=L;}'
                         + 'var card=c.querySelector(".relative")||c;'
                         + 'if(card&&!c.querySelector(".rtom-badge")){var b=document.createElement("span");'
                         + 'b.className="rtom-badge";b.textContent="Recommended for you";'
                         + 'b.style.cssText="position:absolute;top:10px;left:10px;z-index:5;background:var(--brand,#0b5cab);color:#fff;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:4px 8px;border-radius:9999px;box-shadow:0 2px 8px rgba(0,0,0,.25)";'
-                        + 'card.style.position="relative";card.appendChild(b);}}})();<\/script>';
+                        + 'card.style.position="relative";card.appendChild(b);}'
+                        + 'if(!c.querySelector("button")){var body=c.querySelector(".flex-1")||c;var btn=document.createElement("button");btn.type="button";'
+                        + 'btn.textContent="View offer \\u2192";'
+                        + 'btn.style.cssText="margin-top:16px;display:inline-flex;align-items:center;gap:6px;background:var(--brand,#0b5cab);color:#fff;font-size:13px;font-weight:600;padding:9px 18px;border:none;border-radius:9999px;cursor:pointer;align-self:flex-start";'
+                        + 'body.appendChild(btn);}}})();<\/script>';
                 }
 
                 // Self-contained .html export (resolved sim, agent icon inlined as a
