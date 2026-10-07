@@ -724,12 +724,14 @@
         {
           "id": "warmInsightsHeading",
           "label": "Returning-visitor section heading",
-          "type": "text"
+          "type": "text",
+          "placeholder": "Recommended for you"
         },
         {
           "id": "warmInsightsSubtitle",
           "label": "Returning-visitor section subtitle",
-          "type": "text"
+          "type": "text",
+          "placeholder": "Picks selected for you based on your visit."
         },
         {
           "id": "warmInsight1Img",
