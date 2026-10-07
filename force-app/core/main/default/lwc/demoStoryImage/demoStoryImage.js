@@ -32,9 +32,11 @@ export default class DemoStoryImage extends LightningElement {
     @api label;
     @api value;
     @api kind = 'hero'; // 'hero' | 'avatar' | 'logo'
-    @api libraryImages; // optional: override the browse grid (e.g. per-industry pool)
+    @api libraryImages; // optional: override the browse grid (e.g. per-industry pool).
+    // Entries may be plain URL strings OR { url, label } objects; a label enables search.
     showGrid = false;
     uploading = false;
+    query = '';
 
     CLOUD = 'dfx98jgdc';
     PRESET = 'salesforcepersonalization';
@@ -66,15 +68,31 @@ export default class DemoStoryImage extends LightningElement {
     get images() {
         // A caller-supplied pool (e.g. the record's industry library) overrides the
         // built-in kind-based collections. Falls back to the shared libraries so the
-        // 2-way sims are unaffected.
+        // 2-way sims are unaffected. Entries are URL strings or { url, label } objects.
         if (this.libraryImages && this.libraryImages.length) {
-            return this.libraryImages.map((u, i) => ({ id: 'lib-' + i, url: u, description: '' }));
+            return this.libraryImages.map((e, i) => {
+                const url = (typeof e === 'string') ? e : (e && e.url) || '';
+                const label = (typeof e === 'string') ? '' : (e && (e.label || e.description)) || '';
+                return { id: 'lib-' + i, url: url, description: label };
+            });
         }
         let src = NBA_IMAGE_LIBRARY;
         if (this.kind === 'avatar') src = AVATAR_LIBRARY;
         else if (this.kind === 'logo') src = LOGO_LIBRARY;
         return (src || []).map((i) => ({ id: i.id, url: i.url, description: i.description }));
     }
+    // Show a keyword filter once the library is sizable and the images carry labels.
+    get hasSearch() {
+        const imgs = this.images;
+        return imgs.length > 8 && imgs.some((i) => i.description);
+    }
+    get filteredImages() {
+        const q = (this.query || '').trim().toLowerCase();
+        if (!q) return this.images;
+        return this.images.filter((i) => (i.description || '').toLowerCase().includes(q));
+    }
+    get noMatches() { return this.hasSearch && this.query && this.filteredImages.length === 0; }
+    handleSearch(e) { this.query = e.target.value || ''; }
 
     toggleGrid() { this.showGrid = !this.showGrid; }
     handleUrl(e) { this.fire(e.target.value); }

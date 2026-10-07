@@ -28,14 +28,22 @@
             </div>
         </div>
         <template lwc:if={showGrid}>
+            <template lwc:if={hasSearch}>
+                <lightning-input type="search" variant="label-hidden"
+                    placeholder="Search the library (e.g. jacket, tent, serum)…"
+                    value={query} onchange={handleSearch} class="img-search"></lightning-input>
+            </template>
             <div class="img-grid">
-                <template for:each={images} for:item="img">
+                <template for:each={filteredImages} for:item="img">
                     <button key={img.id} class="img-cell" data-url={img.url}
                         title={img.description} onclick={pickFromGrid}>
                         <img src={img.url} alt={img.description} loading="lazy" />
                     </button>
                 </template>
             </div>
+            <template lwc:if={noMatches}>
+                <p class="img-nomatch">No images match “{query}”.</p>
+            </template>
         </template>
     </div>
 </template>
