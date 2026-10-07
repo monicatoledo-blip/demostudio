@@ -790,6 +790,429 @@
           ]
         }
       ]
+    },
+    {
+      "id": "product-catalog",
+      "label": "Product Catalog",
+      "flavors": [
+        "commerce"
+      ],
+      "fields": [
+        {
+          "id": "catalogPreset",
+          "label": "Load a catalog preset (replaces all 12 products)",
+          "type": "picklist",
+          "flavors": [
+            "commerce"
+          ],
+          "options": [
+            {
+              "label": "Apparel & Accessories",
+              "value": "apparel"
+            },
+            {
+              "label": "Beauty & Personal Care",
+              "value": "beauty"
+            },
+            {
+              "label": "Electronics & Tech",
+              "value": "electronics"
+            },
+            {
+              "label": "Home & Living",
+              "value": "homegoods"
+            },
+            {
+              "label": "Camping & Outdoor",
+              "value": "outdoor"
+            }
+          ]
+        },
+        {
+          "id": "catalog1_image",
+          "label": "Product 1 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog1_name",
+          "label": "Product 1 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog1_price",
+          "label": "Product 1 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog1_tag",
+          "label": "Product 1 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog2_image",
+          "label": "Product 2 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog2_name",
+          "label": "Product 2 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog2_price",
+          "label": "Product 2 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog2_tag",
+          "label": "Product 2 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog3_image",
+          "label": "Product 3 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog3_name",
+          "label": "Product 3 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog3_price",
+          "label": "Product 3 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog3_tag",
+          "label": "Product 3 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog4_image",
+          "label": "Product 4 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog4_name",
+          "label": "Product 4 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog4_price",
+          "label": "Product 4 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog4_tag",
+          "label": "Product 4 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog5_image",
+          "label": "Product 5 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog5_name",
+          "label": "Product 5 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog5_price",
+          "label": "Product 5 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog5_tag",
+          "label": "Product 5 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog6_image",
+          "label": "Product 6 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog6_name",
+          "label": "Product 6 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog6_price",
+          "label": "Product 6 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog6_tag",
+          "label": "Product 6 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog7_image",
+          "label": "Product 7 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog7_name",
+          "label": "Product 7 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog7_price",
+          "label": "Product 7 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog7_tag",
+          "label": "Product 7 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog8_image",
+          "label": "Product 8 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog8_name",
+          "label": "Product 8 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog8_price",
+          "label": "Product 8 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog8_tag",
+          "label": "Product 8 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog9_image",
+          "label": "Product 9 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog9_name",
+          "label": "Product 9 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog9_price",
+          "label": "Product 9 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog9_tag",
+          "label": "Product 9 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog10_image",
+          "label": "Product 10 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog10_name",
+          "label": "Product 10 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog10_price",
+          "label": "Product 10 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog10_tag",
+          "label": "Product 10 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog11_image",
+          "label": "Product 11 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog11_name",
+          "label": "Product 11 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog11_price",
+          "label": "Product 11 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog11_tag",
+          "label": "Product 11 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog12_image",
+          "label": "Product 12 — image",
+          "type": "image",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog12_name",
+          "label": "Product 12 — name",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog12_price",
+          "label": "Product 12 — price",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        },
+        {
+          "id": "catalog12_tag",
+          "label": "Product 12 — tag",
+          "type": "text",
+          "flavors": [
+            "commerce"
+          ]
+        }
+      ]
     }
   ]
 }

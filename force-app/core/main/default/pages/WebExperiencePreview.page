@@ -136,9 +136,18 @@
         // array [{name,price,image,tag}] stored in the record config; shoppers scroll
         // this like a real PLP before the agent engages.
         function buildCatalog() {
-            var raw = gvCommerce('catalogProducts');
+            // Prefer the per-product fields (catalogN_*, row-editable); fall back to the
+            // legacy catalogProducts JSON blob.
             var list = [];
-            if (raw) { try { list = JSON.parse(raw); } catch (e) { list = []; } }
+            for (var ci = 1; ci <= 12; ci++) {
+                var nm = gvCommerce('catalog' + ci + '_name');
+                var im = gvCommerce('catalog' + ci + '_image');
+                if (nm || im) list.push({ name: nm, image: im, price: gvCommerce('catalog' + ci + '_price'), tag: gvCommerce('catalog' + ci + '_tag') });
+            }
+            if (!list.length) {
+                var raw = gvCommerce('catalogProducts');
+                if (raw) { try { list = JSON.parse(raw); } catch (e) { list = []; } }
+            }
             if (!Array.isArray(list) || !list.length) return '';
             var esc = function (s) { return escCommerce(resolveCommerceTokens(s)); };
             var html = '<div class="mt-8 grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">';

@@ -22,7 +22,8 @@ const SECTION_ICONS = {
     'home-page-content': 'utility:home', 'market-insights': 'utility:knowledge_base',
     'category-page': 'utility:page', 'ai-chat': 'utility:chat', 'offer-overlay-frame': 'utility:resource_capacity',
     'offer-cards': 'utility:cart', 'handoff-form': 'utility:form', 'return-hero': 'utility:image',
-    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings'
+    'return-content-tiles': 'utility:tile_card_list', 'advanced': 'utility:settings',
+    'product-catalog': 'utility:products'
 };
 // Each editor section maps to the sim "page" it edits, so switching sections
 // navigates the preview straight there (and edits reload onto it, not the intro).
@@ -290,6 +291,8 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         // scenario's default values (so the SE sees what they're overriding).
         if (id === 'adaptiveWebSubIndustry') { this.applyCategory(value); return; }
         if (id === 'adaptiveWebSubUseCase') { this.applyScenario(this.currentCategory, value); return; }
+        // Catalog preset: load another category's 12-product catalog into this record.
+        if (id === 'catalogPreset') { this.applyCatalogPreset(value); return; }
         // "Recommended pick" is mutually exclusive across the 3 offer cards — turning
         // one on turns the others off (radio behavior, not 3 independent toggles).
         const bm = id.match(/^card(\d)_bestMatch$/);
@@ -307,6 +310,21 @@ export default class PersonalizedWebsiteStudio extends LightningElement {
         const d = this.industryData;
         const list = (d && d.scenarios && d.scenarios[cat]) || [];
         return list[0] ? list[0].key : '';
+    }
+    // Load a different RCG category's 12-product catalog (catalogN_* fields) into cfg.
+    applyCatalogPreset(cat) {
+        const rcg = this.defaults['Retail & Consumer Goods'];
+        const cd = rcg && rcg.defaults && rcg.defaults[cat];
+        if (!cd) return;
+        const src = cd[Object.keys(cd)[0]] || {};
+        const next = { ...this.cfg, catalogPreset: cat };
+        for (let i = 1; i <= 12; i++) {
+            ['image', 'name', 'price', 'tag'].forEach((k) => {
+                next['catalog' + i + '_' + k] = src['catalog' + i + '_' + k] || '';
+            });
+        }
+        this.cfg = next;
+        this.queueSave();
     }
     applyCategory(cat) { this.applyScenario(cat, this.firstScenarioKey(cat)); }
     applyScenario(cat, uc) {
