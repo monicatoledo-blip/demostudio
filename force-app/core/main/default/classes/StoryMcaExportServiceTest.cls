@@ -202,4 +202,27 @@ private class StoryMcaExportServiceTest {
         System.assertEquals(0, decsBlank.size(), 'Blank point -> no decisions');
         System.assertNotEquals(null, decs, 'Decisions list returned');
     }
+
+    @isTest
+    static void heroBanner_cropsToProportionalBanner() {
+        String crop = StoryMcaExportService.HERO_CROP;
+        // Cloudinary upload URL: inject the crop right after /image/upload/.
+        String up = StoryMcaExportService.heroBannerUrl(
+            'https://res.cloudinary.com/dfx98jgdc/image/upload/v123/folded.jpg');
+        System.assertEquals(
+            'https://res.cloudinary.com/dfx98jgdc/image/upload/' + crop + '/v123/folded.jpg',
+            up, 'Upload URL should carry the banner crop');
+        // Cloudinary fetch URL: inject after /image/fetch/.
+        String fetched = StoryMcaExportService.heroBannerUrl(
+            'https://res.cloudinary.com/dfx98jgdc/image/fetch/https%3A%2F%2Fx.com%2Fa.png');
+        System.assert(fetched.contains('/image/fetch/' + crop + '/'), 'Fetch URL should carry the crop: ' + fetched);
+        // Non-Cloudinary absolute URL: route through Cloudinary fetch with the crop.
+        String ext = StoryMcaExportService.heroBannerUrl('https://cdn.example.com/hero.png');
+        System.assert(ext.startsWith('https://res.cloudinary.com/dfx98jgdc/image/fetch/' + crop + '/'),
+            'External URL should be routed through Cloudinary fetch with the crop: ' + ext);
+        // Idempotent: an already-cropped URL is not double-wrapped.
+        System.assertEquals(up, StoryMcaExportService.heroBannerUrl(up), 'Already-cropped URL unchanged');
+        // Blank passes through.
+        System.assertEquals('', StoryMcaExportService.heroBannerUrl(''), 'Blank unchanged');
+    }
 }

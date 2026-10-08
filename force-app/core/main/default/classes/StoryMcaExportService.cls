@@ -533,6 +533,32 @@ public with sharing class StoryMcaExportService {
         return out;
     }
 
+    // Deliver the hero as a proportional 2:1 banner (1200x600, center fill-crop)
+    // so the MCA builder's native image block doesn't render a tall Flux/AI
+    // image at full height. Mirrors the sim email template's 300px cover crop.
+    // Injects the transform into a Cloudinary upload/fetch URL; a non-Cloudinary
+    // absolute URL is routed through Cloudinary fetch so it still gets cropped.
+    // createImageMedia only ever handles hero images (default + DC variant).
+    @TestVisible private static final String HERO_CROP = 'c_fill,w_1200,h_600';
+    @TestVisible
+    private static String heroBannerUrl(String url) {
+        if (String.isBlank(url)) return url;
+        String u = url.trim();
+        if (u.contains(HERO_CROP)) return u; // already cropped
+        for (String marker : new List<String>{ '/image/upload/', '/image/fetch/' }) {
+            Integer i = u.indexOf(marker);
+            if (i >= 0) {
+                Integer at = i + marker.length();
+                return u.substring(0, at) + HERO_CROP + '/' + u.substring(at);
+            }
+        }
+        if (u.toLowerCase().startsWith('http')) {
+            return 'https://res.cloudinary.com/' + cloudinaryCloud + '/image/fetch/'
+                + HERO_CROP + '/' + EncodingUtil.urlEncode(u, 'UTF-8');
+        }
+        return u;
+    }
+
     // Create an sfdc_cms__image from an absolute URL (platform fetches it) and
     // return its contentKey (apiName) for a native image block to reference.
     private static String createImageMedia(String url, String title) {
@@ -544,7 +570,7 @@ public with sharing class StoryMcaExportService {
             'urlName' => slug(title) + '-' + String.valueOf(Datetime.now().getTime()),
             'contentBody' => new Map<String, Object>{
                 'sfdc_cms:media' => new Map<String, Object>{
-                    'source' => new Map<String, Object>{ 'type' => 'url', 'url' => url }
+                    'source' => new Map<String, Object>{ 'type' => 'url', 'url' => heroBannerUrl(url) }
                 }
             }
         };
