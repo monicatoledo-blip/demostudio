@@ -29,6 +29,7 @@ const PRE_ALLOWED_HOSTS = new Set([
     'images.unsplash.com',
     'www.gravatar.com',
     'logo.clearbit.com',
+    'img.logo.dev',
     'icons.duckduckgo.com',
     'res.cloudinary.com',
     'images.weserv.nl'
@@ -126,35 +127,43 @@ export default class DemoThemeStudio extends LightningElement {
     }
     get hasLogo() { return !!this.logoSrc; }
 
-    // Cascade: primary URL (usually DuckDuckGo or an uploaded file) → Clearbit
-    //          → give up (broken img; auto-fill can be re-run with a different domain).
-    // Stage 0 = whatever's in Logo_URL__c. Stage 1 = swap to Clearbit for the
-    // same domain. Stage 2 = null (img hides).
+    // Cascade: primary URL (logo.dev via Cloudinary, or an uploaded file)
+    //          → Clearbit → DuckDuckGo favicon → give up (broken img; auto-fill
+    //          can be re-run). Stage 0 = whatever's in Logo_URL__c. Stage 1 =
+    //          Clearbit for the same domain. Stage 2 = DDG favicon. Stage 3 = null.
     logoFallbackStage = 0;
+    // Recover the brand domain from any stored logo src, including a Cloudinary
+    // fetch URL that wraps a logo.dev/Clearbit/favicon URL.
+    _domainFromLogoSrc(src) {
+        if (!src) return null;
+        let s = src;
+        const fetchIdx = s.indexOf('/image/fetch/');
+        if (fetchIdx !== -1) {
+            // Inner remote URL is the last path segment, URL-encoded.
+            try { s = decodeURIComponent(s.substring(s.lastIndexOf('/') + 1)); } catch (e) { /* ignore */ }
+        }
+        let m = /img\.logo\.dev\/([^/?]+)/.exec(s);
+        if (m) return m[1];
+        m = /icons\.duckduckgo\.com\/ip3\/([^/?]+?)(?:\.ico)?(?:[/?]|$)/.exec(s);
+        if (m) return m[1];
+        m = /logo\.clearbit\.com\/([^/?]+)/.exec(s);
+        if (m) return m[1];
+        try { return new URL(s).host; } catch (e) { return null; }
+    }
     get effectiveLogoSrc() {
         const src = this.logoSrc;
         if (!src) return null;
         if (this.logoFallbackStage === 0) return src;
-        if (this.logoFallbackStage === 1) {
-            // Extract domain from either provider's URL, or from the user's URL host.
-            const ddgMatch = /icons\.duckduckgo\.com\/ip3\/([^/?]+?)(?:\.ico)?$/.exec(src);
-            const cbMatch  = /logo\.clearbit\.com\/([^/?]+)/.exec(src);
-            let domain = null;
-            if (ddgMatch) domain = ddgMatch[1];
-            else if (cbMatch) domain = cbMatch[1];
-            else {
-                try { domain = new URL(src).host; } catch (e) { /* ignore */ }
-            }
-            if (!domain) return null;
-            // If we started at DuckDuckGo, try Clearbit. If we started at Clearbit
-            // (or a user URL), try DuckDuckGo.
-            if (/icons\.duckduckgo\.com/.test(src)) return `https://logo.clearbit.com/${domain}`;
-            return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
-        }
+        const domain = this._domainFromLogoSrc(src);
+        if (!domain) return null;
+        // Fall back direct (not re-wrapped through Cloudinary — a Cloudinary
+        // hiccup is a likely trigger). Both hosts are CSP-allowed.
+        if (this.logoFallbackStage === 1) return `https://logo.clearbit.com/${domain}?size=256`;
+        if (this.logoFallbackStage === 2) return `https://icons.duckduckgo.com/ip3/${domain}.ico`;
         return null;
     }
     handleLogoLoadError() {
-        if (this.logoFallbackStage < 2) this.logoFallbackStage++;
+        if (this.logoFallbackStage < 3) this.logoFallbackStage++;
     }
 
     handleLogoUploaded(e) {
@@ -350,13 +359,15 @@ export default class DemoThemeStudio extends LightningElement {
                 if (r.accentColor)  this.gradientEnd   = r.accentColor;
                 this.gradientAngle = 135;
             }
-            if (r.logoUrl) {
-                const url = r.logoUrl;
+            // Cache external logos through Cloudinary fetch (so logo.dev is hit
+            // ~once per brand); pass through relative or already-Cloudinary URLs.
+            const wrapLogo = (url) => {
                 const isCloudinary = /^https:\/\/res\.cloudinary\.com\//i.test(url);
-                next.Logo_URL__c = (isCloudinary || !/^https?:\/\//i.test(url))
-                    ? url
-                    : cloudinaryFetchUrl(url);
-            }
+                return (isCloudinary || !/^https?:\/\//i.test(url)) ? url : cloudinaryFetchUrl(url);
+            };
+            if (r.logoUrl) next.Logo_URL__c = wrapLogo(r.logoUrl);
+            // Secondary = small square icon for agent avatars / footers.
+            if (r.iconUrl) next.Secondary_Logo_URL__c = wrapLogo(r.iconUrl);
             this.working = next;
             this.isDirty = true;
             this.logoFallbackStage = 0; // fresh URL — start the cascade over

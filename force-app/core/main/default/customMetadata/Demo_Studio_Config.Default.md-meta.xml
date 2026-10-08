@@ -6,4 +6,8 @@
         <field>AI_Provider__c</field>
         <value xsi:type="xsd:string">Einstein</value>
     </values>
+    <values>
+        <field>Logo_Dev_Token__c</field>
+        <value xsi:type="xsd:string">pk_C7vSxvfhToSx8jrQYfebCg</value>
+    </values>
 </CustomMetadata>
