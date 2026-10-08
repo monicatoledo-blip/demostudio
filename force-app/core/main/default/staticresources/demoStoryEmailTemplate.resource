@@ -1097,7 +1097,7 @@
                                             <table cellpadding="0" cellspacing="0" border="0" width="100%" role="presentation">
                                                 <tr>
                                                     <td style="padding: 0; text-align: center;">
-                                                        <img src="[[HERO_IMAGE_URL]]" alt="" style="max-width: 100%; width: 100%; height: auto; display: block;">
+                                                        <img src="[[HERO_IMAGE_URL]]" alt="" style="max-width: 100%; width: 100%; height: 300px; object-fit: cover; object-position: center; display: block;">
                                                     </td>
                                                 </tr>
                                             </table>
